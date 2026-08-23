@@ -5,8 +5,8 @@ import { OverviewDashboard } from './components/OverviewDashboard';
 import { ExtensionSimulator } from './components/ExtensionSimulator';
 import { BlockchainExplorer } from './components/BlockchainExplorer';
 import { CMPRegistryManager } from './components/CMPRegistryManager';
-import { EvaluationAnalytics } from './components/EvaluationAnalytics';
-import { ExtensionSourceViewer } from './components/ExtensionSourceViewer';
+import { SettingsView } from './components/SettingsView';
+import { AIPrivacyBot } from './components/AIPrivacyBot';
 import { DatabaseConsole } from './components/DatabaseConsole';
 import { AuthModal } from './components/AuthModal';
 import { initializeDatabase, getDatabaseMetrics, db } from './lib/db';
@@ -102,7 +102,7 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen flex bg-[#0f172a] text-[#f1f5f9] font-sans selection:bg-indigo-500 selection:text-white">
+    <div className="min-h-screen flex bg-[#060a17] text-[#f1f5f9] font-sans selection:bg-violet-600 selection:text-white">
       {/* Left Sidebar Panel */}
       <Sidebar
         activeTab={activeTab}
@@ -140,7 +140,7 @@ export default function App() {
         />
 
         {/* Main Content Viewport */}
-        <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 sm:pt-8">
+        <main className="flex-1 w-full px-4 sm:px-6 lg:px-8 xl:px-10 pt-6 sm:pt-8">
           {activeTab === 'overview' && (
             <OverviewDashboard
               metrics={metrics}
@@ -167,9 +167,9 @@ export default function App() {
             <CMPRegistryManager onRefreshData={refreshDatabaseState} />
           )}
 
-          {activeTab === 'analytics' && <EvaluationAnalytics />}
+          {activeTab === 'settings' && <SettingsView />}
 
-          {activeTab === 'extension_source' && <ExtensionSourceViewer />}
+          {activeTab === 'ai_bot' && <AIPrivacyBot />}
 
           {activeTab === 'database' && (
             <DatabaseConsole onRefreshData={refreshDatabaseState} />

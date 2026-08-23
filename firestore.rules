@@ -1,0 +1,24 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Allow public read/write for Crypticookie hybrid auditing and consent monitoring tables
+    match /cmp_registry/{document=**} {
+      allow read, write: if true;
+    }
+    match /cookie_events/{document=**} {
+      allow read, write: if true;
+    }
+    match /public_ledger/{document=**} {
+      allow read, write: if true;
+    }
+    match /private_ledger/{document=**} {
+      allow read, write: if true;
+    }
+    match /users/{document=**} {
+      allow read, write: if true;
+    }
+    match /monitored_domains/{document=**} {
+      allow read, write: if true;
+    }
+  }
+}

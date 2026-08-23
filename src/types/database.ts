@@ -62,6 +62,33 @@ export interface PublicLedgerBlock {
   timestamp: string;
 }
 
+export type PrivacyRiskLevel = 'Low' | 'Moderate' | 'High' | 'Critical';
+
+export interface DetectedTracker {
+  name: string;
+  category: 'Analytics' | 'Advertising' | 'Fingerprinting' | 'Essential';
+  domain: string;
+  blocked: boolean;
+}
+
+export interface MonitoredDomain {
+  id: string;
+  domain: string;
+  url: string;
+  title: string;
+  cmp_detected: boolean;
+  cmp_name: string;
+  script_hash: string;
+  verification_result: VerificationResult;
+  cookie_count: number;
+  trackers_count: number;
+  trackers_list: DetectedTracker[];
+  privacy_risk_level: PrivacyRiskLevel;
+  timestamp: string;
+  auto_blocked: boolean;
+  guidance: GuidanceRecommendation;
+}
+
 export interface ChainVerificationResult {
   isValid: boolean;
   brokenBlockIndex: number | null;

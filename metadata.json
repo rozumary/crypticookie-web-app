@@ -1,6 +1,6 @@
 {
-  "name": "Crypticookie - Hybrid Blockchain Consent System",
-  "description": "Hybrid blockchain-based cookie consent verification, guidance, and auditing system with real database engine and Manifest V3 extension.",
+  "name": "Crypticookie - Live Website Monitor & Blockchain Consent System",
+  "description": "Real-time active website & CMP detector, tracker audit, hybrid blockchain consent ledger, and Google Cloud Firestore database.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

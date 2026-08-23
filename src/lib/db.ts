@@ -11,12 +11,24 @@ import {
   type VerificationResult,
   type GuidanceRecommendation,
   type AuditOutput,
+  type MonitoredDomain,
 } from '../types/database';
 import {
   sha256,
   computePublicBlockHash,
   computePrivateBlockHash,
 } from './crypto';
+import { firestoreDb, firebaseConfigData } from './firebase';
+import {
+  collection,
+  doc,
+  setDoc,
+  getDocs,
+  deleteDoc,
+  query,
+  orderBy,
+  limit,
+} from 'firebase/firestore';
 
 export class CrypticookieDatabase extends Dexie {
   users!: Table<User, string>;
@@ -24,15 +36,17 @@ export class CrypticookieDatabase extends Dexie {
   cookie_events!: Table<CookieEvent, string>;
   private_ledger!: Table<PrivateLedgerBlock, string>;
   public_ledger!: Table<PublicLedgerBlock, string>;
+  monitored_domains!: Table<MonitoredDomain, string>;
 
   constructor() {
     super('CrypticookieDB');
-    this.version(1).stores({
+    this.version(2).stores({
       users: 'id, email, username',
       cmp_registry: 'id, &script_hash, cmp_name, status',
       cookie_events: 'id, user_id, site_domain, cookie_hash, cookie_type, verification_result, created_at',
       private_ledger: 'id, block_index, hash, user_id, cookie_event_id, timestamp',
       public_ledger: 'id, block_index, hash, site_domain, cookie_hash, timestamp',
+      monitored_domains: 'id, domain, url, privacy_risk_level, timestamp',
     });
   }
 }
@@ -88,32 +102,47 @@ const INITIAL_CMP_REGISTRY: Omit<CMPRegistryItem, 'id'>[] = [
 ];
 
 /**
- * Initialize Database and Seed Canonical CMP entries and Genesis Block if empty
+ * Helper to sync a single document to Firebase Firestore safely
+ */
+export async function syncToFirestore(collectionName: string, docId: string, data: any): Promise<void> {
+  try {
+    if (!firestoreDb) return;
+    const docRef = doc(firestoreDb, collectionName, docId);
+    await setDoc(docRef, data, { merge: true });
+  } catch (error) {
+    console.warn(`Firestore sync note (${collectionName}/${docId}):`, error);
+  }
+}
+
+/**
+ * Helper to delete a single document from Firebase Firestore
+ */
+export async function deleteFromFirestore(collectionName: string, docId: string): Promise<void> {
+  try {
+    if (!firestoreDb) return;
+    const docRef = doc(firestoreDb, collectionName, docId);
+    await deleteDoc(docRef);
+  } catch (error) {
+    console.warn(`Firestore delete note (${collectionName}/${docId}):`, error);
+  }
+}
+
+/**
+ * Initialize Database and Seed Canonical CMP entries and Genesis Block
  */
 export async function initializeDatabase(): Promise<void> {
-  // Clear any legacy mock events if they exist
-  const legacyEvents = await db.cookie_events.where('site_domain').anyOf([
-    'academics.mit.edu',
-    'untracked-forum-blog.org',
-    'free-media-stream-pirate.xyz'
-  ]).toArray();
-  if (legacyEvents.length > 0) {
-    const legacyIds = legacyEvents.map(e => e.id);
-    await db.cookie_events.bulkDelete(legacyIds);
-    await db.public_ledger.where('site_domain').anyOf([
-      'academics.mit.edu',
-      'untracked-forum-blog.org',
-      'free-media-stream-pirate.xyz'
-    ]).delete();
-  }
-
   const cmpCount = await db.cmp_registry.count();
   if (cmpCount === 0) {
-    const items = INITIAL_CMP_REGISTRY.map(item => ({
+    const items: CMPRegistryItem[] = INITIAL_CMP_REGISTRY.map(item => ({
       ...item,
       id: 'cmp_' + Math.random().toString(36).substring(2, 10),
     }));
     await db.cmp_registry.bulkAdd(items);
+
+    // Sync seed CMPs to Firestore
+    for (const item of items) {
+      await syncToFirestore('cmp_registry', item.id, item);
+    }
   }
 
   // Check if public and private ledgers have genesis blocks
@@ -130,7 +159,7 @@ export async function initializeDatabase(): Promise<void> {
       genesisTime
     );
 
-    await db.public_ledger.add({
+    const genesisPublicBlock: PublicLedgerBlock = {
       id: 'pb_genesis_0',
       block_index: 0,
       prev_hash: GENESIS_PREV_HASH,
@@ -140,7 +169,9 @@ export async function initializeDatabase(): Promise<void> {
       verification_result: 'Verified',
       consent_action: 'accept',
       timestamp: genesisTime,
-    });
+    };
+    await db.public_ledger.add(genesisPublicBlock);
+    await syncToFirestore('public_ledger', genesisPublicBlock.id, genesisPublicBlock);
 
     const genesisPrivateHash = await computePrivateBlockHash(
       GENESIS_PREV_HASH,
@@ -152,7 +183,7 @@ export async function initializeDatabase(): Promise<void> {
       genesisTime
     );
 
-    await db.private_ledger.add({
+    const genesisPrivateBlock: PrivateLedgerBlock = {
       id: 'pv_genesis_0',
       block_index: 0,
       prev_hash: GENESIS_PREV_HASH,
@@ -162,12 +193,14 @@ export async function initializeDatabase(): Promise<void> {
       consent_action: 'accept',
       audit_output: 'Consent Recorded',
       timestamp: genesisTime,
-    });
+    };
+    await db.private_ledger.add(genesisPrivateBlock);
+    await syncToFirestore('private_ledger', genesisPrivateBlock.id, genesisPrivateBlock);
   }
 }
 
 /**
- * Determine Verification Result based on CMP Registry placement (Research Table 1)
+ * Determine Verification Result based on CMP Registry placement
  */
 export async function determineVerificationResult(scriptHash: string): Promise<{
   result: VerificationResult;
@@ -187,7 +220,7 @@ export async function determineVerificationResult(scriptHash: string): Promise<{
 }
 
 /**
- * Determine Guidance Recommendation based on Cookie Type & Verification (Research Table 2)
+ * Determine Guidance Recommendation based on Cookie Type & Verification
  */
 export function determineGuidance(cookieType: CookieType, verificationResult: VerificationResult): GuidanceRecommendation {
   if (verificationResult === 'Warning' || cookieType === 'suspicious') {
@@ -206,7 +239,7 @@ export function determineGuidance(cookieType: CookieType, verificationResult: Ve
 }
 
 /**
- * Determine Audit Output based on User Consent Action (Research Table 3)
+ * Determine Audit Output based on User Consent Action
  */
 export function determineAuditOutput(consentAction: ConsentAction): AuditOutput {
   switch (consentAction) {
@@ -220,7 +253,7 @@ export function determineAuditOutput(consentAction: ConsentAction): AuditOutput 
 }
 
 /**
- * Record a full consent transaction across cookie_events, private_ledger, and public_ledger
+ * Record a full consent transaction across cookie_events, private_ledger, public_ledger & Firestore
  */
 export async function recordConsentTransaction(params: {
   userId: string;
@@ -254,6 +287,7 @@ export async function recordConsentTransaction(params: {
     created_at: timestamp,
   };
   await db.cookie_events.add(cookieEvent);
+  await syncToFirestore('cookie_events', cookieEvent.id, cookieEvent);
 
   // 3. Chained Block in private_ledger
   const lastPrivateBlock = await db.private_ledger.orderBy('block_index').last();
@@ -282,6 +316,7 @@ export async function recordConsentTransaction(params: {
     timestamp,
   };
   await db.private_ledger.add(privateBlock);
+  await syncToFirestore('private_ledger', privateBlock.id, privateBlock);
 
   // 4. Chained Block in public_ledger (de-identified)
   const lastPublicBlock = await db.public_ledger.orderBy('block_index').last();
@@ -310,8 +345,39 @@ export async function recordConsentTransaction(params: {
     timestamp,
   };
   await db.public_ledger.add(publicBlock);
+  await syncToFirestore('public_ledger', publicBlock.id, publicBlock);
 
   return { cookieEvent, privateBlock, publicBlock };
+}
+
+/**
+ * Record a Live Monitored Website domain inspection event
+ */
+export async function recordMonitoredDomain(domainData: Omit<MonitoredDomain, 'id' | 'timestamp'>): Promise<MonitoredDomain> {
+  const item: MonitoredDomain = {
+    ...domainData,
+    id: 'mon_' + Math.random().toString(36).substring(2, 11),
+    timestamp: new Date().toISOString(),
+  };
+
+  await db.monitored_domains.add(item);
+  await syncToFirestore('monitored_domains', item.id, item);
+  return item;
+}
+
+/**
+ * Fetch all monitored domains (most recent first)
+ */
+export async function getMonitoredDomains(limitCount: number = 50): Promise<MonitoredDomain[]> {
+  const list = await db.monitored_domains.toArray();
+  return list.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()).slice(0, limitCount);
+}
+
+/**
+ * Clear Monitored Domains log
+ */
+export async function clearMonitoredDomains(): Promise<void> {
+  await db.monitored_domains.clear();
 }
 
 /**
@@ -422,10 +488,12 @@ export async function getDatabaseMetrics() {
   const publicBlocks = await db.public_ledger.toArray();
   const privateBlocks = await db.private_ledger.toArray();
   const cmpItems = await db.cmp_registry.toArray();
+  const monitored = await db.monitored_domains.toArray();
 
-  // Distinct protected platform domains
   const uniqueDomains = new Set(events.map(e => e.site_domain));
-  const threatsBlocked = events.filter(e => e.verification_result === 'Warning' || e.cookie_type === 'suspicious').length;
+  const threatsBlocked = events.filter(e => e.verification_result === 'Warning' || e.cookie_type === 'suspicious').length +
+    monitored.filter(m => m.auto_blocked || m.privacy_risk_level === 'High' || m.privacy_risk_level === 'Critical').length;
+  
   const verifiedCount = events.filter(e => e.verification_result === 'Verified').length;
   const unverifiedCount = events.filter(e => e.verification_result === 'Unverified').length;
 
@@ -440,12 +508,15 @@ export async function getDatabaseMetrics() {
     totalLedgerBlocks: publicBlocks.length + privateBlocks.length,
     threatsBlockedCount: threatsBlocked,
     totalEventsCount: events.length,
+    monitoredDomainsCount: monitored.length,
     verifiedCount,
     unverifiedCount,
     whitelistedCMPs,
     blacklistedCMPs,
     unlistedCMPs,
     totalCMPs: cmpItems.length,
+    firestoreProjectId: firebaseConfigData.projectId,
+    firestoreDatabaseId: firebaseConfigData.firestoreDatabaseId || '(default)',
   };
 }
 
@@ -458,5 +529,6 @@ export async function resetDatabaseToDefault(): Promise<void> {
   await db.cookie_events.clear();
   await db.private_ledger.clear();
   await db.public_ledger.clear();
+  await db.monitored_domains.clear();
   await initializeDatabase();
 }

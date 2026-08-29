@@ -113,14 +113,14 @@ export const CMPRegistryManager: React.FC<CMPRegistryManagerProps> = ({ onRefres
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <div className="flex items-center gap-2">
-            <h1 className="text-2xl font-bold text-white tracking-tight">Verified Provider Registry</h1>
+            <h1 className="text-2xl font-bold text-white tracking-tight">CMP Script Registry</h1>
             <span className="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-300 text-[10px] font-mono border border-emerald-500/20 flex items-center gap-1">
               <Cloud className="h-3 w-3" />
-              Cloud Synchronized
+              Firestore Cloud Synced
             </span>
           </div>
           <p className="text-sm text-slate-400 mt-1">
-            Official catalog of trusted and flagged Cookie Banner Providers (CMPs) for dark pattern prevention.
+            Database of verified Consent Management Platform SHA-256 script hashes.
           </p>
         </div>
 
@@ -129,7 +129,7 @@ export const CMPRegistryManager: React.FC<CMPRegistryManagerProps> = ({ onRefres
           className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-gradient-to-r from-violet-600 to-blue-600 hover:from-violet-500 hover:to-blue-500 text-xs font-semibold text-white shadow-md shadow-violet-950/50 transition-all cursor-pointer"
         >
           <Plus className="h-4 w-4" />
-          <span>Add Provider</span>
+          <span>Add CMP Script</span>
         </button>
       </div>
 
@@ -146,7 +146,7 @@ export const CMPRegistryManager: React.FC<CMPRegistryManagerProps> = ({ onRefres
                   : 'bg-[#0b1026] text-blue-300/70 hover:text-white border border-blue-900/40'
               }`}
             >
-              {tab === 'all' ? `All (${items.length})` : tab === 'whitelist' ? 'Trusted (Whitelisted)' : 'Blocked (Blacklisted)'}
+              {tab === 'all' ? `All (${items.length})` : tab}
             </button>
           ))}
         </div>
@@ -157,7 +157,7 @@ export const CMPRegistryManager: React.FC<CMPRegistryManagerProps> = ({ onRefres
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search provider name or signature..."
+            placeholder="Search CMP name or hash..."
             className="w-full rounded-xl bg-[#0b1026] pl-9 pr-3 py-1.5 text-xs text-blue-100 border border-blue-900/40 focus:outline-none focus:border-violet-500 font-mono placeholder-blue-300/30"
           />
         </div>
@@ -169,9 +169,9 @@ export const CMPRegistryManager: React.FC<CMPRegistryManagerProps> = ({ onRefres
           <table className="w-full text-left text-xs">
             <thead className="bg-[#060a17] text-blue-300/70 border-b border-blue-900/40 font-mono text-[11px]">
               <tr>
-                <th className="py-3 px-4">Provider Name</th>
-                <th className="py-3 px-4">Security Signature</th>
-                <th className="py-3 px-4">Trust Status</th>
+                <th className="py-3 px-4">CMP Name</th>
+                <th className="py-3 px-4">SHA-256 Script Hash</th>
+                <th className="py-3 px-4">Status</th>
                 <th className="py-3 px-4 text-right">Actions</th>
               </tr>
             </thead>

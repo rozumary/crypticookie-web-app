@@ -11,10 +11,8 @@ import { DatabaseConsole } from './components/DatabaseConsole';
 import { AuthModal } from './components/AuthModal';
 import { initializeDatabase, getDatabaseMetrics, db } from './lib/db';
 import { type User, type CookieEvent } from './types/database';
-import { useAppTheme } from './lib/theme';
 
 export default function App() {
-  const { theme, toggleTheme, isPurple } = useAppTheme();
   const [activeTab, setActiveTab] = useState<string>('overview');
   const [isDbReady, setIsDbReady] = useState(false);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
@@ -22,7 +20,6 @@ export default function App() {
   const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signin');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
-
 
   // Live Database Metrics
   const [metrics, setMetrics] = useState({
@@ -105,11 +102,7 @@ export default function App() {
   };
 
   return (
-    <div className={`min-h-screen flex font-sans ${
-      isPurple
-        ? 'bg-[#0a041a] text-[#f5f3ff] selection:bg-pink-600 selection:text-white'
-        : 'bg-[#060a17] text-[#f1f5f9] selection:bg-violet-600 selection:text-white'
-    }`}>
+    <div className="min-h-screen flex bg-[#060a17] text-[#f1f5f9] font-sans selection:bg-violet-600 selection:text-white">
       {/* Left Sidebar Panel */}
       <Sidebar
         activeTab={activeTab}
@@ -125,8 +118,6 @@ export default function App() {
         onOneClickDemo={handleOneClickDemo}
         isDbReady={isDbReady}
         metrics={metrics}
-        theme={theme}
-        onToggleTheme={toggleTheme}
       />
 
       {/* Main Content & Top Header Wrapper */}
@@ -146,8 +137,6 @@ export default function App() {
           onOneClickDemo={handleOneClickDemo}
           isDbReady={isDbReady}
           onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
-          theme={theme}
-          onToggleTheme={toggleTheme}
         />
 
         {/* Main Content Viewport */}
@@ -159,10 +148,8 @@ export default function App() {
               currentUser={currentUser}
               onRefreshData={refreshDatabaseState}
               onNavigateTab={setActiveTab}
-              isPurple={isPurple}
             />
           )}
-
 
           {activeTab === 'simulator' && (
             <ExtensionSimulator

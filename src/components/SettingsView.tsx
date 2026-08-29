@@ -225,57 +225,12 @@ export const SettingsView: React.FC = () => {
           <div className="rounded-2xl border border-blue-900/40 bg-[#0b1026] p-6 space-y-4 shadow-lg">
             <div className="flex items-center gap-2 text-white font-bold text-sm">
               <Sliders className="h-4 w-4 text-sky-400" />
-              <span>General Preferences & Themes</span>
+              <span>General Preferences</span>
             </div>
 
             <div className="space-y-3">
-              {/* Theme Selector Block */}
-              <div className="p-4 rounded-xl bg-[#060a17] border border-purple-900/50 space-y-3">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <div className="text-xs font-semibold text-white flex items-center gap-1.5">
-                      <span className="h-2 w-2 rounded-full bg-pink-500" />
-                      <span>Display Theme & Layout</span>
-                    </div>
-                    <p className="text-[11px] text-purple-200/70 mt-0.5">
-                      Switch between the Science Fair Purple UI and the Midnight Slate interface.
-                    </p>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-3 pt-1">
-                  <button
-                    onClick={() => {
-                      localStorage.setItem('crypticookie_app_theme', 'purple-poster');
-                      window.location.reload();
-                    }}
-                    className="p-3 rounded-xl border-2 border-purple-500 bg-[#1e0a3c] hover:bg-[#2e0f5b] text-left transition-all cursor-pointer shadow-md shadow-purple-950/60"
-                  >
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-black text-pink-200 font-pixel text-[10px]">PURPLE POSTER</span>
-                      <span className="text-[9px] bg-pink-500/20 text-pink-300 px-1.5 py-0.5 rounded border border-pink-400/40 font-mono">Active</span>
-                    </div>
-                    <p className="text-[10px] text-purple-200/80 mt-1">Science fair poster presentation layout with SDG badges & purple gradients.</p>
-                  </button>
-
-                  <button
-                    onClick={() => {
-                      localStorage.setItem('crypticookie_app_theme', 'midnight-slate');
-                      window.location.reload();
-                    }}
-                    className="p-3 rounded-xl border border-slate-700 bg-[#0f172a] hover:bg-[#1e293b] text-left transition-all cursor-pointer"
-                  >
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-bold text-slate-200">Midnight Slate</span>
-                    </div>
-                    <p className="text-[10px] text-slate-400 mt-1">Standard dark analytics dashboard layout with blue & violet accents.</p>
-                  </button>
-                </div>
-              </div>
-
               {/* Notification toggle */}
               <div className="flex items-center justify-between p-3.5 rounded-xl bg-[#060a17] border border-blue-900/40">
-
                 <div className="space-y-0.5 max-w-[80%]">
                   <div className="text-xs font-semibold text-white">
                     Show Extension Alert Badges

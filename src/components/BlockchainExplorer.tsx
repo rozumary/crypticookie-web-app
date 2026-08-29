@@ -55,9 +55,6 @@ export const BlockchainExplorer: React.FC<BlockchainExplorerProps> = ({ onRefres
 
   useEffect(() => {
     loadLedgers();
-    const handleSync = () => loadLedgers();
-    window.addEventListener('crypticookie_db_sync', handleSync);
-    return () => window.removeEventListener('crypticookie_db_sync', handleSync);
   }, []);
 
   const handleCopy = (text: string) => {

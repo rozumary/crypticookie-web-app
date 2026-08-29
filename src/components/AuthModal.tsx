@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { User, Lock, Mail, Sparkles, X, Cookie } from 'lucide-react';
 import { type User as UserType } from '../types/database';
-import { db, syncToFirestore } from '../lib/db';
+import { db } from '../lib/db';
 import { sha256 } from '../lib/crypto';
 
 interface AuthModalProps {
@@ -57,7 +57,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         };
 
         await db.users.add(newUser);
-        await syncToFirestore('users', newUser.id, newUser);
         onLoginSuccess(newUser);
         onClose();
       } else {
@@ -92,7 +91,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           created_at: new Date().toISOString(),
         };
         await db.users.add(user);
-        await syncToFirestore('users', user.id, user);
       }
       onLoginSuccess(user);
       onClose();

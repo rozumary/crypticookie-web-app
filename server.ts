@@ -134,18 +134,22 @@ async function startServer() {
   // API route to log monitored site visits
   app.post("/api/domains/record", async (req, res) => {
     try {
-      const { domain, url, title, privacy_risk_level } = req.body;
+      const { domain, url, title, privacy_risk_level, userId } = req.body;
       if (!domain) return res.status(400).json({ error: "domain is required." });
 
       const siteDomain = String(domain).toLowerCase().trim();
       const timestamp = new Date().toISOString();
+      const uId = userId || 'u_auditor_primary';
+      const recordId = 'mon_' + Math.random().toString(36).substring(2, 11);
+
       const entry = {
-        id: 'mon_' + siteDomain.replace(/[^a-z0-9]/g, '_'),
+        id: recordId,
+        user_id: uId,
         domain: siteDomain,
         url: url || `https://${siteDomain}`,
         title: title || siteDomain,
         privacy_risk_level: privacy_risk_level || 'Low',
-        auto_blocked: false,
+        auto_blocked: privacy_risk_level === 'High' || privacy_risk_level === 'Critical',
         timestamp: timestamp,
       };
 

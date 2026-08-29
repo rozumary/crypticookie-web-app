@@ -98,28 +98,14 @@ const INITIAL_CMP_REGISTRY: Omit<CMPRegistryItem, 'id'>[] = [
   },
 ];
 
-// Initial Demo User Accounts for multi-account testing
+// Initial Real User Accounts for persistent database logs
 export const INITIAL_DEMO_USERS: User[] = [
   {
     id: 'u_auditor_primary',
-    username: 'Dr. Rivera (Auditor)',
-    email: 'auditor@crypticookie.io',
-    password_hash: 'demo_pass_hash_1',
+    username: 'Auditor Rose',
+    email: 'rosedecastromontesa@gmail.com',
+    password_hash: 'demo_pass_hash_rose',
     created_at: new Date(Date.now() - 86400000 * 10).toISOString(),
-  },
-  {
-    id: 'u_researcher_default',
-    username: 'Alex Vance (Researcher)',
-    email: 'alex@crypticookie.io',
-    password_hash: 'demo_pass_hash_2',
-    created_at: new Date(Date.now() - 86400000 * 5).toISOString(),
-  },
-  {
-    id: 'u_personal_default',
-    username: 'Taylor Green (Personal)',
-    email: 'taylor@crypticookie.io',
-    password_hash: 'demo_pass_hash_3',
-    created_at: new Date().toISOString(),
   },
 ];
 

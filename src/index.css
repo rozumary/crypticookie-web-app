@@ -8,14 +8,14 @@
 
 :root {
   font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Arial, sans-serif;
-  color-scheme: dark;
-  background-color: #070210;
-  color: #e9d5ff;
+  color-scheme: light;
+  background-color: #F7F3FF;
+  color: #3B235C;
 }
 
 body {
-  background-color: #070210;
-  color: #e9d5ff;
+  background-color: #F7F3FF;
+  color: #3B235C;
 }
 
 h1, h2, h3, h4, .font-display {
@@ -27,19 +27,18 @@ code, pre, .font-mono, .badge-mono {
   font-family: 'JetBrains Mono', monospace;
 }
 
-/* Custom crisp scrollbar matching the dark purple theme */
+/* Custom crisp scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #070210;
+  background: #F7F3FF;
 }
 ::-webkit-scrollbar-thumb {
-  background: #3b1464;
+  background: #CBA3F5;
   border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #6d28d9;
+  background: #B78AE8;
 }
-

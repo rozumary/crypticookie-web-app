@@ -109,9 +109,9 @@ export const BlockchainExplorer: React.FC<BlockchainExplorerProps> = ({ onRefres
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-white tracking-tight">Blockchain Explorer</h1>
+          <h1 className="text-2xl font-bold text-white tracking-tight">Audit Ledger Explorer</h1>
           <p className="text-sm text-slate-400 mt-1">
-            Dual-layer ledger: Public Ledger (PB) for verification + Private Ledger (P) for user records.
+            Tamper-proof audit logs: Public verification records + Private personal consent history.
           </p>
         </div>
 
@@ -121,7 +121,7 @@ export const BlockchainExplorer: React.FC<BlockchainExplorerProps> = ({ onRefres
             className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-rose-600/20 hover:bg-rose-600/30 text-rose-300 border border-rose-500/30 text-xs font-semibold transition-colors cursor-pointer"
           >
             <Flame className="h-3.5 w-3.5" />
-            <span>Tamper Test</span>
+            <span>Test Tamper Resistance</span>
           </button>
 
           <button
@@ -153,17 +153,17 @@ export const BlockchainExplorer: React.FC<BlockchainExplorerProps> = ({ onRefres
               <div className="flex items-center gap-2">
                 <span className="text-sm font-bold text-white">
                   {verificationResult.isValid
-                    ? 'Chain Integrity: 100% Valid'
-                    : `Tampered Block Detected at Index #${verificationResult.brokenBlockIndex}`}
+                    ? 'Audit Integrity: 100% Valid & Untampered'
+                    : `Tampered Record Detected at Block #${verificationResult.brokenBlockIndex}`}
                 </span>
                 <span className="text-[11px] font-mono px-2 py-0.5 rounded bg-slate-950/80 text-slate-300 border border-slate-800">
-                  {verificationResult.totalBlocks} Blocks
+                  {verificationResult.totalBlocks} Total Blocks
                 </span>
               </div>
               <p className="text-xs text-slate-400 mt-0.5">
                 {verificationResult.isValid
-                  ? 'All sequential cryptographic SHA-256 block hashes are intact.'
-                  : 'A block has been modified out-of-band. Cryptographic proof mismatch.'}
+                  ? 'All sequential security blocks are verified and mathematically intact.'
+                  : 'A record was illegally altered. The system detected the signature mismatch.'}
               </p>
             </div>
           </div>

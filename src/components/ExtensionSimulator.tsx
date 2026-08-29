@@ -144,18 +144,10 @@ export const ExtensionSimulator: React.FC<ExtensionSimulatorProps> = ({
     }
   };
 
-  useEffect(() => {
-    refreshMonitoredHistory();
-    handleNavigateManualDomain();
-  }, []);
-
-  const handleNavigateManualDomain = async (e?: React.FormEvent) => {
-    if (e) e.preventDefault();
-    if (!currentDomain.trim()) return;
-
-    setIsAuditingDomain(true);
-    const domainClean = currentDomain.replace(/^https?:\/\//, '').replace(/\/.*$/, '').toLowerCase().trim();
-    setCurrentDomain(domainClean);
+  // Setup preview state without writing to database
+  const setupDomainPreview = async (domainToPreview: string) => {
+    const domainClean = domainToPreview.replace(/^https?:\/\//, '').replace(/\/.*$/, '').toLowerCase().trim();
+    if (!domainClean) return;
 
     const sniffedTrackers = inferTrackersForDomain(domainClean);
     setDetectedTrackers(sniffedTrackers);
@@ -185,13 +177,51 @@ export const ExtensionSimulator: React.FC<ExtensionSimulatorProps> = ({
 
     const { result, cmpItem } = await determineVerificationResult(computed);
     const guidance = determineGuidance(cookieType, result);
-    const riskLevel = result === 'Warning' || cookieType === 'suspicious' ? 'Critical' : (result === 'Unverified' ? 'Moderate' : 'Low');
 
     setVerificationResult(result);
     setCmpItemName(cmpItem ? cmpItem.cmp_name : `${domainClean.split('.')[0].toUpperCase()} CMP Banner`);
     setGuidanceRec(guidance);
     setBannerVisible(true);
     setLastCommittedBlock(null);
+  };
+
+  useEffect(() => {
+    refreshMonitoredHistory();
+    setupDomainPreview(currentDomain);
+  }, []);
+
+  const handleNavigateManualDomain = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    if (!currentDomain.trim()) return;
+
+    setIsAuditingDomain(true);
+    const domainClean = currentDomain.replace(/^https?:\/\//, '').replace(/\/.*$/, '').toLowerCase().trim();
+    setCurrentDomain(domainClean);
+
+    await setupDomainPreview(domainClean);
+
+    const sniffedTrackers = inferTrackersForDomain(domainClean);
+    let cmpUrl = `https://${domainClean}/consent/cmp-loader.js`;
+    let cookieType: CookieType = 'optional';
+
+    if (domainClean.includes('google') || domainClean.includes('theverge') || domainClean.includes('mit')) {
+      cmpUrl = 'https://cdn.cookielaw.org/scripttemplates/otSDKStub.js';
+      cookieType = 'optional';
+    } else if (domainClean.includes('bbc') || domainClean.includes('github') || domainClean.includes('wikipedia')) {
+      cmpUrl = 'https://consent.cookiebot.com/uc.js';
+      cookieType = 'necessary';
+    } else if (domainClean.includes('pirate') || domainClean.includes('stream') || domainClean.includes('movie')) {
+      cmpUrl = 'https://ad-tracker-network.biz/stealth-cookie-drop.js';
+      cookieType = 'suspicious';
+    } else if (domainClean.includes('shopee') || domainClean.includes('lazada')) {
+      cmpUrl = 'https://sdk.privacy-center.org/loader.js';
+      cookieType = 'all';
+    }
+
+    const computed = await sha256(cmpUrl.trim());
+    const { result, cmpItem } = await determineVerificationResult(computed);
+    const guidance = determineGuidance(cookieType, result);
+    const riskLevel = result === 'Warning' || cookieType === 'suspicious' ? 'Critical' : (result === 'Unverified' ? 'Moderate' : 'Low');
 
     try {
       await recordMonitoredDomain({

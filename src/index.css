@@ -1,14 +1,40 @@
 @import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Outfit:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 
 @theme {
   --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Arial, sans-serif;
-  --font-display: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  --font-display: 'Outfit', 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
   --font-mono: 'JetBrains Mono', monospace, ui-monospace;
+  --font-pixel: 'Press Start 2P', monospace;
 }
 
 :root {
   font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Arial, sans-serif;
   color-scheme: dark;
+}
+
+.font-pixel {
+  font-family: 'Press Start 2P', monospace, sans-serif;
+}
+
+.font-poster {
+  font-family: 'Outfit', 'Plus Jakarta Sans', sans-serif;
+}
+
+/* Theme styling */
+.theme-purple-poster {
+  --bg-main: #0c0620;
+  --color-primary: #a855f7;
+}
+
+.theme-purple-poster body {
+  background-color: #0c0620;
+  background-image: 
+    radial-gradient(ellipse at 15% 0%, rgba(168, 85, 247, 0.18), transparent 45%),
+    radial-gradient(ellipse at 85% 15%, rgba(236, 72, 153, 0.15), transparent 45%),
+    radial-gradient(ellipse at 50% 100%, rgba(139, 92, 246, 0.15), transparent 50%),
+    linear-gradient(to bottom, #0c0620, #070314);
+  background-attachment: fixed;
 }
 
 h1, h2, h3, h4, .font-display {
@@ -26,12 +52,13 @@ code, pre, .font-mono, .badge-mono {
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #090d16;
+  background: #090417;
 }
 ::-webkit-scrollbar-thumb {
-  background: #1e293b;
+  background: #3b0764;
   border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #334155;
+  background: #7e22ce;
 }
+

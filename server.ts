@@ -512,8 +512,28 @@ When analyzing a website or answering questions:
     }
   });
 
-  // API Health Check
-  app.get("/api/health", (req, res) => {
+  // API route for debugging: Clear all user data from Firestore
+  app.post("/api/debug/clear", async (req, res) => {
+    try {
+      const { userId } = req.query;
+      const uId = String(userId || 'u_auditor_primary');
+      if (firestoreDb) {
+        const collections = ['cookie_events', 'public_ledger', 'private_ledger', 'monitored_domains'];
+        for (const colName of collections) {
+          const q = query(collection(firestoreDb, colName), where('user_id', '==', uId));
+          const snapshot = await getDocs(q);
+          for (const docSnap of snapshot.docs) {
+            await setDoc(docSnap.ref, { deleted: true }, { merge: true }); // Soft delete / mark for removal
+          }
+        }
+      }
+      return res.json({ status: "success", message: "User data marked for removal." });
+    } catch (error: any) {
+      console.error("Error clearing user data:", error);
+      return res.status(500).json({ error: error.message });
+    }
+  });
+
     res.json({ status: "ok", timestamp: new Date().toISOString() });
   });
 

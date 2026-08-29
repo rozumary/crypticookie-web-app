@@ -3,7 +3,7 @@ import path from "path";
 import { createServer as createViteServer } from "vite";
 import { GoogleGenAI } from "@google/genai";
 import { firestoreDb } from "./src/lib/firebase";
-import { collection, doc, setDoc, getDocs, query, orderBy, limit, where } from "firebase/firestore";
+import { collection, doc, setDoc, getDoc, getDocs, query, orderBy, limit, where } from "firebase/firestore";
 
 async function sha256Server(message: string): Promise<string> {
   const msgUint8 = new TextEncoder().encode(message);
@@ -41,21 +41,73 @@ async function startServer() {
     });
   };
 
+  // Helper: verify a script hash against the real CMP registry in Firestore
+  async function verifyScriptHash(scriptHash: string): Promise<{ result: string; cmpName: string | null }> {
+    if (!firestoreDb) return { result: 'Unverified', cmpName: null };
+    try {
+      const snapshot = await getDocs(query(collection(firestoreDb, 'cmp_registry'), where('script_hash', '==', scriptHash.trim().toLowerCase())));
+      if (snapshot.empty) return { result: 'Unverified', cmpName: null };
+      const item = snapshot.docs[0].data();
+      if (item.status === 'whitelist') return { result: 'Verified', cmpName: item.cmp_name };
+      if (item.status === 'blacklist') return { result: 'Warning', cmpName: item.cmp_name };
+      return { result: 'Unverified', cmpName: item.cmp_name };
+    } catch (e) {
+ console.warn('CMP registry lookup error:', e);
+      return { result: 'Unverified', cmpName: null };
+    }
+  }
+
+  // Helper: determine guidance based on cookie type and verification
+  function determineGuidance(cookieType: string, verificationResult: string): string {
+    if (verificationResult === 'Warning') return 'Warning';
+    if (cookieType === 'suspicious') return 'Warning';
+    if (cookieType === 'necessary') return 'Accept?';
+    if (cookieType === 'optional') return 'Customize?';
+    if (cookieType === 'all') return 'Opt for Necessary?';
+    return 'Customize?';
+  }
+
+  // Helper: determine audit output based on consent action
+  function determineAuditOutput(action: string): string {
+    if (action === 'accept') return 'Consent Recorded';
+    if (action === 'reject') return 'Rejection Recorded';
+    if (action === 'customize') return 'Preference Change Recorded';
+    return 'Consent Recorded';
+  }
+
+  // API route to verify a CMP script hash (used by browser extension)
+  app.post("/api/cmp/verify", async (req, res) => {
+    try {
+      const { hash } = req.body;
+      if (!hash) return res.status(400).json({ error: "hash is required." });
+      const { result, cmpName } = await verifyScriptHash(String(hash));
+      return res.json({ status: "success", verification: result, cmpName: cmpName || 'Unverified CMP Script', hash: String(hash) });
+    } catch (error: any) {
+      console.error("CMP verify error:", error);
+      return res.status(500).json({ error: error.message || "Failed to verify CMP hash." });
+    }
+  });
+
   // API route to record consent from Chrome Extension or Web App
   app.post("/api/consent/record", async (req, res) => {
     try {
-      const { domain, hash, action, cookieType, userId } = req.body;
+      const { domain, hash, action, cookieType, userId, trackers, cookieCount, cmpName } = req.body;
       if (!domain || !action) {
         return res.status(400).json({ error: "domain and action are required." });
       }
 
       const timestamp = new Date().toISOString();
       const siteDomain = String(domain).toLowerCase().trim();
-      const scriptHash = hash ? String(hash).trim() : '73926ef91823ab0288f34291f09e248b64e9123847a9821034f828108c90fe32';
+      const scriptHash = hash ? String(hash).trim().toLowerCase() : '73926ef91823ab0288f34291f09e248b64e9123847a9821034f828108c90fe32';
       const cType = cookieType || 'all';
       const uId = userId || 'u_auditor_primary';
 
-      // 1. Create Cookie Event
+      // 1. Verify script hash against real CMP registry
+      const { result: verificationResult, cmpName: verifiedCmpName } = await verifyScriptHash(scriptHash);
+      const guidanceShown = determineGuidance(cType, verificationResult);
+      const auditOutput = determineAuditOutput(action);
+
+      // 2. Create Cookie Event
       const eventId = 'ev_' + Math.random().toString(36).substring(2, 11);
       const cookieEvent = {
         id: eventId,
@@ -63,60 +115,102 @@ async function startServer() {
         site_domain: siteDomain,
         cookie_hash: scriptHash,
         cookie_type: cType,
-        verification_result: scriptHash.includes('9f86') || scriptHash.includes('5e88') ? 'Verified' : (scriptHash.includes('a591') ? 'Warning' : 'Unverified'),
-        guidance_shown: action === 'reject' ? 'Warning' : 'Opt for Necessary?',
+        verification_result: verificationResult,
+        guidance_shown: guidanceShown,
         created_at: timestamp,
       };
 
-      // 2. Create Public Ledger Block
+      // 3. Get last public ledger block for proper chain linking
+      let lastPubIndex = -1;
+      let lastPubHash = '0000000000000000000000000000000000000000000000000000000000000000';
+      if (firestoreDb) {
+        const pubSnapshot = await getDocs(query(collection(firestoreDb, 'public_ledger'), orderBy('block_index', 'desc'), limit(1)));
+        if (!pubSnapshot.empty) {
+          const lastPub = pubSnapshot.docs[0].data();
+          lastPubIndex = lastPub.block_index;
+          lastPubHash = lastPub.hash;
+        }
+      }
+      const nextPubIndex = lastPubIndex + 1;
+
+      // 4. Create Public Ledger Block (properly chained)
       const pubBlockId = 'pb_' + Math.random().toString(36).substring(2, 11);
-      const pubPayload = `0000000000000000000000000000000000000000000000000000000000000000|0|${siteDomain}|${scriptHash}|${cookieEvent.verification_result}|${action}|${timestamp}`;
+      const pubPayload = `${lastPubHash}|${nextPubIndex}|${siteDomain}|${scriptHash}|${verificationResult}|${action}|${timestamp}`;
       const pubHash = await sha256Server(pubPayload);
       const publicBlock = {
         id: pubBlockId,
-        block_index: Date.now() % 10000,
-        prev_hash: '0000000000000000000000000000000000000000000000000000000000000000',
+        block_index: nextPubIndex,
+        prev_hash: lastPubHash,
         hash: pubHash,
         user_id: uId,
         site_domain: siteDomain,
         cookie_hash: scriptHash,
-        verification_result: cookieEvent.verification_result,
+        verification_result: verificationResult,
         consent_action: action,
         timestamp: timestamp,
       };
 
-      // 3. Create Private Ledger Block
+      // 5. Get last private ledger block for this user for proper chain linking
+      let lastPrivIndex = -1;
+      let lastPrivHash = '0000000000000000000000000000000000000000000000000000000000000000';
+      if (firestoreDb) {
+        const privSnapshot = await getDocs(query(collection(firestoreDb, 'private_ledger'), where('user_id', '==', uId)));
+        let maxBlock = -1;
+        let maxHash = lastPrivHash;
+        privSnapshot.forEach(d => {
+          const data = d.data();
+          if (data.block_index > maxBlock) { maxBlock = data.block_index; maxHash = data.hash; }
+        });
+        lastPrivIndex = maxBlock;
+        lastPrivHash = maxHash;
+      }
+      const nextPrivIndex = lastPrivIndex + 1;
+
+      // 6. Create Private Ledger Block (properly chained)
       const privBlockId = 'pv_' + Math.random().toString(36).substring(2, 11);
-      const privPayload = `0000000000000000000000000000000000000000000000000000000000000000|0|${uId}|${eventId}|${action}|Consent Recorded|${timestamp}`;
+      const privPayload = `${lastPrivHash}|${nextPrivIndex}|${uId}|${eventId}|${action}|${auditOutput}|${timestamp}`;
       const privHash = await sha256Server(privPayload);
       const privateBlock = {
         id: privBlockId,
-        block_index: Date.now() % 10000,
-        prev_hash: '0000000000000000000000000000000000000000000000000000000000000000',
+        block_index: nextPrivIndex,
+        prev_hash: lastPrivHash,
         hash: privHash,
         user_id: uId,
         cookie_event_id: eventId,
         consent_action: action,
-        audit_output: 'Consent Recorded',
+        audit_output: auditOutput,
         timestamp: timestamp,
       };
 
-      // Sync all 3 to Firestore
+      // 7. Create / update monitored domain with all fields
+      const monId = 'mon_' + uId + '_' + siteDomain.replace(/[^a-z0-9]/g, '_');
+      const riskLevel = verificationResult === 'Warning' || cType === 'suspicious' ? 'High' : (verificationResult === 'Unverified' ? 'Moderate' : 'Low');
+      const monitoredDomain = {
+        id: monId,
+        user_id: uId,
+        domain: siteDomain,
+        url: `https://${siteDomain}`,
+        title: siteDomain,
+        cmp_detected: true,
+        cmp_name: verifiedCmpName || cmpName || 'Unverified CMP Script',
+        script_hash: scriptHash,
+        verification_result: verificationResult,
+        cookie_count: cookieCount || (trackers ? trackers.length + 3 : 5),
+        trackers_count: trackers ? trackers.length : 0,
+        trackers_list: trackers || [],
+        privacy_risk_level: riskLevel,
+        auto_blocked: action === 'reject' || verificationResult === 'Warning',
+        guidance: guidanceShown,
+        timestamp: timestamp,
+      };
+
+      // Sync all to Firestore
       if (firestoreDb) {
         await Promise.all([
           setDoc(doc(firestoreDb, 'cookie_events', cookieEvent.id), cookieEvent),
           setDoc(doc(firestoreDb, 'public_ledger', publicBlock.id), publicBlock),
           setDoc(doc(firestoreDb, 'private_ledger', privateBlock.id), privateBlock),
-          setDoc(doc(firestoreDb, 'monitored_domains', 'mon_' + uId + '_' + siteDomain.replace(/[^a-z0-9]/g, '_')), {
-            id: 'mon_' + uId + '_' + siteDomain.replace(/[^a-z0-9]/g, '_'),
-            user_id: uId,
-            domain: siteDomain,
-            url: `https://${siteDomain}`,
-            title: siteDomain,
-            privacy_risk_level: cookieEvent.verification_result === 'Warning' ? 'High' : 'Low',
-            auto_blocked: action === 'reject',
-            timestamp: timestamp,
-          }),
+          setDoc(doc(firestoreDb, 'monitored_domains', monId), monitoredDomain, { merge: true }),
         ]);
       }
 
@@ -126,6 +220,9 @@ async function startServer() {
         eventId: eventId,
         publicHash: pubHash,
         privateHash: privHash,
+        publicBlockIndex: nextPubIndex,
+        verification: verificationResult,
+        cmpName: verifiedCmpName || cmpName || 'Unverified CMP Script',
       });
     } catch (error: any) {
       console.error("Error recording consent transaction:", error);
@@ -136,27 +233,48 @@ async function startServer() {
   // API route to log monitored site visits
   app.post("/api/domains/record", async (req, res) => {
     try {
-      const { domain, url, title, privacy_risk_level, userId } = req.body;
+      const { domain, url, title, privacy_risk_level, userId, hash, trackers, cookieCount, cmpName } = req.body;
       if (!domain) return res.status(400).json({ error: "domain is required." });
 
       const siteDomain = String(domain).toLowerCase().trim();
       const timestamp = new Date().toISOString();
       const uId = userId || 'u_auditor_primary';
-      const recordId = 'mon_' + Math.random().toString(36).substring(2, 11);
+      const scriptHash = hash ? String(hash).trim().toLowerCase() : '';
 
+      // Verify hash if provided
+      let verificationResult = 'Unverified';
+      let detectedCmpName = cmpName || 'Unverified CMP Script';
+      if (scriptHash) {
+        const v = await verifyScriptHash(scriptHash);
+        verificationResult = v.result;
+        if (v.cmpName) detectedCmpName = v.cmpName;
+      }
+
+      const riskLevel = privacy_risk_level || (verificationResult === 'Warning' ? 'High' : verificationResult === 'Unverified' ? 'Moderate' : 'Low');
+      const guidance = determineGuidance('all', verificationResult);
+
+      const monId = 'mon_' + uId + '_' + siteDomain.replace(/[^a-z0-9]/g, '_');
       const entry = {
-        id: recordId,
+        id: monId,
         user_id: uId,
         domain: siteDomain,
         url: url || `https://${siteDomain}`,
         title: title || siteDomain,
-        privacy_risk_level: privacy_risk_level || 'Low',
-        auto_blocked: privacy_risk_level === 'High' || privacy_risk_level === 'Critical',
+        cmp_detected: true,
+        cmp_name: detectedCmpName,
+        script_hash: scriptHash,
+        verification_result: verificationResult,
+        cookie_count: cookieCount || (trackers ? trackers.length + 3 : 5),
+        trackers_count: trackers ? trackers.length : 0,
+        trackers_list: trackers || [],
+        privacy_risk_level: riskLevel,
+        auto_blocked: riskLevel === 'High' || riskLevel === 'Critical',
+        guidance: guidance,
         timestamp: timestamp,
       };
 
       if (firestoreDb) {
-        await setDoc(doc(firestoreDb, 'monitored_domains', entry.id), entry, { merge: true });
+        await setDoc(doc(firestoreDb, 'monitored_domains', monId), entry, { merge: true });
       }
 
       return res.json({ status: "success", entry });
@@ -198,19 +316,17 @@ async function startServer() {
         // Get user blocks
         const qUser = query(collection(firestoreDb, 'public_ledger'), where('user_id', '==', uId));
         const userSnapshot = await getDocs(qUser);
-        userSnapshot.forEach(doc => {
-          blocks.push({ id: doc.id, ...doc.data() });
+        userSnapshot.forEach(d => {
+          blocks.push({ id: d.id, ...d.data() });
         });
 
-        // Also fetch the genesis block if it is not already fetched
-        const qGen = query(collection(firestoreDb, 'public_ledger'), where('id', '==', 'pb_genesis_0'));
-        const genSnapshot = await getDocs(qGen);
-        genSnapshot.forEach(doc => {
-          if (!blocks.some(b => b.id === doc.id)) {
-            blocks.push({ id: doc.id, ...doc.data() });
-          }
-        });
+        // Also fetch the genesis block directly
+        const genDoc = await getDoc(doc(firestoreDb, 'public_ledger', 'pb_genesis_0'));
+        if (genDoc.exists() && !blocks.some(b => b.id === genDoc.id)) {
+          blocks.push({ id: genDoc.id, ...genDoc.data() });
+        }
       }
+      blocks.sort((a, b) => a.block_index - b.block_index);
       return res.json({ status: "success", data: blocks });
     } catch (error: any) {
       console.error("Error fetching public ledger:", error);
@@ -228,19 +344,17 @@ async function startServer() {
       if (firestoreDb) {
         const qUser = query(collection(firestoreDb, 'private_ledger'), where('user_id', '==', uId));
         const userSnapshot = await getDocs(qUser);
-        userSnapshot.forEach(doc => {
-          blocks.push({ id: doc.id, ...doc.data() });
+        userSnapshot.forEach(d => {
+          blocks.push({ id: d.id, ...d.data() });
         });
 
-        // Fetch genesis block
-        const qGen = query(collection(firestoreDb, 'private_ledger'), where('id', '==', 'pv_genesis_0'));
-        const genSnapshot = await getDocs(qGen);
-        genSnapshot.forEach(doc => {
-          if (!blocks.some(b => b.id === doc.id)) {
-            blocks.push({ id: doc.id, ...doc.data() });
-          }
-        });
+        // Fetch genesis block directly
+        const genDoc = await getDoc(doc(firestoreDb, 'private_ledger', 'pv_genesis_0'));
+        if (genDoc.exists() && !blocks.some(b => b.id === genDoc.id)) {
+          blocks.push({ id: genDoc.id, ...genDoc.data() });
+        }
       }
+      blocks.sort((a, b) => a.block_index - b.block_index);
       return res.json({ status: "success", data: blocks });
     } catch (error: any) {
       console.error("Error fetching private ledger:", error);
@@ -258,10 +372,11 @@ async function startServer() {
       if (firestoreDb) {
         const q = query(collection(firestoreDb, 'monitored_domains'), where('user_id', '==', uId));
         const snapshot = await getDocs(q);
-        snapshot.forEach(doc => {
-          domains.push({ id: doc.id, ...doc.data() });
+        snapshot.forEach(d => {
+          domains.push({ id: d.id, ...d.data() });
         });
       }
+      domains.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
       return res.json({ status: "success", data: domains });
     } catch (error: any) {
       console.error("Error fetching domains history:", error);

@@ -120,6 +120,16 @@ export default function App() {
     };
   }, [activeUserId, isDbReady, refreshDatabaseState]);
 
+  // Periodic REST polling fallback (every 5s) so browser extension data appears live
+  useEffect(() => {
+    if (!isDbReady) return;
+    const pollInterval = setInterval(async () => {
+      await syncAllFromCentralServer(activeUserId);
+      refreshDatabaseState();
+    }, 5000);
+    return () => clearInterval(pollInterval);
+  }, [activeUserId, isDbReady, refreshDatabaseState]);
+
   // Synchronize active user ID to browser extension via window.postMessage
   useEffect(() => {
     window.postMessage({ type: 'CRYPTICOOKIE_USER_CHANGED', userId: activeUserId }, '*');

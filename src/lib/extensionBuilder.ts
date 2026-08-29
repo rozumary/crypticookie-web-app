@@ -11,7 +11,7 @@ export interface ExtensionFile {
 export const EXTENSION_MANIFEST_JSON = `{
   "manifest_version": 3,
   "name": "Crypticookie: Live Website & CMP Consent Shield",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "description": "Real-time active website monitoring, cookie & tracker sniffer, CMP verification, and hybrid blockchain consent auditing with cloud database sync.",
   "permissions": [
     "activeTab",
@@ -47,27 +47,10 @@ export function getExtensionFiles(serverOrigin: string): ExtensionFile[] {
 
   const backgroundJs = `/**
  * Crypticookie Background Service Worker (Manifest V3)
- * Monitors active tab navigation, checks CMP script hashes, and syncs consent transactions to Cloud Database in real-time.
+ * Monitors active tab navigation, checks CMP script hashes against server registry, and syncs consent transactions to Cloud Database in real-time.
  */
 
 const SERVER_API_URL = "${apiOrigin}";
-
-const CMP_REGISTRY_CACHE = new Map([
-  ["9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08", { name: "OneTrust Privacy v6.32", status: "whitelist" }],
-  ["5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8", { name: "Cookiebot CMP v4.1", status: "whitelist" }],
-  ["4b227777d4dd1fc61c6f884f48641d02b4d121d3fd328cb08b5531fcacdabf8a", { name: "Klaro! Consent v0.7", status: "whitelist" }],
-  ["ef2d127de37b942baad06145e54b0c619a1f22327b2ebbcfbec78f5564afe39d", { name: "Axeptio Consent SDK v2.0", status: "whitelist" }],
-  ["a591a6d40bf420404a011733cfb7b190d62c65bf0bcda32b57b277d9ad9f146e", { name: "Malicious Dark Pattern Tracker", status: "blacklist" }],
-  ["c2e26095908990cf250785f7a0c102a90038b36fa2d2a452ef2e63db7a6a4f7e", { name: "Stealth Fingerprint Harvester", status: "blacklist" }]
-]);
-
-// SHA-256 Web Crypto Helper
-async function sha256(message) {
-  const msgUint8 = new TextEncoder().encode(message);
-  const hashBuffer = await crypto.subtle.digest('SHA-256', msgUint8);
-  const hashArray = Array.from(new Uint8Array(hashBuffer));
-  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-}
 
 // 1. Live Website Navigation Detector
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
@@ -75,25 +58,16 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
     try {
       const urlObj = new URL(tab.url);
       const domain = urlObj.hostname;
-      
-      // Update badge indicator
+
       chrome.action.setBadgeText({ tabId: tabId, text: "PROT" });
       chrome.action.setBadgeBackgroundColor({ tabId: tabId, color: "#10b981" });
 
-      // Save visit locally
       chrome.storage.local.get({ monitored_sessions: [], active_user_id: "u_auditor_primary" }, (result) => {
         const list = result.monitored_sessions;
-        const entry = {
-          domain: domain,
-          url: tab.url,
-          title: tab.title || domain,
-          timestamp: new Date().toISOString()
-        };
-        list.unshift(entry);
+        list.unshift({ domain: domain, url: tab.url, title: tab.title || domain, timestamp: new Date().toISOString() });
         if (list.length > 50) list.pop();
         chrome.storage.local.set({ monitored_sessions: list });
 
-        // Real-time sync domain visit to Central Server & Firestore
         fetch(SERVER_API_URL + "/api/domains/record", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -102,7 +76,7 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
             url: tab.url,
             title: tab.title || domain,
             userId: result.active_user_id,
-            privacy_risk_level: domain.includes('track') || domain.includes('pirate') ? "High" : "Low"
+            privacy_risk_level: "Low"
           })
         }).catch(err => console.warn("Server domain sync note:", err));
       });
@@ -122,28 +96,37 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     return true;
   }
 
+  // Verify CMP hash against the real server registry
   if (request.type === "VERIFY_CMP_HASH") {
     const hash = request.hash;
-    const entry = CMP_REGISTRY_CACHE.get(hash);
-    
-    let verification = "Unverified";
-    if (entry) {
-      verification = entry.status === "whitelist" ? "Verified" : "Warning";
-    }
+    (async () => {
+      let verification = "Unverified";
+      let cmpName = "Unverified CMP Script";
 
-    if (sender.tab && sender.tab.id) {
-      const badgeColor = verification === 'Verified' ? '#10b981' : (verification === 'Warning' ? '#ef4444' : '#f59e0b');
-      const badgeText = verification === 'Verified' ? 'SAFE' : (verification === 'Warning' ? 'RISK' : 'UNV');
-      chrome.action.setBadgeText({ tabId: sender.tab.id, text: badgeText });
-      chrome.action.setBadgeBackgroundColor({ tabId: sender.tab.id, color: badgeColor });
-    }
+      try {
+        const resp = await fetch(SERVER_API_URL + "/api/cmp/verify", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ hash: hash })
+        });
+        const data = await resp.json();
+        if (data.status === "success") {
+          verification = data.verification;
+          cmpName = data.cmpName;
+        }
+      } catch (err) {
+        console.warn("Server CMP verify failed, defaulting to Unverified:", err);
+      }
 
-    sendResponse({
-      status: "success",
-      verification: verification,
-      cmpName: entry ? entry.name : "Crypticookie Auto-Inspector",
-      hash: hash
-    });
+      if (sender.tab && sender.tab.id) {
+        const badgeColor = verification === 'Verified' ? '#10b981' : (verification === 'Warning' ? '#ef4444' : '#f59e0b');
+        const badgeText = verification === 'Verified' ? 'SAFE' : (verification === 'Warning' ? 'RISK' : 'UNV');
+        chrome.action.setBadgeText({ tabId: sender.tab.id, text: badgeText });
+        chrome.action.setBadgeBackgroundColor({ tabId: sender.tab.id, color: badgeColor });
+      }
+
+      sendResponse({ status: "success", verification: verification, cmpName: cmpName, hash: hash });
+    })();
     return true;
   }
 
@@ -151,22 +134,12 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     chrome.storage.local.get({ consent_ledger: [], active_user_id: "u_auditor_primary" }, (result) => {
       (async () => {
         const timestamp = new Date().toISOString();
-        const payload = \`\${request.domain}|\${request.hash}|\${request.action}|\${timestamp}\`;
-        const blockHash = await sha256(payload);
 
-        // 1. Save to Chrome local storage
         const ledger = result.consent_ledger;
-        const block = {
-          block_index: ledger.length,
-          domain: request.domain,
-          hash: blockHash,
-          action: request.action,
-          timestamp: timestamp
-        };
-        ledger.push(block);
+        ledger.push({ block_index: ledger.length, domain: request.domain, hash: request.hash, action: request.action, timestamp: timestamp });
         chrome.storage.local.set({ consent_ledger: ledger });
 
-        // 2. REAL-TIME HTTP post to Central Server & Firestore Database
+        let serverResponse = null;
         try {
           const resp = await fetch(SERVER_API_URL + "/api/consent/record", {
             method: "POST",
@@ -176,16 +149,19 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
               hash: request.hash,
               action: request.action,
               userId: result.active_user_id,
+              trackers: request.trackers || [],
+              cookieCount: request.cookieCount || 0,
+              cmpName: request.cmpName || null,
               timestamp: timestamp
             })
           });
-          const data = await resp.json();
-          console.log("Real-time Consent Sync Success:", data);
+          serverResponse = await resp.json();
+          console.log("Real-time Consent Sync Success:", serverResponse);
         } catch (err) {
           console.warn("Failed to reach central server, stored locally:", err);
         }
 
-        sendResponse({ status: "committed", blockHash: blockHash });
+        sendResponse({ status: "committed", serverResponse: serverResponse });
       })();
     });
     return true;
@@ -203,6 +179,10 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
               url: request.url,
               title: request.title,
               userId: result.active_user_id,
+              hash: request.hash || '',
+              trackers: request.trackers || [],
+              cookieCount: request.cookieCount || 0,
+              cmpName: request.cmpName || null,
               privacy_risk_level: request.privacy_risk_level || "Low"
             })
           });
@@ -217,46 +197,31 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
   const contentJs = `/**
  * Crypticookie Content Script (Live Website Inspector & Privacy Shield Overlay)
- * Runs on EVERY website to inspect cookies, verify CMP scripts, and render the Crypticookie Privacy Shield.
+ * Runs on EVERY website to inspect real cookies, detect real CMP scripts, and render the Crypticookie Privacy Shield.
  */
 
 (function initCrypticookieInterceptor() {
   const currentHost = window.location.hostname || 'website';
-  
+
   // Synchronize Active User ID if on the Crypticookie Web App origin
   if (window.location.origin === "${apiOrigin}" || window.location.host.includes("asia-east1.run.app") || window.location.host.includes("localhost:3000")) {
     const activeUserId = localStorage.getItem('crypticookie_active_user_id');
     if (activeUserId) {
-      chrome.runtime.sendMessage({
-        type: 'SET_ACTIVE_USER_ID',
-        userId: activeUserId
-      });
+      chrome.runtime.sendMessage({ type: 'SET_ACTIVE_USER_ID', userId: activeUserId });
     }
-    // Set up reactive listener to sync whenever user logs in or switches accounts
     window.addEventListener('storage', (e) => {
       if (e.key === 'crypticookie_active_user_id' && e.newValue) {
-        chrome.runtime.sendMessage({
-          type: 'SET_ACTIVE_USER_ID',
-          userId: e.newValue
-        });
+        chrome.runtime.sendMessage({ type: 'SET_ACTIVE_USER_ID', userId: e.newValue });
       }
     });
-
-    window.addEventListener('crypticookie_user_changed', (e: any) => {
+    window.addEventListener('crypticookie_user_changed', (e) => {
       if (e.detail && e.detail.userId) {
-        chrome.runtime.sendMessage({
-          type: 'SET_ACTIVE_USER_ID',
-          userId: e.detail.userId
-        });
+        chrome.runtime.sendMessage({ type: 'SET_ACTIVE_USER_ID', userId: e.detail.userId });
       }
     });
-
     window.addEventListener('message', (e) => {
       if (e.data && e.data.type === 'CRYPTICOOKIE_USER_CHANGED') {
-        chrome.runtime.sendMessage({
-          type: 'SET_ACTIVE_USER_ID',
-          userId: e.data.userId
-        });
+        chrome.runtime.sendMessage({ type: 'SET_ACTIVE_USER_ID', userId: e.data.userId });
       }
     });
   }
@@ -264,26 +229,166 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   // Do not run shield on internal extension, local or central app pages
   if (!currentHost || currentHost === 'localhost' || currentHost === '127.0.0.1' || window.location.origin === "${apiOrigin}" || window.location.host.includes("asia-east1.run.app")) return;
 
-  function computeScriptHashMock(domain) {
-    if (domain.includes('mit.edu') || domain.includes('onetrust') || domain.includes('theverge')) {
-      return '9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08';
-    }
-    if (domain.includes('cookiebot') || domain.includes('bbc') || domain.includes('github') || domain.includes('google')) {
-      return '5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8';
-    }
-    if (domain.includes('pirate') || domain.includes('track') || domain.includes('stream') || domain.includes('casino')) {
-      return 'a591a6d40bf420404a011733cfb7b190d62c65bf0bcda32b57b277d9ad9f146e';
-    }
-    return '73926ef91823ab0288f34291f09e248b64e9123847a9821034f828108c90fe32';
+  // Known CMP script domains for real detection
+  const CMP_DOMAINS = [
+    { pattern: 'cookielaw.org', name: 'OneTrust Privacy Banner' },
+    { pattern: 'onetrust', name: 'OneTrust Privacy Banner' },
+    { pattern: 'cookiebot.com', name: 'Cookiebot CMP (Usercentrics)' },
+    { pattern: 'consent.cookiebot', name: 'Cookiebot CMP (Usercentrics)' },
+    { pattern: 'sdk.privacy-center.org', name: 'Didomi Consent SDK' },
+    { pattern: 'didomi.io', name: 'Didomi Consent SDK' },
+    { pattern: 'quantcast', name: 'Quantcast Choice CMP' },
+    { pattern: 'trustarc', name: 'TrustArc Consent Manager' },
+    { pattern: 'consensu.org', name: 'IAB TCF CMP' },
+    { pattern: 'klaro.org', name: 'Klaro! Open Source Consent' },
+    { pattern: 'axeptio', name: 'Axeptio Consent SDK' },
+    { pattern: 'trustcommander', name: 'Commanders Act CMP' },
+    { pattern: 'consentmanager', name: 'ConsentManager.net' },
+    { pattern: 'sourcepoint', name: 'SourcePoint CMP' },
+  ];
+
+  // Known tracker domains for real detection
+  const TRACKER_DOMAINS = [
+    { pattern: 'google-analytics.com', name: 'Google Analytics (_ga)', category: 'Analytics' },
+    { pattern: 'googletagmanager.com', name: 'Google Tag Manager', category: 'Analytics' },
+    { pattern: 'doubleclick.net', name: 'Google Ads / DoubleClick', category: 'Advertising' },
+    { pattern: 'facebook.net', name: 'Facebook Pixel (_fbp)', category: 'Advertising' },
+    { pattern: 'connect.facebook.net', name: 'Facebook Pixel (_fbp)', category: 'Advertising' },
+    { pattern: 'tiktok.com', name: 'TikTok Ads Pixel', category: 'Advertising' },
+    { pattern: 'criteo.com', name: 'Criteo Retargeting', category: 'Advertising' },
+    { pattern: 'criteo.net', name: 'Criteo Retargeting', category: 'Advertising' },
+    { pattern: 'hotjar.com', name: 'Hotjar Session Replay', category: 'Analytics' },
+    { pattern: 'fullstory.com', name: 'FullStory Session Replay', category: 'Analytics' },
+    { pattern: 'chartbeat.com', name: 'Chartbeat Analytics', category: 'Analytics' },
+    { pattern: 'optimizely.com', name: 'Optimizely A/B Testing', category: 'Analytics' },
+    { pattern: 'outbrain.com', name: 'Outbrain Recommendations', category: 'Advertising' },
+    { pattern: 'taboola.com', name: 'Taboola Recommendations', category: 'Advertising' },
+    { pattern: 'amazon-adsystem.com', name: 'Amazon Ads', category: 'Advertising' },
+    { pattern: 'clarity.ms', name: 'Microsoft Clarity', category: 'Analytics' },
+    { pattern: 'segment.com', name: 'Segment Analytics', category: 'Analytics' },
+    { pattern: 'mixpanel.com', name: 'Mixpanel Analytics', category: 'Analytics' },
+    { pattern: 'amplitude.com', name: 'Amplitude Analytics', category: 'Analytics' },
+    { pattern: 'fingerprintjs', name: 'FingerprintJS', category: 'Fingerprinting' },
+    { pattern: 'audiotrack.biz', name: 'Stealth Audio Fingerprinter', category: 'Fingerprinting' },
+    { pattern: 'coinhive', name: 'CryptoMiner Script', category: 'Fingerprinting' },
+    { pattern: 'popunder.net', name: 'Popunder Ad Network', category: 'Advertising' },
+  ];
+
+  // Cookie-based tracker detection
+  const COOKIE_TRACKERS = [
+    { pattern: '_ga', name: 'Google Analytics (_ga)', category: 'Analytics' },
+    { pattern: '_fbp', name: 'Facebook Pixel (_fbp)', category: 'Advertising' },
+    { pattern: '_gid', name: 'Google Analytics (_gid)', category: 'Analytics' },
+    { pattern: 'fr', name: 'Facebook Retargeting (fr)', category: 'Advertising' },
+    { pattern: 'IDE', name: 'Google DoubleClick (IDE)', category: 'Advertising' },
+    { pattern: 'test_cookie', name: 'Google Ads Test Cookie', category: 'Advertising' },
+    { pattern: '_gcl_au', name: 'Google Ads (gcl_au)', category: 'Advertising' },
+    { pattern: 'ttclid', name: 'TikTok Click ID', category: 'Advertising' },
+    { pattern: 'cto_bundle', name: 'Criteo Bundle', category: 'Advertising' },
+  ];
+
+  // SHA-256 helper
+  async function sha256(message) {
+    const msgUint8 = new TextEncoder().encode(message);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', msgUint8);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
   }
 
-  // Notify background script about website visit
-  chrome.runtime.sendMessage({
-    type: 'DOMAIN_VISITED',
-    domain: currentHost,
-    url: window.location.href,
-    title: document.title || currentHost,
-  });
+  // Real CMP script detection: scan all <script> tags for known CMP domains
+  function detectCmpScript() {
+    const scripts = document.querySelectorAll('script[src]');
+    for (const script of scripts) {
+      const src = (script.src || '').toLowerCase();
+      for (const cmp of CMP_DOMAINS) {
+        if (src.includes(cmp.pattern)) {
+          return { src: script.src, name: cmp.name };
+        }
+      }
+    }
+    // Also check inline scripts for CMP initialization patterns
+    const inlineScripts = document.querySelectorAll('script:not([src])');
+    for (const script of inlineScripts) {
+      const text = (script.textContent || '').toLowerCase();
+      if (text.includes('onetrust') || text.includes('cookiebot') || text.includes('didomi') || text.includes('quantcast')) {
+        for (const cmp of CMP_DOMAINS) {
+          if (text.includes(cmp.pattern)) {
+            return { src: cmp.pattern, name: cmp.name };
+          }
+        }
+      }
+    }
+    return null;
+  }
+
+  // Real tracker detection: scan all elements for known tracker domains + cookies
+  function detectTrackers() {
+    const detected = [];
+    const seen = new Set();
+    const allElements = document.querySelectorAll('script[src], link[href], iframe[src], img[src]');
+
+    for (const el of allElements) {
+      const url = (el.src || el.href || '').toLowerCase();
+      if (!url) continue;
+      for (const tracker of TRACKER_DOMAINS) {
+        if (url.includes(tracker.pattern) && !seen.has(tracker.name)) {
+          seen.add(tracker.name);
+          detected.push({
+            name: tracker.name,
+            category: tracker.category,
+            domain: url.split('/')[2] || url,
+            blocked: tracker.category === 'Fingerprinting'
+          });
+        }
+      }
+    }
+
+    // Also detect via cookies
+    if (document.cookie) {
+      const cookies = document.cookie.split(';');
+      for (const cookie of cookies) {
+        const cookieName = cookie.trim().split('=')[0];
+        for (const ct of COOKIE_TRACKERS) {
+          if (cookieName === ct.pattern && !seen.has(ct.name)) {
+            seen.add(ct.name);
+            detected.push({ name: ct.name, category: ct.category, domain: currentHost, blocked: false });
+          }
+        }
+      }
+    }
+
+    return detected;
+  }
+
+  // Detect CMP and compute real SHA-256 hash
+  const detectedCmp = detectCmpScript();
+  const detectedTrackers = detectTrackers();
+  const cookieCount = document.cookie ? document.cookie.split(';').length : 0;
+  const cmpSrcForHash = detectedCmp ? detectedCmp.src : (currentHost + '_no_cmp_detected');
+
+  (async () => {
+    const scriptHash = await sha256(cmpSrcForHash);
+
+    // Notify background script about website visit with real data
+    chrome.runtime.sendMessage({
+      type: 'DOMAIN_VISITED',
+      domain: currentHost,
+      url: window.location.href,
+      title: document.title || currentHost,
+      hash: scriptHash,
+      trackers: detectedTrackers,
+      cookieCount: cookieCount,
+      cmpName: detectedCmp ? detectedCmp.name : null,
+      privacy_risk_level: detectedTrackers.some(t => t.category === 'Fingerprinting') ? 'High' : 'Low'
+    });
+
+    // Verify the real hash against the server CMP registry
+    chrome.runtime.sendMessage({ type: 'VERIFY_CMP_HASH', hash: scriptHash }, (res) => {
+      const verification = res ? res.verification : 'Unverified';
+      const cmpName = res ? res.cmpName : (detectedCmp ? detectedCmp.name : 'No CMP Detected');
+      renderShieldBanner(verification, cmpName, scriptHash);
+    });
+  })();
 
   function renderShieldBanner(verification, cmpName, hash) {
     let existing = document.getElementById('crypticookie-shield-root');
@@ -291,7 +396,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
     const shieldDiv = document.createElement('div');
     shieldDiv.id = 'crypticookie-shield-root';
-    
+
     const badgeColor = verification === 'Verified' ? '#10b981' : (verification === 'Warning' ? '#ef4444' : '#f59e0b');
     const badgeText = verification === 'Verified' ? '✓ Whitelist Verified' : (verification === 'Warning' ? '⚠ Blacklisted Dark Pattern' : 'ℹ Unverified Script');
     const guidance = verification === 'Verified' ? 'Accept Necessary?' : (verification === 'Warning' ? 'Warning: Reject All' : 'Opt for Necessary?');
@@ -311,16 +416,19 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             <button id="crypticookie-close-btn" class="crypticookie-close" title="Dismiss Shield" type="button">&times;</button>
           </div>
         </div>
-        
+
         <div class="crypticookie-body">
           <div class="crypticookie-detail">
             <strong>Monitored Website:</strong> <span class="crypticookie-rec-tag">\${currentHost}</span>
           </div>
           <div class="crypticookie-detail">
-            <strong>Consent Framework:</strong> \${cmpName || 'Crypticookie Auto Inspector'}
+            <strong>Consent Framework:</strong> \${cmpName || 'No CMP Detected'}
           </div>
           <div class="crypticookie-detail">
             <strong>Script SHA-256:</strong> <code class="crypticookie-code">\${hash.substring(0, 16)}...</code>
+          </div>
+          <div class="crypticookie-detail">
+            <strong>Trackers Detected:</strong> <span class="crypticookie-rec-tag">\${detectedTrackers.length} trackers, \${cookieCount} cookies</span>
           </div>
           <div class="crypticookie-recommendation">
             <strong>Guidance Engine:</strong> <span class="crypticookie-rec-tag">\${guidance}</span>
@@ -334,7 +442,6 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         </div>
       </div>
 
-      <!-- Floating Minimized Badge -->
       <div id="crypticookie-mini-badge" class="crypticookie-mini-badge" style="display:none;" title="Click to expand Crypticookie Privacy Shield">
         <span style="font-size:14px;">🛡️</span>
         <span style="font-weight:700; font-size:11px;">Crypticookie Shield</span>
@@ -346,77 +453,49 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     const bannerBox = document.getElementById('crypticookie-banner-box');
     const miniBadge = document.getElementById('crypticookie-mini-badge');
 
-    const minimize = () => {
-      if (bannerBox) bannerBox.style.display = 'none';
-      if (miniBadge) miniBadge.style.display = 'flex';
-    };
+    const minimize = () => { if (bannerBox) bannerBox.style.display = 'none'; if (miniBadge) miniBadge.style.display = 'flex'; };
+    const expand = () => { if (bannerBox) bannerBox.style.display = 'block'; if (miniBadge) miniBadge.style.display = 'none'; };
 
-    const expand = () => {
-      if (bannerBox) bannerBox.style.display = 'block';
-      if (miniBadge) miniBadge.style.display = 'none';
-    };
-
-    document.getElementById('crypticookie-minimize-btn')?.addEventListener('click', (e) => {
-      e.stopPropagation();
-      minimize();
-    });
-
-    document.getElementById('crypticookie-close-btn')?.addEventListener('click', (e) => {
-      e.stopPropagation();
-      shieldDiv.remove();
-    });
-
-    miniBadge?.addEventListener('click', (e) => {
-      e.stopPropagation();
-      expand();
-    });
+    document.getElementById('crypticookie-minimize-btn')?.addEventListener('click', (e) => { e.stopPropagation(); minimize(); });
+    document.getElementById('crypticookie-close-btn')?.addEventListener('click', (e) => { e.stopPropagation(); shieldDiv.remove(); });
+    miniBadge?.addEventListener('click', (e) => { e.stopPropagation(); expand(); });
 
     const handleAction = (action, clickedBtnId) => {
       const btn = document.getElementById(clickedBtnId);
-      if (btn) {
-        btn.innerText = '✓ Recorded to DB!';
-        btn.style.backgroundColor = '#10b981';
-      }
+      if (btn) { btn.innerText = '✓ Recorded to DB!'; btn.style.backgroundColor = '#10b981'; }
 
       chrome.runtime.sendMessage({
         type: 'RECORD_CONSENT_TRANSACTION',
         domain: currentHost,
         hash: hash,
-        action: action
-      }, (response) => {
-        setTimeout(() => {
-          minimize();
-        }, 1200);
-      });
+        action: action,
+        trackers: detectedTrackers,
+        cookieCount: cookieCount,
+        cmpName: cmpName
+      }, () => { setTimeout(() => { minimize(); }, 1200); });
     };
 
-    document.getElementById('crypticookie-action-accept')?.addEventListener('click', (e) => {
-      e.preventDefault();
-      handleAction('accept', 'crypticookie-action-accept');
-    });
-    document.getElementById('crypticookie-action-reject')?.addEventListener('click', (e) => {
-      e.preventDefault();
-      handleAction('reject', 'crypticookie-action-reject');
-    });
-    document.getElementById('crypticookie-action-audit')?.addEventListener('click', (e) => {
-      e.preventDefault();
-      handleAction('customize', 'crypticookie-action-audit');
-    });
+    document.getElementById('crypticookie-action-accept')?.addEventListener('click', (e) => { e.preventDefault(); handleAction('accept', 'crypticookie-action-accept'); });
+    document.getElementById('crypticookie-action-reject')?.addEventListener('click', (e) => { e.preventDefault(); handleAction('reject', 'crypticookie-action-reject'); });
+    document.getElementById('crypticookie-action-audit')?.addEventListener('click', (e) => { e.preventDefault(); handleAction('customize', 'crypticookie-action-audit'); });
   }
-
-  // Auto Inspection on website open
-  const scriptHash = computeScriptHashMock(currentHost);
-  chrome.runtime.sendMessage({ type: 'VERIFY_CMP_HASH', hash: scriptHash }, (res) => {
-    const verification = res ? res.verification : 'Unverified';
-    const cmpName = res ? res.cmpName : 'Auto Detected Web Inspector';
-    renderShieldBanner(verification, cmpName, scriptHash);
-  });
 
   // Listen for toolbar popup commands
   chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     if (msg.type === 'SHOW_SHIELD_OVERLAY') {
-      renderShieldBanner('Verified', 'Crypticookie Manual Trigger', scriptHash);
+      const hash = detectedCmp ? detectedCmp.src : currentHost;
+      sha256(hash).then(function(realHash) {
+        renderShieldBanner('Unverified', detectedCmp ? detectedCmp.name : 'No CMP Detected', realHash);
+      });
       sendResponse({ status: 'shown' });
+    }
+    if (msg.type === 'GET_CMP_INFO_FOR_POPUP') {
+      sendResponse({
+        hash: detectedCmp ? detectedCmp.src : '',
+        cmpName: detectedCmp ? detectedCmp.name : 'No CMP Detected',
+        trackers: detectedTrackers,
+        cookieCount: cookieCount
+      });
     }
   });
 })();
@@ -507,7 +586,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   <div class="header">
     <div class="title">
       <span>🛡️</span>
-      <span>Crypticookie Shield v1.2</span>
+      <span>Crypticookie Shield v1.3</span>
     </div>
     <span class="badge">REAL-TIME</span>
   </div>
@@ -521,8 +600,12 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
   <div class="status-card">
     <div class="metric-row">
-      <span>Website Monitoring</span>
-      <span class="metric-val" style="color:#34d399;">Active (Auto-Scan)</span>
+      <span>CMP Detected</span>
+      <span class="metric-val" id="cmp-info" style="color:#fbbf24;">Scanning...</span>
+    </div>
+    <div class="metric-row">
+      <span>Trackers & Cookies</span>
+      <span class="metric-val" id="tracker-info" style="color:#f87171;">Scanning...</span>
     </div>
     <div class="metric-row">
       <span>Firestore DB Sync</span>
@@ -541,6 +624,9 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
   const popupJs = `document.addEventListener('DOMContentLoaded', () => {
   let currentDomain = 'website';
+  let detectedHash = '';
+  let detectedCmpName = 'No CMP detected';
+  let detectedTrackers = [];
 
   chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
     if (tabs[0] && tabs[0].url) {
@@ -548,6 +634,24 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         const url = new URL(tabs[0].url);
         currentDomain = url.hostname;
         document.getElementById('domain-name').innerText = currentDomain;
+
+        // Ask the content script for the real detected CMP info
+        chrome.tabs.sendMessage(tabs[0].id, { type: 'GET_CMP_INFO_FOR_POPUP' }, (response) => {
+          if (chrome.runtime.lastError) {
+            console.warn('Content script not available:', chrome.runtime.lastError.message);
+            return;
+          }
+          if (response) {
+            detectedHash = response.hash || '';
+            detectedCmpName = response.cmpName || 'No CMP detected';
+            detectedTrackers = response.trackers || [];
+
+            const trackerInfo = document.getElementById('tracker-info');
+            if (trackerInfo) trackerInfo.innerText = detectedTrackers.length + ' trackers, ' + (response.cookieCount || 0) + ' cookies';
+            const cmpInfo = document.getElementById('cmp-info');
+            if (cmpInfo) cmpInfo.innerText = detectedCmpName;
+          }
+        });
       } catch (e) {
         document.getElementById('domain-name').innerText = 'Browser Session';
       }
@@ -568,8 +672,10 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     chrome.runtime.sendMessage({
       type: 'RECORD_CONSENT_TRANSACTION',
       domain: currentDomain,
-      hash: '5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8',
-      action: 'accept'
+      hash: detectedHash || 'unverified',
+      action: 'accept',
+      trackers: detectedTrackers,
+      cmpName: detectedCmpName
     });
   });
 
@@ -579,8 +685,10 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     chrome.runtime.sendMessage({
       type: 'RECORD_CONSENT_TRANSACTION',
       domain: currentDomain,
-      hash: 'a591a6d40bf420404a011733cfb7b190d62c65bf0bcda32b57b277d9ad9f146e',
-      action: 'reject'
+      hash: detectedHash || 'unverified',
+      action: 'reject',
+      trackers: detectedTrackers,
+      cmpName: detectedCmpName
     });
   });
 
@@ -771,55 +879,13 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 `;
 
   return [
-    {
-      name: 'manifest.json',
-      path: 'manifest.json',
-      language: 'json',
-      description: 'Manifest V3 configuration with activeTab, webNavigation, scripting, and storage permissions.',
-      content: EXTENSION_MANIFEST_JSON,
-    },
-    {
-      name: 'background.js',
-      path: 'background.js',
-      language: 'javascript',
-      description: 'Service worker monitoring website navigation, CMP hash lookups, SHA-256 cryptographic hashing, and cloud database sync.',
-      content: backgroundJs,
-    },
-    {
-      name: 'content.js',
-      path: 'content.js',
-      language: 'javascript',
-      description: 'DOM Interceptor running on every website to scan for trackers and render the Crypticookie Privacy Shield overlay.',
-      content: contentJs,
-    },
-    {
-      name: 'popup.html',
-      path: 'popup.html',
-      language: 'html',
-      description: 'Extension toolbar popup UI displaying active detected website and real-time database controls.',
-      content: popupHtml,
-    },
-    {
-      name: 'popup.js',
-      path: 'popup.js',
-      language: 'javascript',
-      description: 'Popup script enabling toolbar quick actions and page overlay triggers.',
-      content: popupJs,
-    },
-    {
-      name: 'styles.css',
-      path: 'styles.css',
-      language: 'css',
-      description: 'Crisp dark-mode styling for the injected DOM privacy shield.',
-      content: stylesCss,
-    },
-    {
-      name: 'README.md',
-      path: 'README.md',
-      language: 'markdown',
-      description: 'Installation and developer instructions for running unpacked in Chromium browsers.',
-      content: readmeMd,
-    },
+    { name: 'manifest.json', path: 'manifest.json', language: 'json', description: 'Manifest V3 configuration with activeTab, webNavigation, scripting, and storage permissions.', content: EXTENSION_MANIFEST_JSON },
+    { name: 'background.js', path: 'background.js', language: 'javascript', description: 'Service worker monitoring website navigation, CMP hash lookups via server, and cloud database sync.', content: backgroundJs },
+    { name: 'content.js', path: 'content.js', language: 'javascript', description: 'DOM Interceptor running on every website to scan for real CMP scripts and trackers, then render the Crypticookie Privacy Shield overlay.', content: contentJs },
+    { name: 'popup.html', path: 'popup.html', language: 'html', description: 'Extension toolbar popup UI displaying active detected website and real-time database controls.', content: popupHtml },
+    { name: 'popup.js', path: 'popup.js', language: 'javascript', description: 'Popup script enabling toolbar quick actions and page overlay triggers.', content: popupJs },
+    { name: 'styles.css', path: 'styles.css', language: 'css', description: 'Crisp dark-mode styling for the injected DOM privacy shield.', content: stylesCss },
+    { name: 'README.md', path: 'README.md', language: 'markdown', description: 'Installation and developer instructions for running unpacked in Chromium browsers.', content: readmeMd },
   ];
 }
 
@@ -827,20 +893,16 @@ export const ALL_EXTENSION_FILES: ExtensionFile[] = getExtensionFiles(
   typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000'
 );
 
-/**
- * Generate a downloadable .zip archive of the complete working Chrome Extension
- */
 export async function downloadExtensionZip(): Promise<void> {
   const origin = typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000';
   const files = getExtensionFiles(origin);
 
   const zip = new JSZip();
-  
+
   for (const file of files) {
     zip.file(file.name, file.content);
   }
 
-  // Create an icons folder
   const iconSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>`;
   zip.file('icons/icon.svg', iconSvg);
 

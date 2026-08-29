@@ -1,6 +1,6 @@
 {
-  "name": "Crypticookie - Smart Cookie & Privacy Protection System",
-  "description": "Smart Cookie & Privacy Protection System — Easily manage cookie choices, block sneaky popups, and audit website privacy.",
+  "name": "Crypticookie - Live Website Monitor & Blockchain Consent System",
+  "description": "Real-time active website & CMP detector, tracker audit, hybrid blockchain consent ledger, and Google Cloud Firestore database.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

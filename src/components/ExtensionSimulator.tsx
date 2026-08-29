@@ -300,7 +300,7 @@ export const ExtensionSimulator: React.FC<ExtensionSimulatorProps> = ({
             </span>
           </div>
           <p className="text-xs text-purple-300/70 mt-1">
-            Type any website domain below to audit its real cookies, verify CMP hash on-chain, or install to Chrome.
+            Type any website domain below to check its real cookies, inspect privacy banners, or add to your web browser.
           </p>
         </div>
 

@@ -113,7 +113,7 @@ export const DatabaseConsole: React.FC<DatabaseConsoleProps> = ({ onRefreshData 
             </span>
           </div>
           <p className="text-xs text-purple-300/70 mt-1">
-            Real cloud database and local Dexie persistence powering CMP whitelists, consent events, monitored websites, and blockchain ledgers.
+            Cloud database and local storage keeping your consent preferences, monitored sites, and security logs saved.
           </p>
         </div>
 

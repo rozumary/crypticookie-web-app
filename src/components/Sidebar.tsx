@@ -165,8 +165,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 title={item.label}
                 className={`group relative flex w-full items-center gap-3 rounded-2xl px-3.5 py-3 text-xs font-semibold transition-all duration-200 cursor-pointer ${
                   isActive
-                    ? 'bg-gradient-to-r from-[#2E0B46] via-[#210836] to-[#3B0E50] text-white border border-pink-500/70'
-                    : 'text-purple-300/80 hover:text-white border border-transparent hover:border-pink-500/40 hover:bg-gradient-to-r hover:from-[#1E0933]/80 hover:to-[#2B0A42]/80'
+                    ? 'bg-gradient-to-r from-[#2B0A42] via-[#200835] to-[#350C48] text-white border border-pink-500/50'
+                    : 'text-purple-300/80 hover:text-white border border-transparent hover:border-purple-500/30 hover:bg-[#18092C]'
                 }`}
               >
                 <Icon

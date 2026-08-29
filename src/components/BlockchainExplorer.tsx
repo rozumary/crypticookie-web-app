@@ -107,18 +107,18 @@ export const BlockchainExplorer: React.FC<BlockchainExplorerProps> = ({ onRefres
   return (
     <div className="space-y-8 pb-12">
       {/* SECTION 1: Top Header Outer Container */}
-      <div className="bg-[#0F1523] border border-slate-800 rounded-2xl p-6 sm:p-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 shadow-sm">
+      <div className="bg-[#0F061F] border border-[#261445] rounded-3xl p-6 sm:p-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <div className="flex items-center gap-2">
             <h1 className="text-2xl font-bold text-white tracking-tight flex items-center gap-2">
               <span>Blockchain Explorer</span>
-              <span className="h-2 w-2 rounded-full bg-indigo-500" />
+              <span className="h-2 w-2 rounded-full bg-pink-500" />
             </h1>
-            <span className="px-2.5 py-0.5 rounded-full bg-slate-800 text-indigo-300 border border-slate-700 text-[11px] font-mono font-semibold">
+            <span className="px-2.5 py-0.5 rounded-full bg-[#1A0935] text-pink-300 border border-pink-500/30 text-[11px] font-mono font-semibold">
               Hybrid PB+P Chain
             </span>
           </div>
-          <p className="text-xs text-slate-400 mt-1">
+          <p className="text-xs text-purple-300/70 mt-1">
             Secure verification history: Public records for transparency + Private records for user privacy choices.
           </p>
         </div>
@@ -135,9 +135,9 @@ export const BlockchainExplorer: React.FC<BlockchainExplorerProps> = ({ onRefres
           <button
             onClick={loadLedgers}
             title="Refresh Integrity"
-            className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition-colors cursor-pointer"
+            className="p-2 rounded-xl bg-[#1A0935] hover:bg-[#250B42] text-purple-200 border border-pink-500/30 transition-colors cursor-pointer"
           >
-            <RotateCw className="h-4 w-4 text-indigo-300" />
+            <RotateCw className="h-4 w-4 text-pink-300" />
           </button>
         </div>
       </div>
@@ -145,9 +145,9 @@ export const BlockchainExplorer: React.FC<BlockchainExplorerProps> = ({ onRefres
       {/* SECTION 2: Integrity Status Outer Container */}
       {verificationResult && (
         <div
-          className={`p-6 sm:p-8 rounded-2xl border flex flex-col sm:flex-row sm:items-center justify-between gap-4 ${
+          className={`p-6 sm:p-8 rounded-3xl border flex flex-col sm:flex-row sm:items-center justify-between gap-4 ${
             verificationResult.isValid
-              ? 'border-slate-800 bg-[#0F1523] text-slate-200'
+              ? 'border-pink-500/30 bg-[#1A0935] text-purple-100'
               : 'border-rose-800/80 bg-rose-950/60 text-rose-200'
           }`}
         >
@@ -164,11 +164,11 @@ export const BlockchainExplorer: React.FC<BlockchainExplorerProps> = ({ onRefres
                     ? 'Chain Integrity: 100% Valid'
                     : `Tampered Block Detected at Index #${verificationResult.brokenBlockIndex}`}
                 </span>
-                <span className="text-[11px] font-mono px-2.5 py-0.5 rounded-full bg-slate-800 text-indigo-300 border border-slate-700 font-bold">
+                <span className="text-[11px] font-mono px-2.5 py-0.5 rounded-full bg-[#0F061F] text-pink-300 border border-pink-500/30 font-bold">
                   {verificationResult.totalBlocks} Blocks
                 </span>
               </div>
-              <p className="text-xs text-slate-400 mt-0.5">
+              <p className="text-xs text-purple-300/70 mt-0.5">
                 {verificationResult.isValid
                   ? 'All sequential cryptographic SHA-256 block hashes are intact.'
                   : 'A block has been modified out-of-band. Cryptographic proof mismatch.'}
@@ -190,19 +190,19 @@ export const BlockchainExplorer: React.FC<BlockchainExplorerProps> = ({ onRefres
       )}
 
       {/* SECTION 3: Main Explorer Outer Container */}
-      <div className="bg-[#0F1523] border border-slate-800 rounded-2xl p-6 sm:p-8 space-y-6 shadow-sm">
+      <div className="bg-[#0F061F] border border-[#261445] rounded-3xl p-6 sm:p-8 space-y-6">
         {/* Tabs & Search */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800 pb-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#29154A] pb-4">
           <div className="flex items-center gap-2">
             <button
               onClick={() => setActiveLedgerTab('public')}
               className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                 activeLedgerTab === 'public'
-                  ? 'bg-indigo-600 text-white'
-                  : 'bg-slate-800 text-slate-200 hover:bg-slate-700 border border-slate-700'
+                  ? 'bg-gradient-to-r from-pink-600 to-purple-600 text-white'
+                  : 'bg-[#1A0935] text-purple-200 hover:bg-[#250B42] border border-pink-500/30'
               }`}
             >
-              <Unlock className="h-3.5 w-3.5 text-indigo-300" />
+              <Unlock className="h-3.5 w-3.5 text-pink-300" />
               <span>Public Ledger ({publicBlocks.length})</span>
             </button>
 
@@ -210,23 +210,23 @@ export const BlockchainExplorer: React.FC<BlockchainExplorerProps> = ({ onRefres
               onClick={() => setActiveLedgerTab('private')}
               className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                 activeLedgerTab === 'private'
-                  ? 'bg-indigo-600 text-white'
-                  : 'bg-slate-800 text-slate-200 hover:bg-slate-700 border border-slate-700'
+                  ? 'bg-gradient-to-r from-pink-600 to-purple-600 text-white'
+                  : 'bg-[#1A0935] text-purple-200 hover:bg-[#250B42] border border-pink-500/30'
               }`}
             >
-              <Lock className="h-3.5 w-3.5 text-indigo-300" />
+              <Lock className="h-3.5 w-3.5 text-pink-300" />
               <span>Private Ledger ({privateBlocks.length})</span>
             </button>
           </div>
 
           <div className="relative w-full sm:w-64">
-            <Search className="absolute left-3 top-2.5 h-3.5 w-3.5 text-indigo-400" />
+            <Search className="absolute left-3 top-2.5 h-3.5 w-3.5 text-pink-400" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search domain or hash..."
-              className="w-full rounded-xl bg-[#141C2E] pl-9 pr-3 py-1.5 text-xs text-slate-100 border border-slate-800 focus:outline-none focus:border-indigo-500 font-mono placeholder-slate-500"
+              className="w-full rounded-xl bg-[#130729] pl-9 pr-3 py-1.5 text-xs text-purple-100 border border-[#29154A] focus:outline-none focus:border-pink-500 font-mono placeholder-purple-400/40"
             />
           </div>
         </div>
@@ -235,7 +235,7 @@ export const BlockchainExplorer: React.FC<BlockchainExplorerProps> = ({ onRefres
         {activeLedgerTab === 'public' && (
           <div className="space-y-4">
             {filteredPublicBlocks.length === 0 ? (
-              <div className="text-center py-10 bg-[#141C2E] rounded-xl border border-slate-800 text-slate-400 text-xs font-mono">
+              <div className="text-center py-10 bg-[#130729] rounded-2xl border border-[#29154A] text-purple-300/60 text-xs font-mono">
                 No public blocks found.
               </div>
             ) : (
@@ -248,15 +248,15 @@ export const BlockchainExplorer: React.FC<BlockchainExplorerProps> = ({ onRefres
                 return (
                   <div
                     key={block.id}
-                    className={`p-5 rounded-xl border transition-all ${
+                    className={`p-5 rounded-2xl border transition-all ${
                       isTampered
                         ? 'border-rose-800/80 bg-rose-950/60'
-                        : 'border-slate-800 bg-[#141C2E] hover:border-slate-700'
+                        : 'border-[#29154A] bg-[#130729] hover:border-pink-500/40'
                     }`}
                   >
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
                       <div className="flex items-center gap-2.5">
-                        <span className="h-7 w-7 rounded-lg bg-slate-800 border border-slate-700 text-indigo-300 font-mono text-xs font-bold flex items-center justify-center">
+                        <span className="h-7 w-7 rounded-lg bg-[#1A0935] border border-pink-500/30 text-pink-300 font-mono text-xs font-bold flex items-center justify-center">
                           #{block.block_index}
                         </span>
                         <span className="font-bold text-white text-sm">
@@ -268,7 +268,7 @@ export const BlockchainExplorer: React.FC<BlockchainExplorerProps> = ({ onRefres
                               ? 'bg-emerald-950/70 text-emerald-300 border border-emerald-500/30'
                               : block.verification_result === 'Warning'
                               ? 'bg-rose-950/70 text-rose-300 border border-rose-500/30'
-                              : 'bg-indigo-950/70 text-indigo-300 border border-indigo-500/30'
+                              : 'bg-purple-950/70 text-purple-300 border border-purple-500/30'
                           }`}
                         >
                           {block.verification_result}
@@ -276,35 +276,35 @@ export const BlockchainExplorer: React.FC<BlockchainExplorerProps> = ({ onRefres
                       </div>
 
                       <div className="flex items-center gap-3 text-xs">
-                        <span className="font-mono text-slate-400 uppercase text-[11px]">
-                          Action: <strong className="text-indigo-300 font-bold">{block.consent_action}</strong>
+                        <span className="font-mono text-purple-300/70 uppercase text-[11px]">
+                          Action: <strong className="text-pink-300 font-bold">{block.consent_action}</strong>
                         </span>
-                        <span className="text-slate-400 text-[11px] font-mono">
+                        <span className="text-purple-300/60 text-[11px] font-mono">
                           {new Date(block.timestamp).toLocaleTimeString()}
                         </span>
                       </div>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs font-mono">
-                      <div className="p-3 rounded-xl bg-[#0F1523] border border-slate-800">
-                        <div className="text-[10px] text-slate-400 flex items-center justify-between mb-1 font-semibold">
+                      <div className="p-3 rounded-xl bg-[#0F061F] border border-[#29154A]">
+                        <div className="text-[10px] text-purple-300/70 flex items-center justify-between mb-1 font-semibold">
                           <span>PREV HASH</span>
                           <button
                             onClick={() => handleCopy(block.prev_hash)}
-                            className="text-indigo-300 hover:text-white cursor-pointer"
+                            className="text-pink-300 hover:text-white cursor-pointer"
                           >
                             {copiedHash === block.prev_hash ? <Check className="h-3 w-3 text-emerald-400" /> : <Copy className="h-3 w-3" />}
                           </button>
                         </div>
-                        <span className="text-slate-400 block truncate">{block.prev_hash}</span>
+                        <span className="text-purple-300/70 block truncate">{block.prev_hash}</span>
                       </div>
 
-                      <div className="p-3 rounded-xl bg-[#0F1523] border border-slate-800">
-                        <div className="text-[10px] text-slate-400 flex items-center justify-between mb-1 font-semibold">
+                      <div className="p-3 rounded-xl bg-[#0F061F] border border-[#29154A]">
+                        <div className="text-[10px] text-purple-300/70 flex items-center justify-between mb-1 font-semibold">
                           <span>BLOCK HASH</span>
                           <button
                             onClick={() => handleCopy(block.hash)}
-                            className="text-indigo-300 hover:text-white cursor-pointer"
+                            className="text-pink-300 hover:text-white cursor-pointer"
                           >
                             {copiedHash === block.hash ? <Check className="h-3 w-3 text-emerald-400" /> : <Copy className="h-3 w-3" />}
                           </button>
@@ -325,18 +325,18 @@ export const BlockchainExplorer: React.FC<BlockchainExplorerProps> = ({ onRefres
         {activeLedgerTab === 'private' && (
           <div className="space-y-4">
             {filteredPrivateBlocks.length === 0 ? (
-              <div className="text-center py-10 bg-[#141C2E] rounded-xl border border-slate-800 text-slate-400 text-xs font-mono">
+              <div className="text-center py-10 bg-[#130729] rounded-2xl border border-[#29154A] text-purple-300/60 text-xs font-mono">
                 No private blocks found.
               </div>
             ) : (
               filteredPrivateBlocks.map((block) => (
                 <div
                   key={block.id}
-                  className="p-5 rounded-xl border border-slate-800 bg-[#141C2E] hover:border-slate-700 transition-all"
+                  className="p-5 rounded-2xl border border-[#29154A] bg-[#130729] hover:border-pink-500/40 transition-all"
                 >
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
                     <div className="flex items-center gap-2.5">
-                      <span className="h-7 w-7 rounded-lg bg-slate-800 border border-slate-700 text-indigo-300 font-mono text-xs font-bold flex items-center justify-center">
+                      <span className="h-7 w-7 rounded-lg bg-[#1A0935] border border-pink-500/30 text-pink-300 font-mono text-xs font-bold flex items-center justify-center">
                         P#{block.block_index}
                       </span>
                       <span className="font-bold text-white text-sm">
@@ -345,22 +345,22 @@ export const BlockchainExplorer: React.FC<BlockchainExplorerProps> = ({ onRefres
                     </div>
 
                     <div className="flex items-center gap-3 text-xs font-mono">
-                      <span className="text-slate-400 text-[11px]">User: <strong className="text-indigo-300 font-bold">{block.user_id}</strong></span>
-                      <span className="text-slate-400 text-[11px]">
+                      <span className="text-purple-300/70 text-[11px]">User: <strong className="text-pink-300 font-bold">{block.user_id}</strong></span>
+                      <span className="text-purple-300/60 text-[11px]">
                         {new Date(block.timestamp).toLocaleTimeString()}
                       </span>
                     </div>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs font-mono">
-                    <div className="p-3 rounded-xl bg-[#0F1523] border border-slate-800">
-                      <span className="text-[10px] text-slate-400 block mb-1 font-semibold">PREV HASH</span>
-                      <span className="text-slate-400 block truncate">{block.prev_hash}</span>
+                    <div className="p-3 rounded-xl bg-[#0F061F] border border-[#29154A]">
+                      <span className="text-[10px] text-purple-300/70 block mb-1 font-semibold">PREV HASH</span>
+                      <span className="text-purple-300/70 block truncate">{block.prev_hash}</span>
                     </div>
 
-                    <div className="p-3 rounded-xl bg-[#0F1523] border border-slate-800">
-                      <span className="text-[10px] text-slate-400 block mb-1 font-semibold">PRIVATE BLOCK HASH</span>
-                      <span className="text-indigo-300 block truncate font-bold">{block.hash}</span>
+                    <div className="p-3 rounded-xl bg-[#0F061F] border border-[#29154A]">
+                      <span className="text-[10px] text-purple-300/70 block mb-1 font-semibold">PRIVATE BLOCK HASH</span>
+                      <span className="text-pink-300 block truncate font-bold">{block.hash}</span>
                     </div>
                   </div>
                 </div>
@@ -373,34 +373,34 @@ export const BlockchainExplorer: React.FC<BlockchainExplorerProps> = ({ onRefres
       {/* Tamper Modal */}
       {isTamperingModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-          <div className="w-full max-w-md rounded-2xl border border-slate-800 bg-[#0F1523] p-6 space-y-4 text-slate-200">
-            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+          <div className="w-full max-w-md rounded-3xl border border-pink-500/40 bg-[#0F061F] p-6 space-y-4 text-purple-100">
+            <div className="flex items-center justify-between border-b border-[#29154A] pb-3">
               <h3 className="text-base font-bold text-white flex items-center gap-2">
                 <Flame className="h-4 w-4 text-rose-500" />
                 <span>Simulate Database Tampering</span>
               </h3>
               <button
                 onClick={() => setIsTamperingModalOpen(false)}
-                className="text-slate-400 hover:text-white text-lg font-bold cursor-pointer"
+                className="text-purple-300/70 hover:text-white text-lg font-bold cursor-pointer"
               >
                 &times;
               </button>
             </div>
 
-            <p className="text-xs text-slate-400">
-              Modifies a row in <code className="text-indigo-300 font-mono font-bold">public_ledger</code> to demonstrate cryptographic detection.
+            <p className="text-xs text-purple-300/70">
+              Modifies a row in <code className="text-pink-300 font-mono font-bold">public_ledger</code> to demonstrate cryptographic detection.
             </p>
 
             <div className="space-y-3 text-xs">
               <div>
-                <label className="block text-slate-300 font-semibold mb-1">Target Block #</label>
+                <label className="block text-purple-200 font-semibold mb-1">Target Block #</label>
                 <select
                   value={tamperTargetIndex}
                   onChange={(e) => setTamperTargetIndex(Number(e.target.value))}
-                  className="w-full rounded-xl bg-[#141C2E] border border-slate-800 p-2.5 text-slate-100 font-mono focus:outline-none focus:border-indigo-500 cursor-pointer"
+                  className="w-full rounded-xl bg-[#130729] border border-[#29154A] p-2.5 text-purple-100 font-mono focus:outline-none focus:border-pink-500 cursor-pointer"
                 >
                   {publicBlocks.map((b) => (
-                    <option key={b.id} value={b.block_index} className="bg-[#0F1523]">
+                    <option key={b.id} value={b.block_index} className="bg-[#0F061F]">
                       Block #{b.block_index} ({b.site_domain})
                     </option>
                   ))}
@@ -408,20 +408,20 @@ export const BlockchainExplorer: React.FC<BlockchainExplorerProps> = ({ onRefres
               </div>
 
               <div>
-                <label className="block text-slate-300 font-semibold mb-1">Tampered Domain</label>
+                <label className="block text-purple-200 font-semibold mb-1">Tampered Domain</label>
                 <input
                   type="text"
                   value={tamperedDomain}
                   onChange={(e) => setTamperedDomain(e.target.value)}
-                  className="w-full rounded-xl bg-[#141C2E] border border-slate-800 p-2.5 text-slate-100 font-mono focus:outline-none focus:border-indigo-500"
+                  className="w-full rounded-xl bg-[#130729] border border-[#29154A] p-2.5 text-purple-100 font-mono focus:outline-none focus:border-pink-500"
                 />
               </div>
             </div>
 
-            <div className="pt-3 border-t border-slate-800 flex items-center justify-end gap-2">
+            <div className="pt-3 border-t border-[#29154A] flex items-center justify-end gap-2">
               <button
                 onClick={() => setIsTamperingModalOpen(false)}
-                className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs text-slate-200 font-semibold border border-slate-700 cursor-pointer"
+                className="px-4 py-2 rounded-xl bg-[#1A0935] hover:bg-[#250B42] text-xs text-purple-200 font-semibold border border-pink-500/30 cursor-pointer"
               >
                 Cancel
               </button>

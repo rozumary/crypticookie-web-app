@@ -110,26 +110,26 @@ export const CMPRegistryManager: React.FC<CMPRegistryManagerProps> = ({ onRefres
   return (
     <div className="space-y-8 pb-12">
       {/* SECTION 1: Top Header Outer Container */}
-      <div className="bg-[#0F061F] border border-[#261445] rounded-3xl p-6 sm:p-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div className="bg-gradient-to-r from-[#2e124f]/90 via-[#250d42]/90 to-[#2e124f]/90 border border-purple-400/30 rounded-3xl p-6 sm:p-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 shadow-xl shadow-purple-950/20 backdrop-blur-md">
         <div>
           <div className="flex items-center gap-2">
             <h1 className="text-2xl font-bold text-white tracking-tight flex items-center gap-2">
               <span>CMP Script Registry</span>
-              <span className="h-2 w-2 rounded-full bg-pink-500" />
+              <span className="h-2 w-2 rounded-full bg-pink-500 shadow-[0_0_8px_#ec4899]" />
             </h1>
-            <span className="px-2.5 py-0.5 rounded-full bg-[#1A0935] text-pink-300 text-[10px] font-mono font-bold border border-pink-500/30 flex items-center gap-1">
+            <span className="px-2.5 py-0.5 rounded-full bg-[#371661] text-pink-300 text-[10px] font-mono font-bold border border-purple-400/40 flex items-center gap-1 shadow-sm">
               <Cloud className="h-3 w-3 text-pink-400" />
               Firestore Cloud Synced
             </span>
           </div>
-          <p className="text-xs text-purple-300/70 mt-1">
+          <p className="text-xs text-purple-200/80 mt-1">
             Database of verified website cookie consent banner scripts and trusted security rules.
           </p>
         </div>
 
         <button
           onClick={() => setIsAddModalOpen(true)}
-          className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 text-xs font-bold text-white transition-all cursor-pointer hover:scale-105 active:scale-95"
+          className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 text-xs font-bold text-white transition-all cursor-pointer hover:scale-105 active:scale-95 shadow-md shadow-pink-500/20"
         >
           <Plus className="h-4 w-4" />
           <span>Add CMP Script</span>
@@ -137,18 +137,18 @@ export const CMPRegistryManager: React.FC<CMPRegistryManagerProps> = ({ onRefres
       </div>
 
       {/* SECTION 2: Main Registry Outer Container */}
-      <div className="bg-[#0F061F] border border-[#261445] rounded-3xl p-6 sm:p-8 space-y-6">
+      <div className="bg-gradient-to-b from-[#2a104a]/90 to-[#200b3b]/90 border border-purple-400/30 rounded-3xl p-6 sm:p-8 space-y-6 shadow-xl shadow-purple-950/20 backdrop-blur-md">
         {/* Filter & Search Bar */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#29154A] pb-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-purple-400/30 pb-4">
           <div className="flex items-center gap-2">
             {['all', 'whitelist', 'blacklist'].map((tab) => (
               <button
                 key={tab}
                 onClick={() => setActiveFilter(tab)}
-                className={`px-4 py-2 rounded-xl text-xs font-bold capitalize transition-all cursor-pointer ${
+                className={`px-4 py-2 rounded-xl text-xs font-bold capitalize transition-all cursor-pointer shadow-sm ${
                   activeFilter === tab
                     ? 'bg-gradient-to-r from-pink-600 to-purple-600 text-white'
-                    : 'bg-[#1A0935] text-purple-200 hover:bg-[#250B42] border border-pink-500/30'
+                    : 'bg-[#371661] text-purple-200 hover:bg-[#471c7d] border border-purple-400/40'
                 }`}
               >
                 {tab === 'all' ? `All (${items.length})` : tab}
@@ -163,16 +163,16 @@ export const CMPRegistryManager: React.FC<CMPRegistryManagerProps> = ({ onRefres
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search CMP name or hash..."
-              className="w-full rounded-xl bg-[#130729] pl-9 pr-3 py-1.5 text-xs text-purple-100 border border-[#29154A] focus:outline-none focus:border-pink-500 font-mono placeholder-purple-400/40"
+              className="w-full rounded-xl bg-[#1e0a36] pl-9 pr-3 py-1.5 text-xs text-purple-100 border border-purple-400/35 focus:outline-none focus:border-pink-500 focus:bg-[#250d42] font-mono placeholder-purple-300/40"
             />
           </div>
         </div>
 
         {/* Registry Table Container */}
-        <div className="bg-[#130729] border border-[#29154A] rounded-2xl overflow-hidden">
+        <div className="bg-[#1e0a36] border border-purple-400/30 rounded-2xl overflow-hidden shadow-md">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs font-mono">
-              <thead className="bg-[#1A0935] text-purple-200 border-b border-[#29154A] text-[11px] font-bold">
+              <thead className="bg-[#2c114d] text-purple-200 border-b border-purple-400/30 text-[11px] font-bold">
                 <tr>
                   <th className="py-3.5 px-4">CMP Name</th>
                   <th className="py-3.5 px-4">SHA-256 Script Hash</th>
@@ -180,18 +180,18 @@ export const CMPRegistryManager: React.FC<CMPRegistryManagerProps> = ({ onRefres
                   <th className="py-3.5 px-4 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#261445]">
+              <tbody className="divide-y divide-purple-500/20">
                 {filteredItems.length === 0 ? (
                   <tr>
-                    <td colSpan={4} className="py-8 text-center text-purple-300/60 text-xs">
+                    <td colSpan={4} className="py-8 text-center text-purple-300/70 text-xs">
                       No CMP registry items match your query.
                     </td>
                   </tr>
                 ) : (
                   filteredItems.map((item) => (
-                    <tr key={item.id} className="hover:bg-[#1C0A3B] transition-colors">
+                    <tr key={item.id} className="hover:bg-[#2e134f]/70 transition-colors">
                       <td className="py-3 px-4 font-bold text-white">{item.cmp_name}</td>
-                      <td className="py-3 px-4 font-mono text-purple-300/70">
+                      <td className="py-3 px-4 font-mono text-purple-200/80">
                         <div className="flex items-center gap-2">
                           <span title={item.script_hash}>{truncateHash(item.script_hash, 8, 8)}</span>
                           <button
@@ -212,18 +212,18 @@ export const CMPRegistryManager: React.FC<CMPRegistryManagerProps> = ({ onRefres
                           onChange={(e) => handleUpdateStatus(item.id, e.target.value as CMPStatus)}
                           className={`text-[11px] font-mono font-bold px-2.5 py-1 rounded-lg border focus:outline-none cursor-pointer ${
                             item.status === 'whitelist'
-                              ? 'bg-emerald-950/70 text-emerald-300 border-emerald-500/30'
-                              : 'bg-rose-950/70 text-rose-300 border-rose-500/30'
+                              ? 'bg-emerald-950/80 text-emerald-300 border-emerald-500/40'
+                              : 'bg-rose-950/80 text-rose-300 border-rose-500/40'
                           }`}
                         >
-                          <option value="whitelist" className="bg-[#0F061F]">whitelist</option>
-                          <option value="blacklist" className="bg-[#0F061F]">blacklist</option>
+                          <option value="whitelist" className="bg-[#240d42]">whitelist</option>
+                          <option value="blacklist" className="bg-[#240d42]">blacklist</option>
                         </select>
                       </td>
                       <td className="py-3 px-4 text-right">
                         <button
                           onClick={() => handleDeleteItem(item.id)}
-                          className="p-1 text-purple-300/70 hover:text-rose-400 transition-colors cursor-pointer"
+                          className="p-1 text-purple-300 hover:text-rose-400 transition-colors cursor-pointer"
                           title="Delete CMP"
                         >
                           <Trash2 className="h-3.5 w-3.5" />
@@ -241,10 +241,10 @@ export const CMPRegistryManager: React.FC<CMPRegistryManagerProps> = ({ onRefres
       {/* Add Modal */}
       {isAddModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-          <div className="w-full max-w-md rounded-3xl border border-pink-500/40 bg-[#0F061F] p-6 space-y-4 text-purple-100">
-            <div className="flex items-center justify-between border-b border-[#29154A] pb-3">
+          <div className="w-full max-w-md rounded-3xl border border-purple-400/40 bg-gradient-to-b from-[#2e124f] to-[#1e0a36] p-6 space-y-4 text-purple-100 shadow-2xl">
+            <div className="flex items-center justify-between border-b border-purple-400/30 pb-3">
               <h3 className="text-base font-bold text-white">Add CMP Script Hash</h3>
-              <button onClick={() => setIsAddModalOpen(false)} className="text-purple-300/70 hover:text-white text-lg font-bold cursor-pointer">
+              <button onClick={() => setIsAddModalOpen(false)} className="text-purple-300 hover:text-white text-lg font-bold cursor-pointer">
                 &times;
               </button>
             </div>
@@ -258,7 +258,7 @@ export const CMPRegistryManager: React.FC<CMPRegistryManagerProps> = ({ onRefres
                   onChange={(e) => setNewCmpName(e.target.value)}
                   placeholder="e.g. Cookiebot v4.2"
                   required
-                  className="w-full rounded-xl bg-[#130729] border border-[#29154A] p-2.5 text-purple-100 focus:outline-none focus:border-pink-500 placeholder-purple-400/40"
+                  className="w-full rounded-xl bg-[#1e0a36] border border-purple-400/35 p-2.5 text-purple-100 focus:outline-none focus:border-pink-500 placeholder-purple-300/40"
                 />
               </div>
 
@@ -269,7 +269,7 @@ export const CMPRegistryManager: React.FC<CMPRegistryManagerProps> = ({ onRefres
                   value={newScriptInput}
                   onChange={(e) => handleComputeHash(e.target.value)}
                   placeholder="Paste script content or URL to hash"
-                  className="w-full rounded-xl bg-[#130729] border border-[#29154A] p-2.5 text-purple-100 focus:outline-none focus:border-pink-500 font-mono placeholder-purple-400/40"
+                  className="w-full rounded-xl bg-[#1e0a36] border border-purple-400/35 p-2.5 text-purple-100 focus:outline-none focus:border-pink-500 font-mono placeholder-purple-300/40"
                 />
               </div>
 
@@ -281,7 +281,7 @@ export const CMPRegistryManager: React.FC<CMPRegistryManagerProps> = ({ onRefres
                   onChange={(e) => setNewScriptHash(e.target.value)}
                   placeholder="64-character hex hash"
                   required
-                  className="w-full rounded-xl bg-[#130729] border border-[#29154A] p-2.5 text-purple-100 focus:outline-none focus:border-pink-500 font-mono text-[11px] placeholder-purple-400/40"
+                  className="w-full rounded-xl bg-[#1e0a36] border border-purple-400/35 p-2.5 text-purple-100 focus:outline-none focus:border-pink-500 font-mono text-[11px] placeholder-purple-300/40"
                 />
               </div>
 
@@ -290,24 +290,24 @@ export const CMPRegistryManager: React.FC<CMPRegistryManagerProps> = ({ onRefres
                 <select
                   value={newStatus}
                   onChange={(e) => setNewStatus(e.target.value as CMPStatus)}
-                  className="w-full rounded-xl bg-[#130729] border border-[#29154A] p-2.5 text-purple-100 focus:outline-none focus:border-pink-500 cursor-pointer font-semibold"
+                  className="w-full rounded-xl bg-[#1e0a36] border border-purple-400/35 p-2.5 text-purple-100 focus:outline-none focus:border-pink-500 cursor-pointer font-semibold"
                 >
-                  <option value="whitelist" className="bg-[#0F061F]">Whitelist (Trusted)</option>
-                  <option value="blacklist" className="bg-[#0F061F]">Blacklist (Deceptive / Threat)</option>
+                  <option value="whitelist" className="bg-[#240d42]">Whitelist (Trusted)</option>
+                  <option value="blacklist" className="bg-[#240d42]">Blacklist (Deceptive / Threat)</option>
                 </select>
               </div>
 
-              <div className="pt-3 border-t border-[#29154A] flex items-center justify-end gap-2">
+              <div className="pt-3 border-t border-purple-400/30 flex items-center justify-end gap-2">
                 <button
                   type="button"
                   onClick={() => setIsAddModalOpen(false)}
-                  className="px-4 py-2 rounded-xl bg-[#1A0935] hover:bg-[#250B42] text-purple-200 border border-pink-500/30 text-xs font-semibold cursor-pointer"
+                  className="px-4 py-2 rounded-xl bg-[#371661] hover:bg-[#471c7d] text-purple-200 border border-purple-400/40 text-xs font-semibold cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 rounded-xl bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 text-white font-bold text-xs cursor-pointer"
+                  className="px-4 py-2 rounded-xl bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 text-white font-bold text-xs cursor-pointer shadow-md"
                 >
                   Add to Registry
                 </button>

@@ -130,7 +130,10 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen flex bg-[#0B0516] text-purple-100 font-sans selection:bg-pink-600 selection:text-white">
+    <div className="min-h-screen flex bg-gradient-to-br from-[#3b1764] via-[#250e42] to-[#1c0836] bg-fixed text-purple-100 font-sans selection:bg-pink-600 selection:text-white relative">
+      {/* Ambient background glow accents */}
+      <div className="fixed inset-0 pointer-events-none z-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(168,85,247,0.18),rgba(236,72,153,0.08),rgba(255,255,255,0))]" />
+
       {/* Left Sidebar Panel */}
       <Sidebar
         activeTab={activeTab}

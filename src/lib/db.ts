@@ -12,7 +12,14 @@ import {
   type GuidanceRecommendation,
   type AuditOutput,
   type MonitoredDomain,
+  type ChromeProfile,
 } from '../types/database';
+
+export const PRESET_CHROME_PROFILES: ChromeProfile[] = [
+  { id: 'profile_a', name: 'Profile A (Default)', icon: '👤', color: '#ec4899', description: 'Primary Chrome Profile' },
+  { id: 'profile_b', name: 'Profile B (Work)', icon: '💼', color: '#3b82f6', description: 'Work Chrome Profile' },
+  { id: 'profile_c', name: 'Profile C (Personal)', icon: '🏠', color: '#10b981', description: 'Personal Chrome Profile' },
+];
 import {
   sha256,
   computePublicBlockHash,
@@ -41,13 +48,13 @@ export class CrypticookieDatabase extends Dexie {
 
   constructor() {
     super('CrypticookieDB');
-    this.version(2).stores({
+    this.version(3).stores({
       users: 'id, email, username',
       cmp_registry: 'id, &script_hash, cmp_name, status',
-      cookie_events: 'id, user_id, site_domain, cookie_hash, cookie_type, verification_result, created_at',
-      private_ledger: 'id, block_index, hash, user_id, cookie_event_id, timestamp',
-      public_ledger: 'id, block_index, hash, site_domain, cookie_hash, timestamp',
-      monitored_domains: 'id, domain, url, privacy_risk_level, timestamp',
+      cookie_events: 'id, user_id, profile_id, site_domain, cookie_hash, cookie_type, verification_result, created_at',
+      private_ledger: 'id, block_index, hash, user_id, profile_id, cookie_event_id, timestamp',
+      public_ledger: 'id, block_index, hash, site_domain, profile_id, cookie_hash, timestamp',
+      monitored_domains: 'id, profile_id, domain, url, privacy_risk_level, timestamp',
     });
   }
 }
@@ -258,6 +265,7 @@ export function determineAuditOutput(consentAction: ConsentAction): AuditOutput 
  */
 export async function recordConsentTransaction(params: {
   userId: string;
+  profileId?: string;
   siteDomain: string;
   cookieHash: string;
   cookieType: CookieType;
@@ -268,6 +276,7 @@ export async function recordConsentTransaction(params: {
   privateBlock: PrivateLedgerBlock;
   publicBlock: PublicLedgerBlock;
 }> {
+  const profileId = params.profileId || 'profile_a';
   const timestamp = new Date(Date.now() + (params.timestampOffsetMs || 0)).toISOString();
   
   // 1. Verify script hash against registry
@@ -280,6 +289,7 @@ export async function recordConsentTransaction(params: {
   const cookieEvent: CookieEvent = {
     id: eventId,
     user_id: params.userId,
+    profile_id: profileId,
     site_domain: params.siteDomain.toLowerCase().trim(),
     cookie_hash: params.cookieHash.trim(),
     cookie_type: params.cookieType,
@@ -311,6 +321,7 @@ export async function recordConsentTransaction(params: {
     prev_hash: prevPrivateHash,
     hash: privateBlockHash,
     user_id: params.userId,
+    profile_id: profileId,
     cookie_event_id: eventId,
     consent_action: params.consentAction,
     audit_output: auditOutput,
@@ -340,6 +351,7 @@ export async function recordConsentTransaction(params: {
     prev_hash: prevPublicHash,
     hash: publicBlockHash,
     site_domain: params.siteDomain.toLowerCase().trim(),
+    profile_id: profileId,
     cookie_hash: params.cookieHash.trim(),
     verification_result: verificationResult,
     consent_action: params.consentAction,
@@ -354,9 +366,13 @@ export async function recordConsentTransaction(params: {
 /**
  * Record a Live Monitored Website domain inspection event
  */
-export async function recordMonitoredDomain(domainData: Omit<MonitoredDomain, 'id' | 'timestamp'>): Promise<MonitoredDomain> {
+export async function recordMonitoredDomain(
+  domainData: Omit<MonitoredDomain, 'id' | 'timestamp'>,
+  profileId: string = 'profile_a'
+): Promise<MonitoredDomain> {
   const item: MonitoredDomain = {
     ...domainData,
+    profile_id: profileId,
     id: 'mon_' + Math.random().toString(36).substring(2, 11),
     timestamp: new Date().toISOString(),
   };
@@ -367,18 +383,27 @@ export async function recordMonitoredDomain(domainData: Omit<MonitoredDomain, 'i
 }
 
 /**
- * Fetch all monitored domains (most recent first)
+ * Fetch monitored domains for a specific Chrome Profile (most recent first)
  */
-export async function getMonitoredDomains(limitCount: number = 50): Promise<MonitoredDomain[]> {
+export async function getMonitoredDomains(
+  limitCount: number = 50,
+  profileId: string = 'profile_a'
+): Promise<MonitoredDomain[]> {
   const list = await db.monitored_domains.toArray();
-  return list.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()).slice(0, limitCount);
+  const filtered = list.filter((item) => (item.profile_id || 'profile_a') === profileId);
+  return filtered.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()).slice(0, limitCount);
 }
 
 /**
- * Clear Monitored Domains log
+ * Clear Monitored Domains log for a specific Chrome Profile
  */
-export async function clearMonitoredDomains(): Promise<void> {
-  await db.monitored_domains.clear();
+export async function clearMonitoredDomains(profileId: string = 'profile_a'): Promise<void> {
+  const all = await db.monitored_domains.toArray();
+  const idsToDelete = all.filter((item) => (item.profile_id || 'profile_a') === profileId).map((item) => item.id);
+  await db.monitored_domains.bulkDelete(idsToDelete);
+  for (const id of idsToDelete) {
+    await deleteFromFirestore('monitored_domains', id);
+  }
 }
 
 /**
@@ -482,25 +507,31 @@ export async function repairPublicChain(fromIndex: number = 0): Promise<void> {
 }
 
 /**
- * Query real database statistics directly using Dexie/SQL queries
+ * Query real database statistics directly for a specific Chrome Profile
  */
-export async function getDatabaseMetrics() {
-  const events = await db.cookie_events.toArray();
-  const publicBlocks = await db.public_ledger.toArray();
-  const privateBlocks = await db.private_ledger.toArray();
+export async function getDatabaseMetrics(profileId: string = 'profile_a') {
+  const allEvents = await db.cookie_events.toArray();
+  const allPublic = await db.public_ledger.toArray();
+  const allPrivate = await db.private_ledger.toArray();
   const cmpItems = await db.cmp_registry.toArray();
-  const monitored = await db.monitored_domains.toArray();
+  const allMonitored = await db.monitored_domains.toArray();
 
-  const uniqueDomains = new Set(events.map(e => e.site_domain));
-  const threatsBlocked = events.filter(e => e.verification_result === 'Warning' || e.cookie_type === 'suspicious').length +
-    monitored.filter(m => m.auto_blocked || m.privacy_risk_level === 'High' || m.privacy_risk_level === 'Critical').length;
-  
-  const verifiedCount = events.filter(e => e.verification_result === 'Verified').length;
-  const unverifiedCount = events.filter(e => e.verification_result === 'Unverified').length;
+  const events = allEvents.filter((e) => (e.profile_id || 'profile_a') === profileId);
+  const publicBlocks = allPublic.filter((pb) => (pb.profile_id || 'profile_a') === profileId);
+  const privateBlocks = allPrivate.filter((pv) => (pv.profile_id || 'profile_a') === profileId);
+  const monitored = allMonitored.filter((m) => (m.profile_id || 'profile_a') === profileId);
 
-  const whitelistedCMPs = cmpItems.filter(c => c.status === 'whitelist').length;
-  const blacklistedCMPs = cmpItems.filter(c => c.status === 'blacklist').length;
-  const unlistedCMPs = cmpItems.filter(c => c.status === 'unlisted').length;
+  const uniqueDomains = new Set([...events.map((e) => e.site_domain), ...monitored.map((m) => m.domain)]);
+  const threatsBlocked =
+    events.filter((e) => e.verification_result === 'Warning' || e.cookie_type === 'suspicious').length +
+    monitored.filter((m) => m.auto_blocked || m.privacy_risk_level === 'High' || m.privacy_risk_level === 'Critical').length;
+
+  const verifiedCount = events.filter((e) => e.verification_result === 'Verified').length;
+  const unverifiedCount = events.filter((e) => e.verification_result === 'Unverified').length;
+
+  const whitelistedCMPs = cmpItems.filter((c) => c.status === 'whitelist').length;
+  const blacklistedCMPs = cmpItems.filter((c) => c.status === 'blacklist').length;
+  const unlistedCMPs = cmpItems.filter((c) => c.status === 'unlisted').length;
 
   return {
     protectedPlatformsCount: uniqueDomains.size,

@@ -43,8 +43,12 @@ import { sha256, truncateHash } from '../lib/crypto';
 import { firebaseConfigData } from '../lib/firebase';
 import { InstallExtensionModal } from './InstallExtensionModal';
 
+import { ChromeProfileSelector } from './ChromeProfileSelector';
+
 interface ExtensionSimulatorProps {
   currentUser: User | null;
+  activeProfileId?: string;
+  onSelectProfile?: (profileId: string) => void;
   onRefreshData: () => void;
   onNavigateTab: (tab: string) => void;
 }
@@ -103,6 +107,8 @@ function inferTrackersForDomain(domain: string): DetectedTracker[] {
 
 export const ExtensionSimulator: React.FC<ExtensionSimulatorProps> = ({
   currentUser,
+  activeProfileId = 'profile_a',
+  onSelectProfile,
   onRefreshData,
   onNavigateTab,
 }) => {
@@ -135,14 +141,19 @@ export const ExtensionSimulator: React.FC<ExtensionSimulatorProps> = ({
   const [copiedHash, setCopiedHash] = useState(false);
   const [isInstallModalOpen, setIsInstallModalOpen] = useState(false);
 
-  const refreshMonitoredHistory = async () => {
+  const refreshMonitoredHistory = async (profId: string = activeProfileId) => {
     try {
-      const items = await getMonitoredDomains(20);
+      const items = await getMonitoredDomains(20, profId);
       setMonitoredHistory(items);
     } catch (e) {
       console.error('Error fetching monitored history:', e);
     }
   };
+
+  // Re-fetch monitored history whenever active profile changes
+  useEffect(() => {
+    refreshMonitoredHistory(activeProfileId);
+  }, [activeProfileId]);
 
   // Setup preview state without writing to database
   const setupDomainPreview = async (domainToPreview: string) => {
@@ -186,7 +197,7 @@ export const ExtensionSimulator: React.FC<ExtensionSimulatorProps> = ({
   };
 
   useEffect(() => {
-    refreshMonitoredHistory();
+    refreshMonitoredHistory(activeProfileId);
     setupDomainPreview(currentDomain);
   }, []);
 
@@ -238,8 +249,8 @@ export const ExtensionSimulator: React.FC<ExtensionSimulatorProps> = ({
         privacy_risk_level: riskLevel,
         auto_blocked: result === 'Warning' || cookieType === 'suspicious',
         guidance: guidance,
-      });
-      await refreshMonitoredHistory();
+      }, activeProfileId);
+      await refreshMonitoredHistory(activeProfileId);
     } catch (err) {
       console.error('Monitored log error:', err);
     } finally {
@@ -252,6 +263,7 @@ export const ExtensionSimulator: React.FC<ExtensionSimulatorProps> = ({
       const userId = currentUser ? currentUser.id : 'u_researcher_default';
       const result = await recordConsentTransaction({
         userId,
+        profileId: activeProfileId,
         siteDomain: currentDomain.trim().toLowerCase() || 'unspecified-domain.com',
         cookieHash: currentScriptHash || '0000000000000000000000000000000000000000000000000000000000000000',
         cookieType: currentCookieType,
@@ -266,7 +278,7 @@ export const ExtensionSimulator: React.FC<ExtensionSimulatorProps> = ({
 
       setBannerVisible(false);
       await onRefreshData();
-      await refreshMonitoredHistory();
+      await refreshMonitoredHistory(activeProfileId);
     } catch (err) {
       console.error('Error committing consent transaction:', err);
     }
@@ -280,8 +292,8 @@ export const ExtensionSimulator: React.FC<ExtensionSimulatorProps> = ({
   };
 
   const handleClearHistory = async () => {
-    await clearMonitoredDomains();
-    await refreshMonitoredHistory();
+    await clearMonitoredDomains(activeProfileId);
+    await refreshMonitoredHistory(activeProfileId);
   };
 
   return (
@@ -289,7 +301,7 @@ export const ExtensionSimulator: React.FC<ExtensionSimulatorProps> = ({
       {/* SECTION 1: Top Header Outer Container */}
       <div className="bg-[#0F061F] border border-[#261445] rounded-3xl p-6 sm:p-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             <h1 className="text-2xl font-bold text-white tracking-tight flex items-center gap-2">
               <span>Active Website & CMP Monitor</span>
               <span className="h-2 w-2 rounded-full bg-pink-500" />
@@ -298,6 +310,13 @@ export const ExtensionSimulator: React.FC<ExtensionSimulatorProps> = ({
               <Radio className="h-3 w-3 text-pink-400 animate-pulse" />
               Live Audit Active
             </span>
+            {onSelectProfile && (
+              <ChromeProfileSelector
+                activeProfileId={activeProfileId}
+                onSelectProfile={onSelectProfile}
+                compact
+              />
+            )}
           </div>
           <p className="text-xs text-purple-300/70 mt-1">
             Type any website domain below to check its real cookies, inspect privacy banners, or add to your web browser.

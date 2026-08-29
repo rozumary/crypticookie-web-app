@@ -8,11 +8,14 @@ import {
   Sparkles,
 } from 'lucide-react';
 import { type User } from '../types/database';
+import { ChromeProfileSelector } from './ChromeProfileSelector';
 
 interface NavbarProps {
   activeTab: string;
   setActiveTab: (tab: string) => void;
   currentUser: User | null;
+  activeProfileId?: string;
+  onSelectProfile?: (profileId: string) => void;
   onOpenSignIn: () => void;
   onOpenSignUp: () => void;
   onLogout: () => void;
@@ -25,6 +28,8 @@ export const Navbar: React.FC<NavbarProps> = ({
   activeTab,
   setActiveTab,
   currentUser,
+  activeProfileId = 'profile_a',
+  onSelectProfile,
   onLogout,
   isDbReady,
   onToggleSidebar,
@@ -61,11 +66,19 @@ export const Navbar: React.FC<NavbarProps> = ({
           </div>
         </div>
 
-        {/* Right Side: AI Bot Access & User profile if active */}
+        {/* Right Side: Chrome Profile Selector, AI Bot Access & User profile */}
         <div className="flex items-center gap-2 sm:gap-3">
+          {onSelectProfile && (
+            <ChromeProfileSelector
+              activeProfileId={activeProfileId}
+              onSelectProfile={onSelectProfile}
+              compact
+            />
+          )}
+
           <button
             onClick={() => setActiveTab('ai_bot')}
-            className="flex items-center gap-1.5 px-3.5 py-1.5 bg-[#1D0938] hover:bg-gradient-to-r hover:from-pink-600 hover:to-purple-600 text-pink-300 hover:text-white text-xs font-semibold rounded-xl border border-pink-500/40 transition-all cursor-pointer hover:scale-105 active:scale-95"
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-[#1D0938] hover:bg-gradient-to-r hover:from-pink-600 hover:to-purple-600 text-pink-300 hover:text-white text-xs font-semibold rounded-xl border border-pink-500/40 transition-all cursor-pointer hover:scale-105 active:scale-95"
           >
             <Bot className="h-3.5 w-3.5 text-pink-400" />
             <span className="hidden sm:inline">AI Privacy Bot</span>

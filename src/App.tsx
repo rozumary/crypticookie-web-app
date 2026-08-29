@@ -21,6 +21,16 @@ export default function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
+  // Chrome Profile Isolation State
+  const [activeProfileId, setActiveProfileId] = useState<string>(
+    () => localStorage.getItem('crypticookie_active_profile_id') || 'profile_a'
+  );
+
+  const handleSelectProfile = (newProfileId: string) => {
+    localStorage.setItem('crypticookie_active_profile_id', newProfileId);
+    setActiveProfileId(newProfileId);
+  };
+
   // Live Database Metrics
   const [metrics, setMetrics] = useState({
     protectedPlatformsCount: 0,
@@ -37,18 +47,26 @@ export default function App() {
 
   const [recentEvents, setRecentEvents] = useState<CookieEvent[]>([]);
 
-  // Refresh all state from database
-  const refreshDatabaseState = async () => {
+  // Refresh all state from database for current isolated Chrome Profile
+  const refreshDatabaseState = async (profId: string = activeProfileId) => {
     try {
-      const stats = await getDatabaseMetrics();
+      const stats = await getDatabaseMetrics(profId);
       setMetrics(stats);
 
-      const evs = await db.cookie_events.orderBy('created_at').reverse().toArray();
-      setRecentEvents(evs);
+      const allEvents = await db.cookie_events.orderBy('created_at').reverse().toArray();
+      const profileEvents = allEvents.filter((e) => (e.profile_id || 'profile_a') === profId);
+      setRecentEvents(profileEvents);
     } catch (err) {
       console.error('Error refreshing DB metrics:', err);
     }
   };
+
+  // Trigger state refresh on profile change
+  useEffect(() => {
+    if (isDbReady) {
+      refreshDatabaseState(activeProfileId);
+    }
+  }, [activeProfileId, isDbReady]);
 
   // Initial Boot
   useEffect(() => {
@@ -57,11 +75,11 @@ export default function App() {
       try {
         await initializeDatabase();
         setIsDbReady(true);
-        await refreshDatabaseState();
+        await refreshDatabaseState(activeProfileId);
 
         // Start real-time Firestore listeners
         unsubListeners = setupFirestoreRealtimeListeners(() => {
-          refreshDatabaseState();
+          refreshDatabaseState(activeProfileId);
         });
 
         const storedUserId = localStorage.getItem('crypticookie_active_user_id');
@@ -141,6 +159,8 @@ export default function App() {
           activeTab={activeTab}
           setActiveTab={setActiveTab}
           currentUser={currentUser}
+          activeProfileId={activeProfileId}
+          onSelectProfile={handleSelectProfile}
           onOpenSignIn={handleOpenSignIn}
           onOpenSignUp={handleOpenSignUp}
           onLogout={handleLogout}
@@ -156,7 +176,9 @@ export default function App() {
               metrics={metrics}
               recentEvents={recentEvents}
               currentUser={currentUser}
-              onRefreshData={refreshDatabaseState}
+              activeProfileId={activeProfileId}
+              onSelectProfile={handleSelectProfile}
+              onRefreshData={() => refreshDatabaseState(activeProfileId)}
               onNavigateTab={setActiveTab}
             />
           )}
@@ -164,7 +186,9 @@ export default function App() {
           {activeTab === 'simulator' && (
             <ExtensionSimulator
               currentUser={currentUser}
-              onRefreshData={refreshDatabaseState}
+              activeProfileId={activeProfileId}
+              onSelectProfile={handleSelectProfile}
+              onRefreshData={() => refreshDatabaseState(activeProfileId)}
               onNavigateTab={setActiveTab}
             />
           )}

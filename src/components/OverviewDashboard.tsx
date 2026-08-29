@@ -10,10 +10,12 @@ import {
   Radio,
   FileCheck,
   AlertTriangle,
+  RefreshCw,
 } from 'lucide-react';
 import { type CookieEvent, type User, type CookieType, type ConsentAction } from '../types/database';
 import { truncateHash, sha256 } from '../lib/crypto';
 import { recordConsentTransaction } from '../lib/db';
+import { ChromeProfileSelector } from './ChromeProfileSelector';
 
 interface OverviewDashboardProps {
   metrics: {
@@ -30,6 +32,8 @@ interface OverviewDashboardProps {
   };
   recentEvents: CookieEvent[];
   currentUser: User | null;
+  activeProfileId?: string;
+  onSelectProfile?: (profileId: string) => void;
   onRefreshData: () => void;
   onNavigateTab: (tab: string) => void;
 }
@@ -38,6 +42,8 @@ export const OverviewDashboard: React.FC<OverviewDashboardProps> = ({
   metrics,
   recentEvents,
   currentUser,
+  activeProfileId = 'profile_a',
+  onSelectProfile,
   onRefreshData,
   onNavigateTab,
 }) => {
@@ -47,7 +53,14 @@ export const OverviewDashboard: React.FC<OverviewDashboardProps> = ({
   const [cookieType, setCookieType] = useState<CookieType>('necessary');
   const [consentAction, setConsentAction] = useState<ConsentAction>('accept');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+
+  const handleManualRefresh = async () => {
+    setIsRefreshing(true);
+    await onRefreshData();
+    setTimeout(() => setIsRefreshing(false), 500);
+  };
 
   const handleRecordNewEvent = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -60,6 +73,7 @@ export const OverviewDashboard: React.FC<OverviewDashboardProps> = ({
 
       const result = await recordConsentTransaction({
         userId,
+        profileId: activeProfileId,
         siteDomain: domainInput.trim().toLowerCase(),
         cookieHash: computedHash,
         cookieType,
@@ -67,7 +81,7 @@ export const OverviewDashboard: React.FC<OverviewDashboardProps> = ({
       });
 
       setSuccessMessage(
-        `Block #${result.publicBlock.block_index} chained: SHA-256 hash ${truncateHash(result.publicBlock.hash, 8, 8)} saved to database.`
+        `Block #${result.publicBlock.block_index} chained to Profile [${activeProfileId}]: SHA-256 hash ${truncateHash(result.publicBlock.hash, 8, 8)} saved to database.`
       );
       await onRefreshData();
     } catch (err) {
@@ -83,7 +97,7 @@ export const OverviewDashboard: React.FC<OverviewDashboardProps> = ({
       {/* SECTION 1: Top Header Container */}
       <div className="bg-[#0F061F] border border-[#261445] rounded-3xl p-6 sm:p-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             <h1 className="text-2xl font-bold text-white tracking-tight flex items-center gap-2">
               <span>System Overview</span>
               <span className="h-2 w-2 rounded-full bg-pink-500" />
@@ -91,13 +105,31 @@ export const OverviewDashboard: React.FC<OverviewDashboardProps> = ({
             <span className="px-2.5 py-0.5 rounded-full bg-[#1A0935] text-pink-300 text-[11px] font-mono border border-pink-500/30 font-semibold">
               Live Monitor
             </span>
+            {onSelectProfile && (
+              <ChromeProfileSelector
+                activeProfileId={activeProfileId}
+                onSelectProfile={onSelectProfile}
+                compact
+              />
+            )}
           </div>
           <p className="text-sm text-purple-300/70 mt-1">
             Live monitoring and protection for website cookies, privacy choices, and consent banners.
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
+          {/* REFRESH BUTTON */}
+          <button
+            onClick={handleManualRefresh}
+            disabled={isRefreshing}
+            className="flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-[#1A0935] hover:bg-[#250B42] text-xs font-semibold text-pink-300 border border-pink-500/30 hover:border-pink-500/60 transition-all cursor-pointer"
+            title="Refresh dashboard data"
+          >
+            <RefreshCw className={`h-3.5 w-3.5 text-pink-400 ${isRefreshing ? 'animate-spin' : ''}`} />
+            <span>{isRefreshing ? 'Refreshing...' : 'Refresh Data'}</span>
+          </button>
+
           <button
             onClick={() => onNavigateTab('simulator')}
             className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-pink-600 via-purple-600 to-purple-700 hover:from-pink-500 hover:to-purple-600 text-xs font-semibold text-white transition-all cursor-pointer shadow-sm"

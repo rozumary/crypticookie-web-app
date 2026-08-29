@@ -9,7 +9,7 @@ import { SettingsView } from './components/SettingsView';
 import { AIPrivacyBot } from './components/AIPrivacyBot';
 import { DatabaseConsole } from './components/DatabaseConsole';
 import { AuthModal } from './components/AuthModal';
-import { initializeDatabase, getDatabaseMetrics, db, setupFirestoreRealtimeListeners, INITIAL_DEMO_USERS } from './lib/db';
+import { initializeDatabase, getDatabaseMetrics, db, setupFirestoreRealtimeListeners, INITIAL_DEMO_USERS, broadcastDbUpdate } from './lib/db';
 import { type User, type CookieEvent } from './types/database';
 
 export default function App() {
@@ -71,7 +71,6 @@ export default function App() {
 
   // Initial Boot
   useEffect(() => {
-    let unsubListeners: (() => void) | null = null;
     const boot = async () => {
       try {
         await initializeDatabase();
@@ -90,26 +89,42 @@ export default function App() {
           setCurrentUser(null);
           setIsAuthModalOpen(true);
         }
-
-        // Start real-time Firestore listeners
-        unsubListeners = setupFirestoreRealtimeListeners(() => {
-          refreshDatabaseState();
-        });
       } catch (err) {
         console.error('Boot initialization error:', err);
       }
     };
     boot();
+  }, []);
+
+  // Real-time Firestore subscriptions per logged-in User Account
+  useEffect(() => {
+    if (!isDbReady) return;
+
+    let unsubListeners: (() => void) | null = null;
+    try {
+      unsubListeners = setupFirestoreRealtimeListeners(activeUserId, () => {
+        refreshDatabaseState();
+        broadcastDbUpdate();
+      });
+    } catch (err) {
+      console.error('Error establishing Firestore subscriptions:', err);
+    }
 
     return () => {
       if (unsubListeners) unsubListeners();
     };
-  }, []);
+  }, [activeUserId, isDbReady, refreshDatabaseState]);
+
+  // Synchronize active user ID to browser extension via window.postMessage
+  useEffect(() => {
+    window.postMessage({ type: 'CRYPTICOOKIE_USER_CHANGED', userId: activeUserId }, '*');
+  }, [activeUserId]);
 
   const handleSelectUser = (user: User) => {
     localStorage.setItem('crypticookie_active_user_id', user.id);
     setCurrentUser(user);
     window.dispatchEvent(new CustomEvent('crypticookie_user_changed', { detail: { userId: user.id } }));
+    window.postMessage({ type: 'CRYPTICOOKIE_USER_CHANGED', userId: user.id }, '*');
   };
 
   const handleLogout = () => {
@@ -118,6 +133,7 @@ export default function App() {
     setAuthMode('signin');
     setIsAuthModalOpen(true);
     window.dispatchEvent(new CustomEvent('crypticookie_user_changed', { detail: { userId: null } }));
+    window.postMessage({ type: 'CRYPTICOOKIE_USER_CHANGED', userId: null }, '*');
   };
 
   const handleOpenSignIn = () => {
@@ -195,7 +211,7 @@ export default function App() {
           )}
 
           {activeTab === 'blockchain' && (
-            <BlockchainExplorer onRefreshData={refreshDatabaseState} />
+            <BlockchainExplorer currentUser={currentUser} onRefreshData={refreshDatabaseState} />
           )}
 
           {activeTab === 'cmp_registry' && (

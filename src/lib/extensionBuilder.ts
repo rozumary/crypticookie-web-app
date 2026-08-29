@@ -249,6 +249,15 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         });
       }
     });
+
+    window.addEventListener('message', (e) => {
+      if (e.data && e.data.type === 'CRYPTICOOKIE_USER_CHANGED') {
+        chrome.runtime.sendMessage({
+          type: 'SET_ACTIVE_USER_ID',
+          userId: e.data.userId
+        });
+      }
+    });
   }
 
   // Do not run shield on internal extension, local or central app pages

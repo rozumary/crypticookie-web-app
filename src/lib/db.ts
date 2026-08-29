@@ -25,6 +25,8 @@ import {
   setDoc,
   deleteDoc,
   onSnapshot,
+  query,
+  where,
 } from 'firebase/firestore';
 
 export class CrypticookieDatabase extends Dexie {
@@ -363,6 +365,7 @@ export async function recordConsentTransaction(params: {
     prev_hash: prevPublicHash,
     hash: publicBlockHash,
     site_domain: params.siteDomain.toLowerCase().trim(),
+    user_id: params.userId,
     cookie_hash: params.cookieHash.trim(),
     verification_result: verificationResult,
     consent_action: params.consentAction,
@@ -456,14 +459,25 @@ export async function clearUserHistory(userId: string): Promise<void> {
     await deleteFromFirestore('private_ledger', p.id);
   }
 
+  // 4. Clear public_ledger blocks
+  const publicBlocks = await db.public_ledger.toArray();
+  const publicToDelete = publicBlocks.filter((pb) => pb.user_id === userId);
+  await db.public_ledger.bulkDelete(publicToDelete.map((pb) => pb.id));
+  for (const pb of publicToDelete) {
+    await deleteFromFirestore('public_ledger', pb.id);
+  }
+
   broadcastDbUpdate();
 }
 
 /**
  * Verify cryptographic integrity of the Public Ledger Chain
  */
-export async function verifyPublicChainIntegrity(): Promise<ChainVerificationResult> {
-  const blocks = await db.public_ledger.orderBy('block_index').toArray();
+export async function verifyPublicChainIntegrity(userId?: string): Promise<ChainVerificationResult> {
+  let blocks = await db.public_ledger.orderBy('block_index').toArray();
+  if (userId) {
+    blocks = blocks.filter((b) => b.block_index === 0 || b.user_id === userId);
+  }
   if (blocks.length === 0) {
     return { isValid: true, brokenBlockIndex: null, expectedHash: null, actualHash: null, totalBlocks: 0 };
   }
@@ -572,9 +586,9 @@ export async function getDatabaseMetrics(userId?: string) {
   const allMonitored = await db.monitored_domains.toArray();
 
   const events = userId ? allEvents.filter((e) => !e.user_id || e.user_id === userId) : allEvents;
-  const privateBlocks = userId ? allPrivate.filter((pv) => !pv.user_id || pv.user_id === userId) : allPrivate;
+  const privateBlocks = userId ? allPrivate.filter((pv) => pv.block_index === 0 || pv.user_id === userId) : allPrivate;
   const monitored = userId ? allMonitored.filter((m) => !m.user_id || m.user_id === userId) : allMonitored;
-  const publicBlocks = allPublic;
+  const publicBlocks = userId ? allPublic.filter((pb) => pb.block_index === 0 || pb.user_id === userId) : allPublic;
 
   const uniqueDomains = new Set([...events.map((e) => e.site_domain), ...monitored.map((m) => m.domain)]);
   const threatsBlocked =
@@ -624,10 +638,15 @@ export async function resetDatabaseToDefault(): Promise<void> {
 /**
  * Setup Real-time Firestore Listeners to mirror Cloud Database writes to local Dexie & UI
  */
-export function setupFirestoreRealtimeListeners(onUpdate: () => void): () => void {
+export function setupFirestoreRealtimeListeners(userId: string, onUpdate: () => void): () => void {
   if (!firestoreDb) return () => {};
 
-  const unsub1 = onSnapshot(collection(firestoreDb, 'cookie_events'), async (snapshot) => {
+  const qEvents = query(collection(firestoreDb, 'cookie_events'), where('user_id', '==', userId));
+  const qPublic = query(collection(firestoreDb, 'public_ledger'), where('user_id', '==', userId));
+  const qPrivate = query(collection(firestoreDb, 'private_ledger'), where('user_id', '==', userId));
+  const qMonitored = query(collection(firestoreDb, 'monitored_domains'), where('user_id', '==', userId));
+
+  const unsub1 = onSnapshot(qEvents, async (snapshot) => {
     let hasChanges = false;
     for (const change of snapshot.docChanges()) {
       if (change.type === 'added' || change.type === 'modified') {
@@ -642,7 +661,7 @@ export function setupFirestoreRealtimeListeners(onUpdate: () => void): () => voi
     if (hasChanges) onUpdate();
   });
 
-  const unsub2 = onSnapshot(collection(firestoreDb, 'public_ledger'), async (snapshot) => {
+  const unsub2 = onSnapshot(qPublic, async (snapshot) => {
     let hasChanges = false;
     for (const change of snapshot.docChanges()) {
       if (change.type === 'added' || change.type === 'modified') {
@@ -657,7 +676,7 @@ export function setupFirestoreRealtimeListeners(onUpdate: () => void): () => voi
     if (hasChanges) onUpdate();
   });
 
-  const unsub3 = onSnapshot(collection(firestoreDb, 'monitored_domains'), async (snapshot) => {
+  const unsub3 = onSnapshot(qMonitored, async (snapshot) => {
     let hasChanges = false;
     for (const change of snapshot.docChanges()) {
       if (change.type === 'added' || change.type === 'modified') {
@@ -672,9 +691,25 @@ export function setupFirestoreRealtimeListeners(onUpdate: () => void): () => voi
     if (hasChanges) onUpdate();
   });
 
+  const unsub4 = onSnapshot(qPrivate, async (snapshot) => {
+    let hasChanges = false;
+    for (const change of snapshot.docChanges()) {
+      if (change.type === 'added' || change.type === 'modified') {
+        const data = { id: change.doc.id, ...change.doc.data() } as PrivateLedgerBlock;
+        await db.private_ledger.put(data);
+        hasChanges = true;
+      } else if (change.type === 'removed') {
+        await db.private_ledger.delete(change.doc.id);
+        hasChanges = true;
+      }
+    }
+    if (hasChanges) onUpdate();
+  });
+
   return () => {
     unsub1();
     unsub2();
     unsub3();
+    unsub4();
   };
 }

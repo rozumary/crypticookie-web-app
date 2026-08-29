@@ -66,6 +66,7 @@ export interface PublicLedgerBlock {
   prev_hash: string;
   hash: string;
   site_domain: string;
+  user_id?: string;
   profile_id?: string;
   cookie_hash: string;
   verification_result: VerificationResult;

@@ -239,7 +239,7 @@ export function determineGuidance(cookieType: CookieType, verificationResult: Ve
 }
 
 /**
- * Determine Audit Output based on User Consent Action
+ * Determine Audit Output based on Your Consent Choice
  */
 export function determineAuditOutput(consentAction: ConsentAction): AuditOutput {
   switch (consentAction) {
@@ -351,7 +351,7 @@ export async function recordConsentTransaction(params: {
 }
 
 /**
- * Record a Live Monitored Website domain inspection event
+ * Record a Active Protectioned Website domain inspection event
  */
 export async function recordMonitoredDomain(domainData: Omit<MonitoredDomain, 'id' | 'timestamp'>): Promise<MonitoredDomain> {
   const item: MonitoredDomain = {

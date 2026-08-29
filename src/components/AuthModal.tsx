@@ -103,22 +103,22 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-fadeIn">
-      <div className="w-full max-w-md rounded-2xl border border-blue-900/40 bg-[#0b1026] p-6 sm:p-8 shadow-2xl space-y-6 relative">
+      <div className="w-full max-w-md rounded-2xl border border-fuchsia-900/40 bg-[#0a0510] p-6 sm:p-8 shadow-2xl space-y-6 relative">
         <button
           onClick={onClose}
-          className="absolute right-4 top-4 text-blue-400 hover:text-white transition-colors cursor-pointer p-1"
+          className="absolute right-4 top-4 text-fuchsia-400 hover:text-white transition-colors cursor-pointer p-1"
         >
           <X className="h-5 w-5" />
         </button>
 
         <div className="text-center space-y-1">
-          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-600 to-blue-600 text-white border border-violet-400/40 mb-3 shadow-lg shadow-violet-950/50">
+          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br bg-fuchsia-600 text-white border border-fuchsia-400/40 mb-3 shadow-lg shadow-fuchsia-950/50">
             <Cookie className="h-7 w-7 text-amber-300" />
           </div>
           <h2 className="text-xl font-bold text-white tracking-tight">
             {isRegisterMode ? 'Create Your Account' : 'Welcome Back'}
           </h2>
-          <p className="text-xs text-blue-200/70">
+          <p className="text-xs text-fuchsia-200/70">
             {isRegisterMode
               ? 'Sign up to record and audit cryptographic cookie consents'
               : 'Sign in to access your consent logs and blockchain explorer'}
@@ -126,7 +126,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         </div>
 
         {/* Tab switcher: Sign In vs Sign Up */}
-        <div className="flex rounded-xl bg-[#060a17] p-1 border border-blue-900/50">
+        <div className="flex rounded-xl bg-[#06020a] p-1 border border-fuchsia-900/50">
           <button
             type="button"
             onClick={() => {
@@ -135,8 +135,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             }}
             className={`flex-1 py-2 text-xs font-semibold rounded-lg transition-all cursor-pointer ${
               !isRegisterMode
-                ? 'bg-gradient-to-r from-violet-600 to-blue-600 text-white shadow-sm'
-                : 'text-blue-300/70 hover:text-white'
+                ? 'bg-fuchsia-600 text-white shadow-sm'
+                : 'text-fuchsia-300/70 hover:text-white'
             }`}
           >
             Sign In
@@ -149,8 +149,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             }}
             className={`flex-1 py-2 text-xs font-semibold rounded-lg transition-all cursor-pointer ${
               isRegisterMode
-                ? 'bg-gradient-to-r from-violet-600 to-blue-600 text-white shadow-sm'
-                : 'text-blue-300/70 hover:text-white'
+                ? 'bg-fuchsia-600 text-white shadow-sm'
+                : 'text-fuchsia-300/70 hover:text-white'
             }`}
           >
             Sign Up
@@ -166,47 +166,47 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         <form onSubmit={handleSubmit} className="space-y-4 text-xs">
           {isRegisterMode && (
             <div>
-              <label className="block text-blue-200 font-medium mb-1.5">Full Name / Username</label>
+              <label className="block text-fuchsia-200 font-medium mb-1.5">Full Name / Username</label>
               <div className="relative">
-                <User className="absolute left-3 top-3 h-4 w-4 text-blue-400/50" />
+                <User className="absolute left-3 top-3 h-4 w-4 text-fuchsia-400/50" />
                 <input
                   type="text"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   placeholder="e.g. Alex Rivera"
                   required={isRegisterMode}
-                  className="w-full bg-[#060a17] border border-blue-900/50 rounded-xl pl-9 pr-3.5 py-2.5 text-white placeholder-blue-400/30 focus:outline-none focus:border-violet-500 font-sans"
+                  className="w-full bg-[#06020a] border border-fuchsia-900/50 rounded-xl pl-9 pr-3.5 py-2.5 text-white placeholder-fuchsia-400/30 focus:outline-none focus:border-fuchsia-500 font-sans"
                 />
               </div>
             </div>
           )}
 
           <div>
-            <label className="block text-blue-200 font-medium mb-1.5">Email Address</label>
+            <label className="block text-fuchsia-200 font-medium mb-1.5">Email Address</label>
             <div className="relative">
-              <Mail className="absolute left-3 top-3 h-4 w-4 text-blue-400/50" />
+              <Mail className="absolute left-3 top-3 h-4 w-4 text-fuchsia-400/50" />
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="name@company.com"
                 required
-                className="w-full bg-[#060a17] border border-blue-900/50 rounded-xl pl-9 pr-3.5 py-2.5 text-white placeholder-blue-400/30 focus:outline-none focus:border-violet-500 font-sans"
+                className="w-full bg-[#06020a] border border-fuchsia-900/50 rounded-xl pl-9 pr-3.5 py-2.5 text-white placeholder-fuchsia-400/30 focus:outline-none focus:border-fuchsia-500 font-sans"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-blue-200 font-medium mb-1.5">Password</label>
+            <label className="block text-fuchsia-200 font-medium mb-1.5">Password</label>
             <div className="relative">
-              <Lock className="absolute left-3 top-3 h-4 w-4 text-blue-400/50" />
+              <Lock className="absolute left-3 top-3 h-4 w-4 text-fuchsia-400/50" />
               <input
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
                 required
-                className="w-full bg-[#060a17] border border-blue-900/50 rounded-xl pl-9 pr-3.5 py-2.5 text-white placeholder-blue-400/30 focus:outline-none focus:border-violet-500 font-sans"
+                className="w-full bg-[#06020a] border border-fuchsia-900/50 rounded-xl pl-9 pr-3.5 py-2.5 text-white placeholder-fuchsia-400/30 focus:outline-none focus:border-fuchsia-500 font-sans"
               />
             </div>
           </div>
@@ -214,15 +214,15 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-2.5 rounded-xl bg-gradient-to-r from-violet-600 to-blue-600 hover:from-violet-500 hover:to-blue-500 text-white font-semibold shadow-md shadow-violet-950/50 transition-all cursor-pointer disabled:opacity-50"
+            className="w-full py-2.5 rounded-xl bg-fuchsia-600 hover:bg-fuchsia-500 text-white font-semibold shadow-md shadow-fuchsia-950/50 transition-all cursor-pointer disabled:opacity-50"
           >
             {loading ? 'Processing...' : isRegisterMode ? 'Create Free Account' : 'Sign In'}
           </button>
         </form>
 
         <div className="relative flex items-center justify-center">
-          <div className="border-t border-blue-900/40 w-full" />
-          <span className="bg-[#0b1026] px-2 text-[10px] text-blue-400/50 uppercase tracking-wider font-mono">
+          <div className="border-t border-fuchsia-900/40 w-full" />
+          <span className="bg-[#0a0510] px-2 text-[10px] text-fuchsia-400/50 uppercase tracking-wider font-mono">
             or
           </span>
         </div>
@@ -231,7 +231,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           type="button"
           onClick={handleDemoLogin}
           disabled={loading}
-          className="w-full flex items-center justify-center gap-2 py-2 rounded-xl bg-blue-950/60 hover:bg-blue-900/60 border border-blue-800/40 text-xs font-semibold text-blue-200 hover:text-white transition-colors cursor-pointer"
+          className="w-full flex items-center justify-center gap-2 py-2 rounded-xl bg-blue-950/60 hover:bg-fuchsia-900/60 border border-blue-800/40 text-xs font-semibold text-fuchsia-200 hover:text-white transition-colors cursor-pointer"
         >
           <Sparkles className="h-4 w-4 text-amber-400" />
           <span>Quick 1-Click Demo Login</span>

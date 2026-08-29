@@ -128,10 +128,10 @@ export const SettingsView: React.FC = () => {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-white tracking-tight flex items-center gap-2">
-            <SettingsIcon className="h-6 w-6 text-violet-400" />
+            <SettingsIcon className="h-6 w-6 text-fuchsia-400" />
             <span>Settings</span>
           </h1>
-          <p className="text-xs text-blue-200/70 mt-1">
+          <p className="text-xs text-fuchsia-200/70 mt-1">
             Manage your cookie blocking preferences, extension alerts, and stored data.
           </p>
         </div>
@@ -149,20 +149,20 @@ export const SettingsView: React.FC = () => {
         {/* Left 2 Columns: Core Toggles */}
         <div className="lg:col-span-2 space-y-6">
           {/* Privacy & Tracker Protection */}
-          <div className="rounded-2xl border border-blue-900/40 bg-[#0b1026] p-6 space-y-4 shadow-lg">
+          <div className="rounded-2xl border border-fuchsia-900/40 bg-[#0a0510] p-6 space-y-4 shadow-lg">
             <div className="flex items-center gap-2 text-white font-bold text-sm">
-              <Shield className="h-4 w-4 text-violet-400" />
+              <Shield className="h-4 w-4 text-fuchsia-400" />
               <span>Privacy & Tracker Protection</span>
             </div>
 
             <div className="space-y-3">
               {/* Setting Item 1 */}
-              <div className="flex items-center justify-between p-3.5 rounded-xl bg-[#060a17] border border-blue-900/40">
+              <div className="flex items-center justify-between p-3.5 rounded-xl bg-[#06020a] border border-fuchsia-900/40">
                 <div className="space-y-0.5 max-w-[80%]">
                   <div className="text-xs font-semibold text-white">
                     Auto-Block Advertising & Marketing Pixels
                   </div>
-                  <p className="text-[11px] text-blue-200/60">
+                  <p className="text-[11px] text-fuchsia-200/60">
                     Automatically prevent Facebook Pixel, Google Ads, and third-party marketing tags from tracking you across sites.
                   </p>
                 </div>
@@ -173,17 +173,17 @@ export const SettingsView: React.FC = () => {
                     onChange={(e) => updateSetting('autoBlockAds', e.target.checked)}
                     className="sr-only peer"
                   />
-                  <div className="w-11 h-6 bg-blue-950 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-violet-600"></div>
+                  <div className="w-11 h-6 bg-blue-950 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-fuchsia-600"></div>
                 </label>
               </div>
 
               {/* Setting Item 2 */}
-              <div className="flex items-center justify-between p-3.5 rounded-xl bg-[#060a17] border border-blue-900/40">
+              <div className="flex items-center justify-between p-3.5 rounded-xl bg-[#06020a] border border-fuchsia-900/40">
                 <div className="space-y-0.5 max-w-[80%]">
                   <div className="text-xs font-semibold text-white">
                     Block Browser Fingerprinting
                   </div>
-                  <p className="text-[11px] text-blue-200/60">
+                  <p className="text-[11px] text-fuchsia-200/60">
                     Prevent stealth tracking via canvas, audio, and device hardware probes.
                   </p>
                 </div>
@@ -194,17 +194,17 @@ export const SettingsView: React.FC = () => {
                     onChange={(e) => updateSetting('blockFingerprinting', e.target.checked)}
                     className="sr-only peer"
                   />
-                  <div className="w-11 h-6 bg-blue-950 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-violet-600"></div>
+                  <div className="w-11 h-6 bg-blue-950 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-fuchsia-600"></div>
                 </label>
               </div>
 
               {/* Setting Item 3 */}
-              <div className="flex items-center justify-between p-3.5 rounded-xl bg-[#060a17] border border-blue-900/40">
+              <div className="flex items-center justify-between p-3.5 rounded-xl bg-[#06020a] border border-fuchsia-900/40">
                 <div className="space-y-0.5 max-w-[80%]">
                   <div className="text-xs font-semibold text-white">
                     Strict SHA-256 Script Verification
                   </div>
-                  <p className="text-[11px] text-blue-200/60">
+                  <p className="text-[11px] text-fuchsia-200/60">
                     Flag any consent banner script whose cryptographic signature has changed or is unverified.
                   </p>
                 </div>
@@ -215,14 +215,14 @@ export const SettingsView: React.FC = () => {
                     onChange={(e) => updateSetting('strictScriptHashing', e.target.checked)}
                     className="sr-only peer"
                   />
-                  <div className="w-11 h-6 bg-blue-950 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-violet-600"></div>
+                  <div className="w-11 h-6 bg-blue-950 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-fuchsia-600"></div>
                 </label>
               </div>
             </div>
           </div>
 
           {/* General & Notifications */}
-          <div className="rounded-2xl border border-blue-900/40 bg-[#0b1026] p-6 space-y-4 shadow-lg">
+          <div className="rounded-2xl border border-fuchsia-900/40 bg-[#0a0510] p-6 space-y-4 shadow-lg">
             <div className="flex items-center gap-2 text-white font-bold text-sm">
               <Sliders className="h-4 w-4 text-sky-400" />
               <span>General Preferences</span>
@@ -230,12 +230,12 @@ export const SettingsView: React.FC = () => {
 
             <div className="space-y-3">
               {/* Notification toggle */}
-              <div className="flex items-center justify-between p-3.5 rounded-xl bg-[#060a17] border border-blue-900/40">
+              <div className="flex items-center justify-between p-3.5 rounded-xl bg-[#06020a] border border-fuchsia-900/40">
                 <div className="space-y-0.5 max-w-[80%]">
                   <div className="text-xs font-semibold text-white">
                     Show Extension Alert Badges
                   </div>
-                  <p className="text-[11px] text-blue-200/60">
+                  <p className="text-[11px] text-fuchsia-200/60">
                     Display badge count on browser toolbar when risky trackers or dark patterns are detected.
                   </p>
                 </div>
@@ -246,17 +246,17 @@ export const SettingsView: React.FC = () => {
                     onChange={(e) => updateSetting('enableNotifications', e.target.checked)}
                     className="sr-only peer"
                   />
-                  <div className="w-11 h-6 bg-blue-950 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-violet-600"></div>
+                  <div className="w-11 h-6 bg-blue-950 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-fuchsia-600"></div>
                 </label>
               </div>
 
               {/* Auto audit toggle */}
-              <div className="flex items-center justify-between p-3.5 rounded-xl bg-[#060a17] border border-blue-900/40">
+              <div className="flex items-center justify-between p-3.5 rounded-xl bg-[#06020a] border border-fuchsia-900/40">
                 <div className="space-y-0.5 max-w-[80%]">
                   <div className="text-xs font-semibold text-white">
                     Automatic Background Audit
                   </div>
-                  <p className="text-[11px] text-blue-200/60">
+                  <p className="text-[11px] text-fuchsia-200/60">
                     Inspect cookies and consent banners seamlessly upon visiting new websites.
                   </p>
                 </div>
@@ -267,7 +267,7 @@ export const SettingsView: React.FC = () => {
                     onChange={(e) => updateSetting('autoAuditNewSites', e.target.checked)}
                     className="sr-only peer"
                   />
-                  <div className="w-11 h-6 bg-blue-950 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-violet-600"></div>
+                  <div className="w-11 h-6 bg-blue-950 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-fuchsia-600"></div>
                 </label>
               </div>
             </div>
@@ -277,18 +277,18 @@ export const SettingsView: React.FC = () => {
         {/* Right 1 Column: Data & Storage Actions */}
         <div className="space-y-6">
           {/* Export Data */}
-          <div className="rounded-2xl border border-blue-900/40 bg-[#0b1026] p-5 space-y-3.5 shadow-lg">
+          <div className="rounded-2xl border border-fuchsia-900/40 bg-[#0a0510] p-5 space-y-3.5 shadow-lg">
             <div className="flex items-center gap-2 text-white font-bold text-xs">
-              <Download className="h-4 w-4 text-violet-400" />
+              <Download className="h-4 w-4 text-fuchsia-400" />
               <span>Export Audit Data</span>
             </div>
-            <p className="text-[11px] text-blue-200/70">
+            <p className="text-[11px] text-fuchsia-200/70">
               Download your monitored domains, tracker classifications, and blockchain consent blocks in JSON format.
             </p>
             <button
               onClick={handleExportData}
               disabled={isExporting}
-              className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-violet-600 hover:bg-violet-500 text-white font-semibold text-xs transition-all cursor-pointer shadow-md shadow-violet-950/60"
+              className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-fuchsia-600 hover:bg-fuchsia-500 text-white font-semibold text-xs transition-all cursor-pointer shadow-md shadow-fuchsia-950/60"
             >
               {isExporting ? (
                 <RefreshCw className="h-3.5 w-3.5 animate-spin" />
@@ -300,12 +300,12 @@ export const SettingsView: React.FC = () => {
           </div>
 
           {/* Clear Browsing Data */}
-          <div className="rounded-2xl border border-blue-900/40 bg-[#0b1026] p-5 space-y-3.5 shadow-lg">
+          <div className="rounded-2xl border border-fuchsia-900/40 bg-[#0a0510] p-5 space-y-3.5 shadow-lg">
             <div className="flex items-center gap-2 text-white font-bold text-xs">
               <Trash2 className="h-4 w-4 text-rose-400" />
               <span>Clear Stored Data</span>
             </div>
-            <p className="text-[11px] text-blue-200/70">
+            <p className="text-[11px] text-fuchsia-200/70">
               Wipe all recorded domains, tracker event logs, and local browser cache from this device.
             </p>
             <button
@@ -324,10 +324,10 @@ export const SettingsView: React.FC = () => {
           </div>
 
           {/* Reset Settings */}
-          <div className="rounded-2xl border border-blue-900/40 bg-[#0b1026] p-4 text-center">
+          <div className="rounded-2xl border border-fuchsia-900/40 bg-[#0a0510] p-4 text-center">
             <button
               onClick={handleResetDefaults}
-              className="text-xs text-blue-400/80 hover:text-blue-200 underline cursor-pointer transition-colors"
+              className="text-xs text-fuchsia-400/80 hover:text-fuchsia-200 underline cursor-pointer transition-colors"
             >
               Reset Settings to Defaults
             </button>

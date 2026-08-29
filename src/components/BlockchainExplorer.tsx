@@ -188,8 +188,8 @@ export const BlockchainExplorer: React.FC<BlockchainExplorerProps> = ({ onRefres
             onClick={() => setActiveLedgerTab('public')}
             className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-medium transition-all cursor-pointer ${
               activeLedgerTab === 'public'
-                ? 'bg-gradient-to-r from-violet-600 to-blue-600 text-white font-semibold shadow-md shadow-violet-950/60'
-                : 'bg-[#0b1026] text-blue-300/70 hover:text-white border border-blue-900/40 hover:border-violet-700/50'
+                ? 'bg-fuchsia-600 text-white font-semibold shadow-md shadow-fuchsia-950/60'
+                : 'bg-[#0a0510] text-fuchsia-300/70 hover:text-white border border-fuchsia-900/40 hover:border-fuchsia-700/50'
             }`}
           >
             <Unlock className="h-3.5 w-3.5" />
@@ -200,8 +200,8 @@ export const BlockchainExplorer: React.FC<BlockchainExplorerProps> = ({ onRefres
             onClick={() => setActiveLedgerTab('private')}
             className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-medium transition-all cursor-pointer ${
               activeLedgerTab === 'private'
-                ? 'bg-gradient-to-r from-violet-600 to-blue-600 text-white font-semibold shadow-md shadow-violet-950/60'
-                : 'bg-[#0b1026] text-blue-300/70 hover:text-white border border-blue-900/40 hover:border-violet-700/50'
+                ? 'bg-fuchsia-600 text-white font-semibold shadow-md shadow-fuchsia-950/60'
+                : 'bg-[#0a0510] text-fuchsia-300/70 hover:text-white border border-fuchsia-900/40 hover:border-fuchsia-700/50'
             }`}
           >
             <Lock className="h-3.5 w-3.5" />
@@ -210,13 +210,13 @@ export const BlockchainExplorer: React.FC<BlockchainExplorerProps> = ({ onRefres
         </div>
 
         <div className="relative w-full sm:w-64">
-          <Search className="absolute left-3 top-2.5 h-3.5 w-3.5 text-blue-400/50" />
+          <Search className="absolute left-3 top-2.5 h-3.5 w-3.5 text-fuchsia-400/50" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search domain or hash..."
-            className="w-full rounded-xl bg-[#0b1026] pl-9 pr-3 py-1.5 text-xs text-blue-100 border border-blue-900/40 focus:outline-none focus:border-violet-500 font-mono placeholder-blue-300/30"
+            className="w-full rounded-xl bg-[#0a0510] pl-9 pr-3 py-1.5 text-xs text-fuchsia-100 border border-fuchsia-900/40 focus:outline-none focus:border-fuchsia-500 font-mono placeholder-fuchsia-300/30"
           />
         </div>
       </div>
@@ -225,7 +225,7 @@ export const BlockchainExplorer: React.FC<BlockchainExplorerProps> = ({ onRefres
       {activeLedgerTab === 'public' && (
         <div className="space-y-3">
           {filteredPublicBlocks.length === 0 ? (
-            <div className="text-center py-10 bg-[#0b1026]/40 rounded-2xl border border-blue-900/30 text-blue-300/60 text-xs font-mono">
+            <div className="text-center py-10 bg-[#0a0510]/40 rounded-2xl border border-fuchsia-900/30 text-fuchsia-300/60 text-xs font-mono">
               No public blocks found.
             </div>
           ) : (
@@ -241,12 +241,12 @@ export const BlockchainExplorer: React.FC<BlockchainExplorerProps> = ({ onRefres
                   className={`p-4 rounded-2xl border transition-all ${
                     isTampered
                       ? 'border-rose-500 bg-rose-950/30 shadow-md shadow-rose-950/50'
-                      : 'border-blue-900/30 bg-[#0b1026]/90 hover:border-violet-700/40 shadow-sm'
+                      : 'border-fuchsia-900/30 bg-[#0a0510]/90 hover:border-fuchsia-700/40 shadow-sm'
                   }`}
                 >
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
                     <div className="flex items-center gap-2.5">
-                      <span className="h-7 w-7 rounded-lg bg-violet-600/20 border border-violet-500/30 text-violet-300 font-mono text-xs font-bold flex items-center justify-center">
+                      <span className="h-7 w-7 rounded-lg bg-fuchsia-600/20 border border-fuchsia-500/30 text-fuchsia-300 font-mono text-xs font-bold flex items-center justify-center">
                         #{block.block_index}
                       </span>
                       <span className="font-semibold text-white text-sm">
@@ -258,7 +258,7 @@ export const BlockchainExplorer: React.FC<BlockchainExplorerProps> = ({ onRefres
                             ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
                             : block.verification_result === 'Warning'
                             ? 'bg-rose-500/10 text-rose-400 border border-rose-500/20'
-                            : 'bg-violet-500/10 text-violet-300 border border-violet-500/20'
+                            : 'bg-fuchsia-500/10 text-fuchsia-300 border border-fuchsia-500/20'
                         }`}
                       >
                         {block.verification_result}
@@ -266,35 +266,35 @@ export const BlockchainExplorer: React.FC<BlockchainExplorerProps> = ({ onRefres
                     </div>
 
                     <div className="flex items-center gap-3 text-xs">
-                      <span className="font-mono text-blue-300/70 uppercase text-[11px]">
+                      <span className="font-mono text-fuchsia-300/70 uppercase text-[11px]">
                         Action: <strong className="text-white">{block.consent_action}</strong>
                       </span>
-                      <span className="text-blue-300/50 text-[11px] font-mono">
+                      <span className="text-fuchsia-300/50 text-[11px] font-mono">
                         {new Date(block.timestamp).toLocaleTimeString()}
                       </span>
                     </div>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs font-mono">
-                    <div className="p-2.5 rounded-xl bg-[#060a17] border border-blue-950">
-                      <div className="text-[10px] text-blue-300/60 flex items-center justify-between mb-1">
+                    <div className="p-2.5 rounded-xl bg-[#06020a] border border-blue-950">
+                      <div className="text-[10px] text-fuchsia-300/60 flex items-center justify-between mb-1">
                         <span>PREV HASH</span>
                         <button
                           onClick={() => handleCopy(block.prev_hash)}
-                          className="text-blue-400 hover:text-white"
+                          className="text-fuchsia-400 hover:text-white"
                         >
                           {copiedHash === block.prev_hash ? <Check className="h-3 w-3 text-emerald-400" /> : <Copy className="h-3 w-3" />}
                         </button>
                       </div>
-                      <span className="text-blue-300/70 block truncate">{block.prev_hash}</span>
+                      <span className="text-fuchsia-300/70 block truncate">{block.prev_hash}</span>
                     </div>
 
-                    <div className="p-2.5 rounded-xl bg-[#060a17] border border-blue-950">
-                      <div className="text-[10px] text-blue-300/60 flex items-center justify-between mb-1">
+                    <div className="p-2.5 rounded-xl bg-[#06020a] border border-blue-950">
+                      <div className="text-[10px] text-fuchsia-300/60 flex items-center justify-between mb-1">
                         <span>BLOCK HASH</span>
                         <button
                           onClick={() => handleCopy(block.hash)}
-                          className="text-blue-400 hover:text-white"
+                          className="text-fuchsia-400 hover:text-white"
                         >
                           {copiedHash === block.hash ? <Check className="h-3 w-3 text-emerald-400" /> : <Copy className="h-3 w-3" />}
                         </button>
@@ -315,18 +315,18 @@ export const BlockchainExplorer: React.FC<BlockchainExplorerProps> = ({ onRefres
       {activeLedgerTab === 'private' && (
         <div className="space-y-3">
           {filteredPrivateBlocks.length === 0 ? (
-            <div className="text-center py-10 bg-[#0b1026]/40 rounded-2xl border border-blue-900/30 text-blue-300/60 text-xs font-mono">
+            <div className="text-center py-10 bg-[#0a0510]/40 rounded-2xl border border-fuchsia-900/30 text-fuchsia-300/60 text-xs font-mono">
               No private blocks found.
             </div>
           ) : (
             filteredPrivateBlocks.map((block) => (
               <div
                 key={block.id}
-                className="p-4 rounded-2xl border border-blue-900/30 bg-[#0b1026]/90 hover:border-violet-700/40 transition-all shadow-sm"
+                className="p-4 rounded-2xl border border-fuchsia-900/30 bg-[#0a0510]/90 hover:border-fuchsia-700/40 transition-all shadow-sm"
               >
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
                   <div className="flex items-center gap-2.5">
-                    <span className="h-7 w-7 rounded-lg bg-violet-600/20 border border-violet-500/30 text-violet-300 font-mono text-xs font-bold flex items-center justify-center">
+                    <span className="h-7 w-7 rounded-lg bg-fuchsia-600/20 border border-fuchsia-500/30 text-fuchsia-300 font-mono text-xs font-bold flex items-center justify-center">
                       P#{block.block_index}
                     </span>
                     <span className="font-semibold text-white text-sm">
@@ -335,22 +335,22 @@ export const BlockchainExplorer: React.FC<BlockchainExplorerProps> = ({ onRefres
                   </div>
 
                   <div className="flex items-center gap-3 text-xs font-mono">
-                    <span className="text-blue-300/70 text-[11px]">User: <strong className="text-violet-300">{block.user_id}</strong></span>
-                    <span className="text-blue-300/50 text-[11px]">
+                    <span className="text-fuchsia-300/70 text-[11px]">User: <strong className="text-fuchsia-300">{block.user_id}</strong></span>
+                    <span className="text-fuchsia-300/50 text-[11px]">
                       {new Date(block.timestamp).toLocaleTimeString()}
                     </span>
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs font-mono">
-                  <div className="p-2.5 rounded-xl bg-[#060a17] border border-blue-950">
-                    <span className="text-[10px] text-blue-300/60 block mb-1">PREV HASH</span>
-                    <span className="text-blue-300/70 block truncate">{block.prev_hash}</span>
+                  <div className="p-2.5 rounded-xl bg-[#06020a] border border-blue-950">
+                    <span className="text-[10px] text-fuchsia-300/60 block mb-1">PREV HASH</span>
+                    <span className="text-fuchsia-300/70 block truncate">{block.prev_hash}</span>
                   </div>
 
-                  <div className="p-2.5 rounded-xl bg-[#060a17] border border-blue-950">
-                    <span className="text-[10px] text-blue-300/60 block mb-1">PRIVATE BLOCK HASH</span>
-                    <span className="text-violet-300 block truncate font-bold">{block.hash}</span>
+                  <div className="p-2.5 rounded-xl bg-[#06020a] border border-blue-950">
+                    <span className="text-[10px] text-fuchsia-300/60 block mb-1">PRIVATE BLOCK HASH</span>
+                    <span className="text-fuchsia-300 block truncate font-bold">{block.hash}</span>
                   </div>
                 </div>
               </div>
@@ -362,31 +362,31 @@ export const BlockchainExplorer: React.FC<BlockchainExplorerProps> = ({ onRefres
       {/* Tamper Modal */}
       {isTamperingModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-          <div className="w-full max-w-md rounded-2xl border border-blue-900/40 bg-[#0b1026] p-6 shadow-2xl space-y-4">
-            <div className="flex items-center justify-between border-b border-blue-900/40 pb-3">
+          <div className="w-full max-w-md rounded-2xl border border-fuchsia-900/40 bg-[#0a0510] p-6 shadow-2xl space-y-4">
+            <div className="flex items-center justify-between border-b border-fuchsia-900/40 pb-3">
               <h3 className="text-base font-bold text-white flex items-center gap-2">
                 <Flame className="h-4 w-4 text-rose-400" />
                 <span>Simulate Database Tampering</span>
               </h3>
               <button
                 onClick={() => setIsTamperingModalOpen(false)}
-                className="text-blue-400 hover:text-white"
+                className="text-fuchsia-400 hover:text-white"
               >
                 &times;
               </button>
             </div>
 
-            <p className="text-xs text-blue-200/70">
-              Modifies a row in <code className="text-violet-300 font-mono">public_ledger</code> to demonstrate cryptographic detection.
+            <p className="text-xs text-fuchsia-200/70">
+              Modifies a row in <code className="text-fuchsia-300 font-mono">public_ledger</code> to demonstrate cryptographic detection.
             </p>
 
             <div className="space-y-3 text-xs">
               <div>
-                <label className="block text-blue-300 mb-1">Target Block #</label>
+                <label className="block text-fuchsia-300 mb-1">Target Block #</label>
                 <select
                   value={tamperTargetIndex}
                   onChange={(e) => setTamperTargetIndex(Number(e.target.value))}
-                  className="w-full rounded-xl bg-[#060a17] border border-blue-900/50 p-2.5 text-white font-mono focus:outline-none focus:border-violet-500"
+                  className="w-full rounded-xl bg-[#06020a] border border-fuchsia-900/50 p-2.5 text-white font-mono focus:outline-none focus:border-fuchsia-500"
                 >
                   {publicBlocks.map((b) => (
                     <option key={b.id} value={b.block_index}>
@@ -397,20 +397,20 @@ export const BlockchainExplorer: React.FC<BlockchainExplorerProps> = ({ onRefres
               </div>
 
               <div>
-                <label className="block text-blue-300 mb-1">Tampered Domain</label>
+                <label className="block text-fuchsia-300 mb-1">Tampered Domain</label>
                 <input
                   type="text"
                   value={tamperedDomain}
                   onChange={(e) => setTamperedDomain(e.target.value)}
-                  className="w-full rounded-xl bg-[#060a17] border border-blue-900/50 p-2.5 text-white font-mono focus:outline-none focus:border-violet-500"
+                  className="w-full rounded-xl bg-[#06020a] border border-fuchsia-900/50 p-2.5 text-white font-mono focus:outline-none focus:border-fuchsia-500"
                 />
               </div>
             </div>
 
-            <div className="pt-2 border-t border-blue-900/40 flex items-center justify-end gap-2">
+            <div className="pt-2 border-t border-fuchsia-900/40 flex items-center justify-end gap-2">
               <button
                 onClick={() => setIsTamperingModalOpen(false)}
-                className="px-4 py-2 rounded-xl bg-blue-950/60 hover:bg-blue-900/60 text-xs text-blue-200 border border-blue-800/40 cursor-pointer"
+                className="px-4 py-2 rounded-xl bg-blue-950/60 hover:bg-fuchsia-900/60 text-xs text-fuchsia-200 border border-blue-800/40 cursor-pointer"
               >
                 Cancel
               </button>

@@ -28,7 +28,6 @@ import {
   query,
   orderBy,
   limit,
-  onSnapshot,
 } from 'firebase/firestore';
 
 export class CrypticookieDatabase extends Dexie {
@@ -532,62 +531,4 @@ export async function resetDatabaseToDefault(): Promise<void> {
   await db.public_ledger.clear();
   await db.monitored_domains.clear();
   await initializeDatabase();
-}
-
-/**
- * Setup Real-time Firestore Listeners to mirror Cloud Database writes to local Dexie & UI
- */
-export function setupFirestoreRealtimeListeners(onUpdate: () => void): () => void {
-  if (!firestoreDb) return () => {};
-
-  const unsub1 = onSnapshot(collection(firestoreDb, 'cookie_events'), async (snapshot) => {
-    let hasChanges = false;
-    for (const change of snapshot.docChanges()) {
-      if (change.type === 'added' || change.type === 'modified') {
-        const data = { id: change.doc.id, ...change.doc.data() } as CookieEvent;
-        await db.cookie_events.put(data);
-        hasChanges = true;
-      } else if (change.type === 'removed') {
-        await db.cookie_events.delete(change.doc.id);
-        hasChanges = true;
-      }
-    }
-    if (hasChanges) onUpdate();
-  });
-
-  const unsub2 = onSnapshot(collection(firestoreDb, 'public_ledger'), async (snapshot) => {
-    let hasChanges = false;
-    for (const change of snapshot.docChanges()) {
-      if (change.type === 'added' || change.type === 'modified') {
-        const data = { id: change.doc.id, ...change.doc.data() } as PublicLedgerBlock;
-        await db.public_ledger.put(data);
-        hasChanges = true;
-      } else if (change.type === 'removed') {
-        await db.public_ledger.delete(change.doc.id);
-        hasChanges = true;
-      }
-    }
-    if (hasChanges) onUpdate();
-  });
-
-  const unsub3 = onSnapshot(collection(firestoreDb, 'monitored_domains'), async (snapshot) => {
-    let hasChanges = false;
-    for (const change of snapshot.docChanges()) {
-      if (change.type === 'added' || change.type === 'modified') {
-        const data = { id: change.doc.id, ...change.doc.data() } as MonitoredDomain;
-        await db.monitored_domains.put(data);
-        hasChanges = true;
-      } else if (change.type === 'removed') {
-        await db.monitored_domains.delete(change.doc.id);
-        hasChanges = true;
-      }
-    }
-    if (hasChanges) onUpdate();
-  });
-
-  return () => {
-    unsub1();
-    unsub2();
-    unsub3();
-  };
 }

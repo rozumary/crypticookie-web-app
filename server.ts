@@ -534,6 +534,8 @@ When analyzing a website or answering questions:
     }
   });
 
+  // API Health Check
+  app.get("/api/health", (req, res) => {
     res.json({ status: "ok", timestamp: new Date().toISOString() });
   });
 

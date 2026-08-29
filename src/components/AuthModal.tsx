@@ -56,6 +56,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           email: email.trim().toLowerCase(),
           password_hash: hashedPass,
           created_at: new Date().toISOString(),
+          immutable: 0,
         };
 
         await db.users.add(newUser);
@@ -92,6 +93,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           email: 'test@crypticookie.io',
           password_hash: await sha256('test123_secure'),
           created_at: new Date().toISOString(),
+          immutable: 0,
         };
         await db.users.add(user);
         await syncToFirestore('users', user.id, user);

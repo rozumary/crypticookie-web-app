@@ -205,7 +205,7 @@ export const OverviewDashboard: React.FC<OverviewDashboardProps> = ({
             </span>
           </div>
           <p className="text-sm text-purple-300/70 mt-1">
-            Real-time live monitoring of visited websites, cookie audits, and cryptographic blockchain ledger for account <strong className="text-white">{currentUser ? currentUser.username : 'Primary Auditor'}</strong>.
+            Live cookie audits and blockchain ledger for <strong className="text-white">{currentUser ? currentUser.username : 'Primary Auditor'}</strong>.
           </p>
         </div>
 

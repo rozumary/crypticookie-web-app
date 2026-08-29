@@ -16,6 +16,7 @@ export interface User {
   password_hash: string;
   username: string;
   created_at: string;
+  immutable: number;
 }
 
 export interface ChromeProfile {

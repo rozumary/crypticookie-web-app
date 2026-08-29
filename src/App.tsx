@@ -15,6 +15,7 @@ import { type User, type CookieEvent } from './types/database';
 export default function App() {
   const [activeTab, setActiveTab] = useState<string>('overview');
   const [isDbReady, setIsDbReady] = useState(false);
+  const [isInitialSyncDone, setIsInitialSyncDone] = useState(false);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signin');
@@ -75,6 +76,7 @@ export default function App() {
       try {
         await initializeDatabase();
         setIsDbReady(true);
+        setIsInitialSyncDone(true); // Ensure dashboard renders
 
         const storedUserId = localStorage.getItem('crypticookie_active_user_id');
         if (storedUserId) {
@@ -103,6 +105,7 @@ export default function App() {
     // Trigger full REST-based sync on active user change to bypass iframe WebSocket/long-poll restrictions
     syncAllFromCentralServer(activeUserId).then(() => {
       refreshDatabaseState();
+      setIsInitialSyncDone(true);
     });
 
     let unsubListeners: (() => void) | null = null;
@@ -207,38 +210,46 @@ export default function App() {
 
         {/* Main Content Viewport */}
         <main className="flex-1 w-full px-4 sm:px-6 lg:px-8 xl:px-10 pt-6 sm:pt-8">
-          {activeTab === 'overview' && (
-            <OverviewDashboard
-              metrics={metrics}
-              recentEvents={recentEvents}
-              currentUser={currentUser}
-              onRefreshData={refreshDatabaseState}
-              onNavigateTab={setActiveTab}
-            />
-          )}
+          {!isInitialSyncDone ? (
+            <div className="flex h-[80vh] items-center justify-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-500"></div>
+            </div>
+          ) : (
+            <>
+              {activeTab === 'overview' && (
+                <OverviewDashboard
+                  metrics={metrics}
+                  recentEvents={recentEvents}
+                  currentUser={currentUser}
+                  onRefreshData={refreshDatabaseState}
+                  onNavigateTab={setActiveTab}
+                />
+              )}
 
-          {activeTab === 'simulator' && (
-            <ExtensionSimulator
-              currentUser={currentUser}
-              onRefreshData={refreshDatabaseState}
-              onNavigateTab={setActiveTab}
-            />
-          )}
+              {activeTab === 'simulator' && (
+                <ExtensionSimulator
+                  currentUser={currentUser}
+                  onRefreshData={refreshDatabaseState}
+                  onNavigateTab={setActiveTab}
+                />
+              )}
 
-          {activeTab === 'blockchain' && (
-            <BlockchainExplorer currentUser={currentUser} onRefreshData={refreshDatabaseState} />
-          )}
+              {activeTab === 'blockchain' && (
+                <BlockchainExplorer currentUser={currentUser} onRefreshData={refreshDatabaseState} />
+              )}
 
-          {activeTab === 'cmp_registry' && (
-            <CMPRegistryManager onRefreshData={refreshDatabaseState} />
-          )}
+              {activeTab === 'cmp_registry' && (
+                <CMPRegistryManager onRefreshData={refreshDatabaseState} />
+              )}
 
-          {activeTab === 'settings' && <SettingsView currentUser={currentUser} onRefreshData={refreshDatabaseState} />}
+              {activeTab === 'settings' && <SettingsView currentUser={currentUser} onRefreshData={refreshDatabaseState} />}
 
-          {activeTab === 'ai_bot' && <AIPrivacyBot />}
+              {activeTab === 'ai_bot' && <AIPrivacyBot />}
 
-          {activeTab === 'database' && (
-            <DatabaseConsole onRefreshData={refreshDatabaseState} />
+              {activeTab === 'database' && (
+                <DatabaseConsole onRefreshData={refreshDatabaseState} />
+              )}
+            </>
           )}
         </main>
       </div>

@@ -108,6 +108,7 @@ export const INITIAL_DEMO_USERS: User[] = [
     email: 'test@crypticookie.io',
     password_hash: 'demo_pass_hash_test',
     created_at: new Date(Date.now() - 86400000 * 10).toISOString(),
+    immutable: 0,
   },
 ];
 

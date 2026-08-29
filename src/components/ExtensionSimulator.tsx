@@ -309,7 +309,7 @@ export const ExtensionSimulator: React.FC<ExtensionSimulatorProps> = ({
             </span>
           </div>
           <p className="text-xs text-purple-300/70 mt-1">
-            Audits any website domain in real time, intercepts cookie consent banners, and hashes script signatures to the ledger for account <strong className="text-white">{currentUser ? currentUser.username : 'Primary Auditor'}</strong>.
+            Live domain audits and script hashing for <strong className="text-white">{currentUser ? currentUser.username : 'Primary Auditor'}</strong>.
           </p>
         </div>
 
@@ -356,7 +356,7 @@ export const ExtensionSimulator: React.FC<ExtensionSimulatorProps> = ({
                 value={currentDomain}
                 onChange={(e) => setCurrentDomain(e.target.value)}
                 className="w-full bg-transparent text-purple-100 font-mono focus:outline-none placeholder-purple-400/40"
-                placeholder="Type any website (e.g. google.com, lazada.com, shopee.ph, cnn.com)"
+                placeholder="Type any website (e.g. shopee.ph, lazada.com.ph, gcash.com, cnn.com)"
               />
               <button
                 type="submit"

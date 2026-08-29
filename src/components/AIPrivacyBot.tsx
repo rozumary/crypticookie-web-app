@@ -201,9 +201,9 @@ export const AIPrivacyBot: React.FC = () => {
       </div>
 
       {/* SECTION 2: Main Grid Outer Containers */}
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-5 items-stretch">
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-5">
         {/* Left Side: Quick Audit Tool & Suggested Questions */}
-        <div className="lg:col-span-1 space-y-4 flex flex-col">
+        <div className="lg:col-span-1 space-y-4">
           {/* Quick Domain Audit Outer Box */}
           <div className="bg-[#0F061F] border border-[#261445] rounded-2xl p-4 space-y-2.5">
             <div className="flex items-center gap-2 text-white font-bold text-xs">
@@ -234,7 +234,7 @@ export const AIPrivacyBot: React.FC = () => {
           </div>
 
           {/* Quick Privacy Topics Outer Box */}
-          <div className="bg-[#0F061F] border border-[#261445] rounded-2xl p-4 space-y-2.5 flex-1 flex flex-col justify-between">
+          <div className="bg-[#0F061F] border border-[#261445] rounded-2xl p-4 space-y-2.5">
             <div className="flex items-center gap-2 text-white font-bold text-xs">
               <HelpCircle className="h-4 w-4 text-pink-400" />
               <span>Quick Topics</span>
@@ -268,7 +268,7 @@ export const AIPrivacyBot: React.FC = () => {
         </div>
 
         {/* Right Side: Interactive Chat Window Outer Box */}
-        <div className="lg:col-span-3 flex flex-col rounded-2xl border border-[#261445] bg-[#0F061F] overflow-hidden min-h-[480px] h-full">
+        <div className="lg:col-span-3 flex flex-col rounded-2xl border border-[#261445] bg-[#0F061F] overflow-hidden h-[460px]">
           {/* Chat Window Top Bar */}
           <div className="flex items-center justify-between border-b border-[#29154A] bg-[#14082B] px-5 py-3 shrink-0">
             <div className="flex items-center gap-2.5">
@@ -359,41 +359,6 @@ export const AIPrivacyBot: React.FC = () => {
                 </div>
               );
             })}
-
-            {/* Quick Action Suggestion Cards inside Chat to fill empty canvas space */}
-            {messages.length <= 1 && (
-              <div className="mt-3 pt-3 border-t border-[#29154A]/60 space-y-2.5">
-                <div className="text-[11px] font-bold text-purple-300/80 flex items-center gap-1.5">
-                  <Sparkles className="h-3.5 w-3.5 text-pink-400" />
-                  <span>Explore Suggested Privacy Audits & Topics</span>
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                  {DEFAULT_SUGGESTIONS.map((s, idx) => {
-                    const Icon = s.icon;
-                    return (
-                      <button
-                        key={idx}
-                        onClick={() => handleSendMessage(s.prompt)}
-                        disabled={isLoading}
-                        className="text-left p-3 rounded-xl bg-[#130729] hover:bg-[#1C0A3B] border border-[#29154A] hover:border-pink-500/40 transition-all cursor-pointer group flex items-start gap-2.5"
-                      >
-                        <div className="h-7 w-7 rounded-lg bg-[#1A0935] border border-pink-500/30 flex items-center justify-center shrink-0 text-pink-400 group-hover:scale-105 transition-transform">
-                          <Icon className="h-3.5 w-3.5" />
-                        </div>
-                        <div>
-                          <div className="text-[11px] font-bold text-white group-hover:text-pink-300 transition-colors">
-                            {s.title}
-                          </div>
-                          <p className="text-[10px] text-purple-300/70 line-clamp-2 mt-0.5">
-                            {s.prompt}
-                          </p>
-                        </div>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
 
             {isLoading && (
               <div className="flex items-start gap-3 justify-start animate-pulse">

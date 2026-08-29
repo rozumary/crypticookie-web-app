@@ -81,13 +81,14 @@ export const OverviewDashboard: React.FC<OverviewDashboardProps> = ({
   return (
     <div className="space-y-8 pb-12">
       {/* SECTION 1: Top Header Container */}
-      <div className="bg-[#160E2A] border border-[#2E1C50] rounded-3xl p-6 sm:p-8 shadow-xl shadow-purple-950/40 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div className="bg-[#0F061F] border border-[#261445] rounded-3xl p-6 sm:p-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <div className="flex items-center gap-2">
-            <h1 className="text-2xl font-bold text-white tracking-tight">
-              System Overview
+            <h1 className="text-2xl font-bold text-white tracking-tight flex items-center gap-2">
+              <span>System Overview</span>
+              <span className="h-2 w-2 rounded-full bg-pink-500" />
             </h1>
-            <span className="px-2.5 py-0.5 rounded-full bg-[#251545] text-purple-300 text-[11px] font-mono border border-[#4C2888] font-semibold">
+            <span className="px-2.5 py-0.5 rounded-full bg-[#1A0935] text-pink-300 text-[11px] font-mono border border-pink-500/30 font-semibold">
               Live Monitor
             </span>
           </div>
@@ -99,43 +100,43 @@ export const OverviewDashboard: React.FC<OverviewDashboardProps> = ({
         <div className="flex items-center gap-3">
           <button
             onClick={() => onNavigateTab('simulator')}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-xs font-semibold text-white shadow-md shadow-purple-900/40 transition-all cursor-pointer"
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 text-xs font-semibold text-white transition-all cursor-pointer"
           >
             <Play className="h-3.5 w-3.5" />
             <span>Open Simulator</span>
           </button>
           <button
             onClick={() => onNavigateTab('blockchain')}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#251545] hover:bg-[#2F1B56] text-xs font-semibold text-purple-200 border border-[#4C2888] transition-all cursor-pointer"
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#1A0935] hover:bg-[#250B42] text-xs font-semibold text-purple-200 border border-pink-500/30 hover:border-pink-500/60 transition-all cursor-pointer"
           >
-            <Layers className="h-3.5 w-3.5 text-purple-300" />
+            <Layers className="h-3.5 w-3.5 text-pink-400" />
             <span>View Blockchain</span>
           </button>
         </div>
       </div>
 
       {/* SECTION 2: Metrics Outer Container */}
-      <div className="bg-[#160E2A] border border-[#2E1C50] rounded-3xl p-6 sm:p-8 shadow-xl shadow-purple-950/40 space-y-4">
+      <div className="bg-[#0F061F] border border-[#261445] rounded-3xl p-6 sm:p-8 space-y-4">
         <div className="flex items-center justify-between">
           <h2 className="text-base font-bold text-white flex items-center gap-2">
-            <Shield className="h-4 w-4 text-purple-300" />
+            <Shield className="h-4 w-4 text-pink-400" />
             <span>System Telemetry & Metrics</span>
           </h2>
-          <span className="text-xs font-mono text-purple-300 bg-[#251545] px-2.5 py-1 rounded-full border border-[#4C2888] font-semibold">
+          <span className="text-xs font-mono text-pink-300 bg-[#1A0935] px-2.5 py-1 rounded-full border border-pink-500/30 font-semibold">
             Live Stats
           </span>
         </div>
 
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="bg-[#1B1133] border border-[#341F5C] p-5 rounded-2xl shadow-sm hover:border-purple-500/50 transition-all">
+          <div className="bg-[#130729] border border-[#29154A] p-5 rounded-2xl hover:border-pink-500/40 transition-all">
             <span className="text-xs font-semibold text-purple-300/70">Protected Domains</span>
             <div className="text-2xl sm:text-3xl font-bold text-white mt-1">
               {metrics.protectedPlatformsCount}
             </div>
-            <span className="text-[11px] text-purple-400 mt-1 block font-mono font-medium">Active In Database</span>
+            <span className="text-[11px] text-pink-400 mt-1 block font-mono font-medium">Active In Database</span>
           </div>
 
-          <div className="bg-[#1B1133] border border-[#341F5C] p-5 rounded-2xl shadow-sm hover:border-purple-500/50 transition-all">
+          <div className="bg-[#130729] border border-[#29154A] p-5 rounded-2xl hover:border-pink-500/40 transition-all">
             <span className="text-xs font-semibold text-purple-300/70">Blockchain Blocks</span>
             <div className="text-2xl sm:text-3xl font-bold text-purple-300 mt-1">
               {metrics.publicLedgerCount}
@@ -143,7 +144,7 @@ export const OverviewDashboard: React.FC<OverviewDashboardProps> = ({
             <span className="text-[11px] text-purple-400 mt-1 block font-mono font-medium">Chained P & PB Ledgers</span>
           </div>
 
-          <div className="bg-[#1B1133] border border-[#341F5C] p-5 rounded-2xl shadow-sm hover:border-purple-500/50 transition-all">
+          <div className="bg-[#130729] border border-[#29154A] p-5 rounded-2xl hover:border-pink-500/40 transition-all">
             <span className="text-xs font-semibold text-purple-300/70">Threats Blocked</span>
             <div className="text-2xl sm:text-3xl font-bold text-rose-400 mt-1">
               {metrics.threatsBlockedCount}
@@ -151,7 +152,7 @@ export const OverviewDashboard: React.FC<OverviewDashboardProps> = ({
             <span className="text-[11px] text-rose-400 mt-1 block font-mono font-medium">Dark Patterns Intercepted</span>
           </div>
 
-          <div className="bg-[#1B1133] border border-[#341F5C] p-5 rounded-2xl shadow-sm hover:border-purple-500/50 transition-all">
+          <div className="bg-[#130729] border border-[#29154A] p-5 rounded-2xl hover:border-pink-500/40 transition-all">
             <span className="text-xs font-semibold text-purple-300/70">Verified CMPs</span>
             <div className="text-2xl sm:text-3xl font-bold text-emerald-400 mt-1">
               {metrics.whitelistedCMPs}
@@ -162,10 +163,10 @@ export const OverviewDashboard: React.FC<OverviewDashboardProps> = ({
       </div>
 
       {/* SECTION 3: Record Real Consent Event Outer Container */}
-      <div className="bg-[#160E2A] border border-[#2E1C50] rounded-3xl p-6 sm:p-8 shadow-xl shadow-purple-950/40 space-y-5">
+      <div className="bg-[#0F061F] border border-[#261445] rounded-3xl p-6 sm:p-8 space-y-5">
         <div>
           <h2 className="text-base font-bold text-white flex items-center gap-2">
-            <Plus className="h-4 w-4 text-purple-300" />
+            <Plus className="h-4 w-4 text-pink-400" />
             <span>Record Real Consent Event</span>
           </h2>
           <p className="text-xs text-purple-300/70 mt-0.5">
@@ -174,8 +175,8 @@ export const OverviewDashboard: React.FC<OverviewDashboardProps> = ({
         </div>
 
         {successMessage && (
-          <div className="p-3.5 rounded-xl bg-[#251545] border border-[#4C2888] text-xs text-purple-200 flex items-center gap-2 font-mono">
-            <CheckCircle2 className="h-4 w-4 text-purple-300 shrink-0" />
+          <div className="p-3.5 rounded-xl bg-[#1A0935] border border-pink-500/40 text-xs text-purple-200 flex items-center gap-2 font-mono">
+            <CheckCircle2 className="h-4 w-4 text-pink-400 shrink-0" />
             <span>{successMessage}</span>
           </div>
         )}
@@ -192,7 +193,7 @@ export const OverviewDashboard: React.FC<OverviewDashboardProps> = ({
                 onChange={(e) => setDomainInput(e.target.value)}
                 placeholder="e.g. github.com"
                 required
-                className="w-full bg-[#120B22] border border-[#35205F] rounded-xl px-3.5 py-2.5 text-xs text-purple-100 placeholder-purple-400/40 focus:outline-none focus:border-purple-500 transition-colors"
+                className="w-full bg-[#130729] border border-[#29154A] rounded-xl px-3.5 py-2.5 text-xs text-purple-100 placeholder-purple-400/40 focus:outline-none focus:border-pink-500 transition-colors"
               />
             </div>
 
@@ -206,7 +207,7 @@ export const OverviewDashboard: React.FC<OverviewDashboardProps> = ({
                 onChange={(e) => setScriptTextInput(e.target.value)}
                 placeholder="Script URL or raw JS"
                 required
-                className="w-full bg-[#120B22] border border-[#35205F] rounded-xl px-3.5 py-2.5 text-xs text-purple-100 placeholder-purple-400/40 focus:outline-none focus:border-purple-500 transition-colors"
+                className="w-full bg-[#130729] border border-[#29154A] rounded-xl px-3.5 py-2.5 text-xs text-purple-100 placeholder-purple-400/40 focus:outline-none focus:border-pink-500 transition-colors"
               />
             </div>
           </div>
@@ -219,12 +220,12 @@ export const OverviewDashboard: React.FC<OverviewDashboardProps> = ({
               <select
                 value={cookieType}
                 onChange={(e) => setCookieType(e.target.value as CookieType)}
-                className="w-full bg-[#120B22] border border-[#35205F] rounded-xl px-3.5 py-2.5 text-xs text-purple-100 focus:outline-none focus:border-purple-500 transition-colors cursor-pointer"
+                className="w-full bg-[#130729] border border-[#29154A] rounded-xl px-3.5 py-2.5 text-xs text-purple-100 focus:outline-none focus:border-pink-500 transition-colors cursor-pointer"
               >
-                <option value="necessary" className="bg-[#160E2A]">Necessary (Essential)</option>
-                <option value="optional" className="bg-[#160E2A]">Optional (Analytics / Marketing)</option>
-                <option value="all" className="bg-[#160E2A]">Bundled (All Cookies)</option>
-                <option value="suspicious" className="bg-[#160E2A]">Suspicious (Dark Pattern / Tracker)</option>
+                <option value="necessary" className="bg-[#0F061F]">Necessary (Essential)</option>
+                <option value="optional" className="bg-[#0F061F]">Optional (Analytics / Marketing)</option>
+                <option value="all" className="bg-[#0F061F]">Bundled (All Cookies)</option>
+                <option value="suspicious" className="bg-[#0F061F]">Suspicious (Dark Pattern / Tracker)</option>
               </select>
             </div>
 
@@ -235,11 +236,11 @@ export const OverviewDashboard: React.FC<OverviewDashboardProps> = ({
               <select
                 value={consentAction}
                 onChange={(e) => setConsentAction(e.target.value as ConsentAction)}
-                className="w-full bg-[#120B22] border border-[#35205F] rounded-xl px-3.5 py-2.5 text-xs text-purple-100 focus:outline-none focus:border-purple-500 transition-colors cursor-pointer"
+                className="w-full bg-[#130729] border border-[#29154A] rounded-xl px-3.5 py-2.5 text-xs text-purple-100 focus:outline-none focus:border-pink-500 transition-colors cursor-pointer"
               >
-                <option value="accept" className="bg-[#160E2A]">Accept Cookies</option>
-                <option value="reject" className="bg-[#160E2A]">Reject Cookies</option>
-                <option value="customize" className="bg-[#160E2A]">Customize Preferences</option>
+                <option value="accept" className="bg-[#0F061F]">Accept Cookies</option>
+                <option value="reject" className="bg-[#0F061F]">Reject Cookies</option>
+                <option value="customize" className="bg-[#0F061F]">Customize Preferences</option>
               </select>
             </div>
           </div>
@@ -248,7 +249,7 @@ export const OverviewDashboard: React.FC<OverviewDashboardProps> = ({
             <button
               type="submit"
               disabled={isSubmitting}
-              className="px-5 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-xs font-semibold text-white shadow-md shadow-purple-900/30 transition-all cursor-pointer flex items-center gap-2"
+              className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 text-xs font-semibold text-white transition-all cursor-pointer flex items-center gap-2"
             >
               <Database className="h-3.5 w-3.5" />
               <span>{isSubmitting ? 'Mining Block...' : 'Submit & Mine to Blockchain'}</span>
@@ -258,23 +259,23 @@ export const OverviewDashboard: React.FC<OverviewDashboardProps> = ({
       </div>
 
       {/* SECTION 4: Recent Real Events Outer Container */}
-      <div className="bg-[#160E2A] border border-[#2E1C50] rounded-3xl p-6 sm:p-8 shadow-xl shadow-purple-950/40 space-y-5">
+      <div className="bg-[#0F061F] border border-[#261445] rounded-3xl p-6 sm:p-8 space-y-5">
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-base font-bold text-white">Database Consent Events</h2>
             <p className="text-xs text-purple-300/70 mt-0.5">
-              Live records queried directly from the <code className="text-purple-300 font-mono">cookie_events</code> table.
+              Live records queried directly from the <code className="text-pink-300 font-mono">cookie_events</code> table.
             </p>
           </div>
-          <span className="text-xs font-mono font-semibold text-purple-300 bg-[#251545] px-3 py-1 rounded-full border border-[#4C2888]">
+          <span className="text-xs font-mono font-semibold text-pink-300 bg-[#1A0935] px-3 py-1 rounded-full border border-pink-500/30">
             {recentEvents.length} Total Records
           </span>
         </div>
 
-        <div className="bg-[#180F2F] border border-[#321E59] rounded-2xl overflow-hidden shadow-sm">
+        <div className="bg-[#130729] border border-[#29154A] rounded-2xl overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
-              <thead className="bg-[#21143D] text-purple-200 border-b border-[#321E59] font-mono text-[11px] font-bold">
+              <thead className="bg-[#1A0935] text-purple-200 border-b border-[#29154A] font-mono text-[11px] font-bold">
                 <tr>
                   <th className="py-3 px-4">Event ID</th>
                   <th className="py-3 px-4">Domain</th>
@@ -284,7 +285,7 @@ export const OverviewDashboard: React.FC<OverviewDashboardProps> = ({
                   <th className="py-3 px-4">Timestamp</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#2B1B4B]">
+              <tbody className="divide-y divide-[#261445]">
                 {recentEvents.length === 0 ? (
                   <tr>
                     <td colSpan={6} className="py-6 text-center text-purple-300/60 text-xs">
@@ -293,8 +294,8 @@ export const OverviewDashboard: React.FC<OverviewDashboardProps> = ({
                   </tr>
                 ) : (
                   recentEvents.slice(0, 8).map((ev) => (
-                    <tr key={ev.id} className="hover:bg-[#251645] transition-colors">
-                      <td className="py-3 px-4 font-mono font-bold text-purple-300">{ev.id}</td>
+                    <tr key={ev.id} className="hover:bg-[#1C0A3B] transition-colors">
+                      <td className="py-3 px-4 font-mono font-bold text-pink-300">{ev.id}</td>
                       <td className="py-3 px-4 font-semibold text-purple-100">{ev.site_domain}</td>
                       <td className="py-3 px-4 font-mono text-purple-300/70" title={ev.cookie_hash}>
                         {truncateHash(ev.cookie_hash, 6, 6)}

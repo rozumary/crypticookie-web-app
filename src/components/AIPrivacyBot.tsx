@@ -171,15 +171,15 @@ export const AIPrivacyBot: React.FC = () => {
   return (
     <div className="space-y-8 pb-12">
       {/* SECTION 1: Top Header Outer Container */}
-      <div className="bg-[#160E2A] border border-[#2E1C50] rounded-3xl p-6 sm:p-8 shadow-xl shadow-purple-950/40 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="bg-[#0F061F] border border-[#261445] rounded-3xl p-6 sm:p-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2">
             <h1 className="text-2xl font-bold text-white tracking-tight flex items-center gap-2">
-              <Bot className="h-6 w-6 text-purple-300" />
+              <Bot className="h-6 w-6 text-pink-400" />
               <span>Crypticookie AI Privacy Advisor</span>
             </h1>
-            <span className="flex items-center gap-1 px-3 py-0.5 rounded-full bg-[#251545] text-purple-300 border border-[#4C2888] text-[11px] font-mono font-bold">
-              <Sparkles className="h-3 w-3 text-purple-300" />
+            <span className="flex items-center gap-1 px-3 py-0.5 rounded-full bg-[#1A0935] text-pink-300 border border-pink-500/30 text-[11px] font-mono font-bold">
+              <Sparkles className="h-3 w-3 text-pink-400" />
               Gemini 3.7 Flash
             </span>
           </div>
@@ -191,10 +191,10 @@ export const AIPrivacyBot: React.FC = () => {
         <div className="flex items-center gap-2">
           <button
             onClick={handleResetChat}
-            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#251545] hover:bg-[#2F1B56] text-purple-200 border border-[#4C2888] text-xs font-semibold transition-colors cursor-pointer"
+            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#1A0935] hover:bg-[#250B42] text-purple-200 border border-pink-500/30 text-xs font-semibold transition-colors cursor-pointer"
             title="Reset conversation"
           >
-            <RotateCcw className="h-3.5 w-3.5" />
+            <RotateCcw className="h-3.5 w-3.5 text-pink-300" />
             <span>Reset Chat</span>
           </button>
         </div>
@@ -205,9 +205,9 @@ export const AIPrivacyBot: React.FC = () => {
         {/* Left Side: Quick Audit Tool & Suggested Questions */}
         <div className="lg:col-span-1 space-y-6">
           {/* Quick Domain Audit Outer Box */}
-          <div className="bg-[#160E2A] border border-[#2E1C50] rounded-3xl p-5 shadow-xl shadow-purple-950/40 space-y-3">
+          <div className="bg-[#0F061F] border border-[#261445] rounded-3xl p-5 space-y-3">
             <div className="flex items-center gap-2 text-white font-bold text-xs">
-              <Globe className="h-4 w-4 text-purple-300" />
+              <Globe className="h-4 w-4 text-pink-400" />
               <span>Ask AI to Audit a Site</span>
             </div>
             <p className="text-[11px] text-purple-300/70">
@@ -219,13 +219,13 @@ export const AIPrivacyBot: React.FC = () => {
                 value={auditDomain}
                 onChange={(e) => setAuditDomain(e.target.value)}
                 placeholder="e.g. shopee.ph, lazada.com, nytimes.com"
-                className="w-full bg-[#120B22] border border-[#35205F] rounded-xl px-3 py-2 text-xs text-purple-100 placeholder-purple-400/40 font-mono focus:outline-none focus:border-purple-500"
+                className="w-full bg-[#130729] border border-[#29154A] rounded-xl px-3 py-2 text-xs text-purple-100 placeholder-purple-400/40 font-mono focus:outline-none focus:border-pink-500"
                 onKeyDown={(e) => e.key === 'Enter' && handleAuditWebsite()}
               />
               <button
                 onClick={handleAuditWebsite}
                 disabled={isLoading || !auditDomain.trim()}
-                className="w-full flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 disabled:opacity-50 text-white font-bold text-xs transition-all cursor-pointer shadow-md shadow-purple-900/30"
+                className="w-full flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 disabled:opacity-50 text-white font-bold text-xs transition-all cursor-pointer"
               >
                 <Zap className="h-3.5 w-3.5" />
                 <span>Audit Domain</span>
@@ -234,9 +234,9 @@ export const AIPrivacyBot: React.FC = () => {
           </div>
 
           {/* Quick Privacy Topics Outer Box */}
-          <div className="bg-[#160E2A] border border-[#2E1C50] rounded-3xl p-5 shadow-xl shadow-purple-950/40 space-y-3">
+          <div className="bg-[#0F061F] border border-[#261445] rounded-3xl p-5 space-y-3">
             <div className="flex items-center gap-2 text-white font-bold text-xs">
-              <HelpCircle className="h-4 w-4 text-purple-300" />
+              <HelpCircle className="h-4 w-4 text-pink-400" />
               <span>Quick Topics</span>
             </div>
             <div className="space-y-2">
@@ -247,10 +247,10 @@ export const AIPrivacyBot: React.FC = () => {
                     key={idx}
                     onClick={() => handleSendMessage(item.prompt)}
                     disabled={isLoading}
-                    className="w-full text-left p-2.5 rounded-xl bg-[#180F2F] hover:bg-[#251545] border border-[#341F5C] transition-all cursor-pointer group"
+                    className="w-full text-left p-2.5 rounded-xl bg-[#130729] hover:bg-[#1C0A3B] border border-[#29154A] transition-all cursor-pointer group"
                   >
                     <div className="flex items-start gap-2">
-                      <Icon className="h-3.5 w-3.5 text-purple-300 mt-0.5 shrink-0 group-hover:scale-110 transition-transform" />
+                      <Icon className="h-3.5 w-3.5 text-pink-400 mt-0.5 shrink-0 group-hover:scale-110 transition-transform" />
                       <div>
                         <div className="text-xs font-bold text-white">
                           {item.title}
@@ -268,11 +268,11 @@ export const AIPrivacyBot: React.FC = () => {
         </div>
 
         {/* Right Side: Interactive Chat Window Outer Box */}
-        <div className="lg:col-span-3 flex flex-col rounded-3xl border border-[#2E1C50] bg-[#160E2A] shadow-xl shadow-purple-950/40 overflow-hidden min-h-[560px]">
+        <div className="lg:col-span-3 flex flex-col rounded-3xl border border-[#261445] bg-[#0F061F] overflow-hidden min-h-[560px]">
           {/* Chat Window Top Bar */}
-          <div className="flex items-center justify-between border-b border-[#341F5C] bg-[#1C1233] px-6 py-4">
+          <div className="flex items-center justify-between border-b border-[#29154A] bg-[#14082B] px-6 py-4">
             <div className="flex items-center gap-3">
-              <div className="h-9 w-9 rounded-xl bg-purple-600 text-white flex items-center justify-center shrink-0 shadow-sm">
+              <div className="h-9 w-9 rounded-xl bg-gradient-to-r from-pink-600 to-purple-600 text-white flex items-center justify-center shrink-0">
                 <Bot className="h-5 w-5" />
               </div>
               <div>
@@ -288,12 +288,12 @@ export const AIPrivacyBot: React.FC = () => {
               <span className="text-[11px] font-mono font-semibold text-purple-300/70 hidden sm:inline">
                 Encrypted Session
               </span>
-              <Lock className="h-3.5 w-3.5 text-purple-300" />
+              <Lock className="h-3.5 w-3.5 text-pink-400" />
             </div>
           </div>
 
           {/* Messages Stream */}
-          <div className="flex-1 p-6 space-y-4 overflow-y-auto max-h-[500px] bg-[#140D27]">
+          <div className="flex-1 p-6 space-y-4 overflow-y-auto max-h-[500px] bg-[#0A0414]">
             {messages.map((m) => {
               const isBot = m.role === 'model';
               return (
@@ -304,7 +304,7 @@ export const AIPrivacyBot: React.FC = () => {
                   } animate-fadeIn`}
                 >
                   {isBot && (
-                    <div className="h-8 w-8 rounded-xl bg-[#251545] border border-[#4C2888] flex items-center justify-center text-purple-300 shrink-0 mt-0.5 shadow-sm">
+                    <div className="h-8 w-8 rounded-xl bg-[#1A0935] border border-pink-500/30 flex items-center justify-center text-pink-300 shrink-0 mt-0.5">
                       <Bot className="h-4 w-4" />
                     </div>
                   )}
@@ -312,8 +312,8 @@ export const AIPrivacyBot: React.FC = () => {
                   <div
                     className={`relative max-w-[85%] sm:max-w-[75%] rounded-2xl p-4 text-xs leading-relaxed ${
                       isBot
-                        ? 'bg-[#180F2F] border border-[#341F5C] text-purple-100 shadow-sm'
-                        : 'bg-purple-600 text-white shadow-sm'
+                        ? 'bg-[#130729] border border-[#29154A] text-purple-100'
+                        : 'bg-gradient-to-r from-pink-600 to-purple-600 text-white'
                     }`}
                   >
                     {/* Render message with linebreaks */}
@@ -331,13 +331,13 @@ export const AIPrivacyBot: React.FC = () => {
                     </div>
 
                     <div className={`flex items-center justify-between gap-4 mt-2.5 pt-2 border-t text-[10px] font-mono ${
-                      isBot ? 'border-[#341F5C] text-purple-300/70' : 'border-white/20 text-purple-100'
+                      isBot ? 'border-[#29154A] text-purple-300/70' : 'border-white/20 text-purple-100'
                     }`}>
                       <span>{m.timestamp}</span>
                       {isBot && (
                         <button
                           onClick={() => handleCopy(m.content, m.id)}
-                          className="flex items-center gap-1 hover:text-white transition-colors cursor-pointer font-bold"
+                          className="flex items-center gap-1 hover:text-white transition-colors cursor-pointer font-bold text-pink-300"
                           title="Copy response"
                         >
                           {copiedId === m.id ? (
@@ -352,7 +352,7 @@ export const AIPrivacyBot: React.FC = () => {
                   </div>
 
                   {!isBot && (
-                    <div className="h-8 w-8 rounded-xl bg-[#251545] border border-[#4C2888] flex items-center justify-center text-purple-300 shrink-0 mt-0.5">
+                    <div className="h-8 w-8 rounded-xl bg-[#1A0935] border border-pink-500/30 flex items-center justify-center text-pink-300 shrink-0 mt-0.5">
                       <User className="h-4 w-4" />
                     </div>
                   )}
@@ -362,11 +362,11 @@ export const AIPrivacyBot: React.FC = () => {
 
             {isLoading && (
               <div className="flex items-start gap-3 justify-start animate-pulse">
-                <div className="h-8 w-8 rounded-xl bg-[#251545] border border-[#4C2888] flex items-center justify-center text-purple-300 shrink-0">
-                  <Bot className="h-4 w-4 animate-spin" />
+                <div className="h-8 w-8 rounded-xl bg-[#1A0935] border border-pink-500/30 flex items-center justify-center text-pink-300 shrink-0">
+                  <Bot className="h-4 w-4 animate-spin text-pink-400" />
                 </div>
-                <div className="rounded-2xl bg-[#180F2F] border border-[#341F5C] p-4 text-xs text-purple-300 font-bold flex items-center gap-2">
-                  <span className="h-2 w-2 rounded-full bg-purple-400 animate-ping" />
+                <div className="rounded-2xl bg-[#130729] border border-[#29154A] p-4 text-xs text-purple-300 font-bold flex items-center gap-2">
+                  <span className="h-2 w-2 rounded-full bg-pink-400 animate-ping" />
                   <span>Crypticookie AI is analyzing privacy policies & cryptographic rules...</span>
                 </div>
               </div>
@@ -376,7 +376,7 @@ export const AIPrivacyBot: React.FC = () => {
           </div>
 
           {/* Bottom Chat Input Form */}
-          <div className="border-t border-[#341F5C] bg-[#1C1233] p-4">
+          <div className="border-t border-[#29154A] bg-[#14082B] p-4">
             <form
               onSubmit={(e) => {
                 e.preventDefault();
@@ -389,12 +389,12 @@ export const AIPrivacyBot: React.FC = () => {
                 value={inputMessage}
                 onChange={(e) => setInputMessage(e.target.value)}
                 placeholder="Ask anything about website cookies, CMP script hashes, dark patterns, or privacy laws..."
-                className="flex-1 bg-[#120B22] border border-[#35205F] rounded-xl px-4 py-2.5 text-xs text-purple-100 placeholder-purple-400/40 focus:outline-none focus:border-purple-500 shadow-inner"
+                className="flex-1 bg-[#0F061F] border border-[#29154A] rounded-xl px-4 py-2.5 text-xs text-purple-100 placeholder-purple-400/40 focus:outline-none focus:border-pink-500"
               />
               <button
                 type="submit"
                 disabled={isLoading || !inputMessage.trim()}
-                className="px-4 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 disabled:opacity-50 text-white text-xs font-bold shadow-md transition-all flex items-center gap-1.5 cursor-pointer hover:scale-105 active:scale-95"
+                className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 disabled:opacity-50 text-white text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer hover:scale-105 active:scale-95"
               >
                 <span>Send</span>
                 <Send className="h-3.5 w-3.5" />

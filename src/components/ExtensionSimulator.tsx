@@ -287,12 +287,15 @@ export const ExtensionSimulator: React.FC<ExtensionSimulatorProps> = ({
   return (
     <div className="space-y-8 pb-12">
       {/* SECTION 1: Top Header Outer Container */}
-      <div className="bg-[#160E2A] border border-[#2E1C50] rounded-3xl p-6 sm:p-8 shadow-xl shadow-purple-950/40 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="bg-[#0F061F] border border-[#261445] rounded-3xl p-6 sm:p-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2">
-            <h1 className="text-2xl font-bold text-white tracking-tight">Active Website & CMP Monitor</h1>
-            <span className="flex items-center gap-1 px-3 py-1 rounded-full bg-[#251545] text-purple-300 border border-[#4C2888] text-[11px] font-mono font-semibold">
-              <Radio className="h-3 w-3 text-purple-300 animate-pulse" />
+            <h1 className="text-2xl font-bold text-white tracking-tight flex items-center gap-2">
+              <span>Active Website & CMP Monitor</span>
+              <span className="h-2 w-2 rounded-full bg-pink-500" />
+            </h1>
+            <span className="flex items-center gap-1 px-3 py-1 rounded-full bg-[#1A0935] text-pink-300 border border-pink-500/30 text-[11px] font-mono font-semibold">
+              <Radio className="h-3 w-3 text-pink-400 animate-pulse" />
               Live Audit Active
             </span>
           </div>
@@ -304,7 +307,7 @@ export const ExtensionSimulator: React.FC<ExtensionSimulatorProps> = ({
         <div className="flex items-center gap-3">
           <button
             onClick={() => setIsInstallModalOpen(true)}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold shadow-md shadow-purple-900/30 transition-all cursor-pointer hover:scale-105 active:scale-95"
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 text-white text-xs font-bold transition-all cursor-pointer hover:scale-105 active:scale-95"
           >
             <Sparkles className="h-4 w-4 text-white" />
             <span>Install to Real Browser</span>
@@ -313,21 +316,21 @@ export const ExtensionSimulator: React.FC<ExtensionSimulatorProps> = ({
       </div>
 
       {/* SECTION 2: Interactive Browser Window Outer Container */}
-      <div className="bg-[#160E2A] border border-[#2E1C50] rounded-3xl p-6 sm:p-8 shadow-xl shadow-purple-950/40 space-y-4">
+      <div className="bg-[#0F061F] border border-[#261445] rounded-3xl p-6 sm:p-8 space-y-4">
         <div className="flex items-center justify-between">
           <h2 className="text-base font-bold text-white flex items-center gap-2">
-            <Globe className="h-4 w-4 text-purple-300" />
+            <Globe className="h-4 w-4 text-pink-400" />
             <span>Simulator Browser Frame</span>
           </h2>
-          <span className="text-xs font-mono font-semibold text-purple-300 bg-[#251545] px-3 py-1 rounded-full border border-[#4C2888]">
+          <span className="text-xs font-mono font-semibold text-pink-300 bg-[#1A0935] px-3 py-1 rounded-full border border-pink-500/30">
             {currentDomain}
           </span>
         </div>
 
         {/* Clean Interactive Browser Window Frame */}
-        <div className="rounded-2xl border border-[#341F5C] bg-[#140D27] shadow-sm overflow-hidden">
+        <div className="rounded-2xl border border-[#29154A] bg-[#0A0414] overflow-hidden">
           {/* Browser Top Navigation Toolbar */}
-          <div className="flex items-center gap-3 border-b border-[#341F5C] bg-[#1C1233] px-4 py-3">
+          <div className="flex items-center gap-3 border-b border-[#29154A] bg-[#14082B] px-4 py-3">
             {/* Window dots */}
             <div className="flex items-center gap-1.5 shrink-0">
               <span className="h-3 w-3 rounded-full bg-rose-500 inline-block" />
@@ -336,8 +339,8 @@ export const ExtensionSimulator: React.FC<ExtensionSimulatorProps> = ({
             </div>
 
             {/* Clean URL Input Bar */}
-            <form onSubmit={handleNavigateManualDomain} className="flex flex-1 items-center gap-2 rounded-xl bg-[#120B22] px-3.5 py-2 border border-[#35205F] text-xs shadow-inner">
-              <Globe className="h-4 w-4 text-purple-300 shrink-0" />
+            <form onSubmit={handleNavigateManualDomain} className="flex flex-1 items-center gap-2 rounded-xl bg-[#0F061F] px-3.5 py-2 border border-[#29154A] text-xs">
+              <Globe className="h-4 w-4 text-pink-400 shrink-0" />
               <span className="text-purple-300/60 font-mono">https://</span>
               <input
                 type="text"
@@ -348,7 +351,7 @@ export const ExtensionSimulator: React.FC<ExtensionSimulatorProps> = ({
               />
               <button
                 type="submit"
-                className="px-3 py-1 rounded-lg bg-purple-600 hover:bg-purple-500 text-white font-medium text-xs shrink-0 transition-colors cursor-pointer"
+                className="px-3 py-1 rounded-lg bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 text-white font-medium text-xs shrink-0 transition-colors cursor-pointer"
               >
                 Open Site
               </button>
@@ -362,25 +365,25 @@ export const ExtensionSimulator: React.FC<ExtensionSimulatorProps> = ({
                 handleNavigateManualDomain();
               }}
               title="Re-audit website"
-              className="p-2 text-purple-300/70 hover:text-white hover:bg-[#2A184E] rounded-xl transition-colors cursor-pointer shrink-0"
+              className="p-2 text-purple-300/70 hover:text-white hover:bg-[#1A0935] rounded-xl transition-colors cursor-pointer shrink-0"
             >
-              <RotateCw className={`h-4 w-4 ${isAuditingDomain ? 'animate-spin text-purple-300' : ''}`} />
+              <RotateCw className={`h-4 w-4 ${isAuditingDomain ? 'animate-spin text-pink-400' : ''}`} />
             </button>
           </div>
 
           {/* Browser Page Viewport */}
-          <div className="p-6 sm:p-8 bg-[#180F2F] min-h-[380px] flex flex-col justify-between space-y-6">
+          <div className="p-6 sm:p-8 bg-[#130729] min-h-[380px] flex flex-col justify-between space-y-6">
             {/* Simulated Webpage Header & Sniffed Trackers Bar */}
             <div className="space-y-4">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-xl bg-[#1B1133] border border-[#341F5C]">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-xl bg-[#1A0935] border border-[#29154A]">
                 <div className="flex items-center gap-3">
-                  <div className="h-10 w-10 rounded-xl bg-[#251545] border border-[#4C2888] flex items-center justify-center text-purple-300 font-mono font-bold text-base shrink-0">
+                  <div className="h-10 w-10 rounded-xl bg-[#250B42] border border-pink-500/30 flex items-center justify-center text-pink-300 font-mono font-bold text-base shrink-0">
                     {currentDomain.charAt(0).toUpperCase()}
                   </div>
                   <div>
                     <div className="flex items-center gap-2">
                       <span className="font-mono text-sm font-bold text-purple-100">{currentDomain}</span>
-                      <span className="px-2 py-0.5 rounded text-[10px] font-mono bg-[#251545] text-purple-300 border border-[#4C2888]">
+                      <span className="px-2 py-0.5 rounded text-[10px] font-mono bg-[#250B42] text-pink-300 border border-pink-500/30">
                         {detectedTrackers.length} Trackers Sniffed
                       </span>
                     </div>
@@ -403,7 +406,7 @@ export const ExtensionSimulator: React.FC<ExtensionSimulatorProps> = ({
                           : 'bg-purple-950/80 text-purple-300 border border-purple-800/60'
                       }`}
                     >
-                      <Cookie className="h-3 w-3" />
+                      <Cookie className="h-3 w-3 text-pink-400" />
                       {t.name}
                     </span>
                   ))}
@@ -414,9 +417,9 @@ export const ExtensionSimulator: React.FC<ExtensionSimulatorProps> = ({
               <div className="flex items-center justify-between">
                 <button
                   onClick={() => onNavigateTab('ai_bot')}
-                  className="text-xs text-purple-300 hover:text-white bg-[#251545] hover:bg-[#2F1B56] border border-[#4C2888] rounded-xl px-3 py-1.5 flex items-center gap-1.5 cursor-pointer transition-all shadow-sm font-semibold"
+                  className="text-xs text-pink-300 hover:text-white bg-[#1A0935] hover:bg-[#250B42] border border-pink-500/30 rounded-xl px-3 py-1.5 flex items-center gap-1.5 cursor-pointer transition-all font-semibold"
                 >
-                  <Bot className="h-3.5 w-3.5 text-purple-300" />
+                  <Bot className="h-3.5 w-3.5 text-pink-400" />
                   <span>Ask AI Bot About {currentDomain}</span>
                 </button>
 
@@ -430,24 +433,24 @@ export const ExtensionSimulator: React.FC<ExtensionSimulatorProps> = ({
               </div>
 
               {showTechnicalDetails && (
-                <div className="p-4 rounded-xl bg-[#1B1133] border border-[#341F5C] space-y-3 text-xs animate-fadeIn">
+                <div className="p-4 rounded-xl bg-[#1A0935] border border-[#29154A] space-y-3 text-xs animate-fadeIn">
                   <div>
                     <label className="block text-[11px] font-semibold text-purple-200 mb-1">CMP Script URL / Intercepted Payload</label>
                     <input
                       type="text"
                       value={scriptInput}
                       onChange={(e) => setScriptInput(e.target.value)}
-                      className="w-full bg-[#120B22] border border-[#35205F] rounded-lg px-3 py-2 text-purple-100 font-mono text-xs focus:outline-none"
+                      className="w-full bg-[#0F061F] border border-[#29154A] rounded-lg px-3 py-2 text-purple-100 font-mono text-xs focus:outline-none"
                     />
                   </div>
                   <div className="flex items-center justify-between font-mono text-[11px] text-purple-300/70">
                     <div className="flex items-center gap-2">
                       <span>SHA-256 Digest:</span>
-                      <span className="text-purple-300 font-bold">{truncateHash(currentScriptHash, 16, 16)}</span>
+                      <span className="text-pink-300 font-bold">{truncateHash(currentScriptHash, 16, 16)}</span>
                     </div>
                     <button
                       onClick={handleCopyHash}
-                      className="flex items-center gap-1 text-purple-300 hover:text-white cursor-pointer font-semibold"
+                      className="flex items-center gap-1 text-pink-300 hover:text-white cursor-pointer font-semibold"
                     >
                       {copiedHash ? <Check className="h-3 w-3 text-emerald-400" /> : <Copy className="h-3 w-3" />}
                       <span>{copiedHash ? 'Copied' : 'Copy'}</span>
@@ -459,10 +462,10 @@ export const ExtensionSimulator: React.FC<ExtensionSimulatorProps> = ({
 
             {/* Unified Smart Consent Shield Banner (Single, Clean Prompt) */}
             {bannerVisible ? (
-              <div className="rounded-2xl border border-[#4C2888] bg-[#251545] p-5 sm:p-6 shadow-md space-y-4 animate-fadeIn">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#3E246E] pb-3">
+              <div className="rounded-2xl border border-pink-500/40 bg-[#1C093B] p-5 sm:p-6 space-y-4 animate-fadeIn">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#2C1258] pb-3">
                   <div className="flex items-center gap-2.5">
-                    <div className="h-9 w-9 rounded-xl bg-purple-600 text-white flex items-center justify-center shrink-0 shadow-sm">
+                    <div className="h-9 w-9 rounded-xl bg-gradient-to-r from-pink-600 to-purple-600 text-white flex items-center justify-center shrink-0">
                       <Shield className="h-5 w-5" />
                     </div>
                     <div>
@@ -471,7 +474,7 @@ export const ExtensionSimulator: React.FC<ExtensionSimulatorProps> = ({
                         <span className="text-xs font-normal text-purple-300/70 font-mono">({cmpItemName})</span>
                       </h3>
                       <p className="text-xs text-purple-300/70 mt-0.5">
-                        Recommendation Engine: <strong className="text-purple-300 font-bold">{guidanceRec}</strong>
+                        Recommendation Engine: <strong className="text-pink-300 font-bold">{guidanceRec}</strong>
                       </p>
                     </div>
                   </div>
@@ -499,7 +502,7 @@ export const ExtensionSimulator: React.FC<ExtensionSimulatorProps> = ({
                         </>
                       ) : (
                         <>
-                          <Shield className="h-3.5 w-3.5 text-purple-400" />
+                          <Shield className="h-3.5 w-3.5 text-pink-400" />
                           <span>ℹ Unverified CMP</span>
                         </>
                       )}
@@ -507,7 +510,7 @@ export const ExtensionSimulator: React.FC<ExtensionSimulatorProps> = ({
 
                     <button
                       onClick={() => setBannerVisible(false)}
-                      className="p-1 rounded-lg text-purple-300/70 hover:text-white hover:bg-[#3E246E] transition-colors cursor-pointer"
+                      className="p-1 rounded-lg text-purple-300/70 hover:text-white hover:bg-[#2C1258] transition-colors cursor-pointer"
                       title="Dismiss Shield"
                     >
                       <X className="h-4 w-4" />
@@ -530,13 +533,13 @@ export const ExtensionSimulator: React.FC<ExtensionSimulatorProps> = ({
                     </button>
                     <button
                       onClick={() => handleExecuteConsentAction('customize')}
-                      className="px-4 py-2 rounded-xl bg-[#1B1133] hover:bg-[#251645] text-purple-200 border border-[#3E246E] text-xs font-semibold cursor-pointer transition-all"
+                      className="px-4 py-2 rounded-xl bg-[#14082B] hover:bg-[#1A0935] text-purple-200 border border-[#29154A] text-xs font-semibold cursor-pointer transition-all"
                     >
                       Customize
                     </button>
                     <button
                       onClick={() => handleExecuteConsentAction('accept')}
-                      className="px-5 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold shadow-md cursor-pointer transition-all hover:scale-105 active:scale-95"
+                      className="px-5 py-2 rounded-xl bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 text-white text-xs font-bold cursor-pointer transition-all hover:scale-105 active:scale-95"
                     >
                       Accept Verified
                     </button>
@@ -544,7 +547,7 @@ export const ExtensionSimulator: React.FC<ExtensionSimulatorProps> = ({
                 </div>
               </div>
             ) : (
-              <div className="p-6 rounded-2xl bg-[#251545]/60 border border-[#4C2888] text-center space-y-2">
+              <div className="p-6 rounded-2xl bg-[#1C093B]/60 border border-pink-500/30 text-center space-y-2">
                 <CheckCircle2 className="h-8 w-8 text-emerald-400 mx-auto" />
                 <h4 className="text-sm font-bold text-white">Consent Decision Logged</h4>
                 <p className="text-xs text-purple-300/70">
@@ -552,7 +555,7 @@ export const ExtensionSimulator: React.FC<ExtensionSimulatorProps> = ({
                 </p>
                 <button
                   onClick={() => setBannerVisible(true)}
-                  className="mt-2 text-xs text-purple-300 hover:text-white underline cursor-pointer font-semibold"
+                  className="mt-2 text-xs text-pink-300 hover:text-white underline cursor-pointer font-semibold"
                 >
                   Reset & Change Consent Decision
                 </button>
@@ -561,7 +564,7 @@ export const ExtensionSimulator: React.FC<ExtensionSimulatorProps> = ({
 
             {/* Transaction Success Toast */}
             {lastCommittedBlock && (
-              <div className="rounded-xl border border-[#4C2888] bg-[#251545] p-3.5 flex items-center justify-between animate-fadeIn">
+              <div className="rounded-xl border border-pink-500/30 bg-[#1C093B] p-3.5 flex items-center justify-between animate-fadeIn">
                 <div className="flex items-center gap-2 text-xs text-purple-200 font-medium">
                   <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0" />
                   <span>
@@ -570,7 +573,7 @@ export const ExtensionSimulator: React.FC<ExtensionSimulatorProps> = ({
                 </div>
                 <button
                   onClick={() => onNavigateTab('blockchain')}
-                  className="text-xs font-bold text-purple-300 hover:text-white flex items-center gap-1 cursor-pointer"
+                  className="text-xs font-bold text-pink-300 hover:text-white flex items-center gap-1 cursor-pointer"
                 >
                   <span>View on Blockchain</span>
                   <Layers className="h-3 w-3" />
@@ -582,12 +585,12 @@ export const ExtensionSimulator: React.FC<ExtensionSimulatorProps> = ({
       </div>
 
       {/* SECTION 3: Live Monitored Domains History Table Outer Container */}
-      <div className="bg-[#160E2A] border border-[#2E1C50] rounded-3xl p-6 sm:p-8 shadow-xl shadow-purple-950/40 space-y-4">
+      <div className="bg-[#0F061F] border border-[#261445] rounded-3xl p-6 sm:p-8 space-y-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Eye className="h-4 w-4 text-purple-300" />
+            <Eye className="h-4 w-4 text-pink-400" />
             <h3 className="text-sm font-bold text-white">Live Monitored Domains History</h3>
-            <span className="text-[10px] px-2.5 py-0.5 rounded-full bg-[#251545] text-purple-300 border border-[#4C2888] font-mono font-semibold">
+            <span className="text-[10px] px-2.5 py-0.5 rounded-full bg-[#1A0935] text-pink-300 border border-pink-500/30 font-mono font-semibold">
               {monitoredHistory.length} Logged
             </span>
           </div>
@@ -596,9 +599,9 @@ export const ExtensionSimulator: React.FC<ExtensionSimulatorProps> = ({
             <button
               onClick={refreshMonitoredHistory}
               title="Refresh logs"
-              className="p-1.5 rounded-lg bg-[#251545] hover:bg-[#2F1B56] text-purple-200 border border-[#4C2888] text-xs cursor-pointer"
+              className="p-1.5 rounded-lg bg-[#1A0935] hover:bg-[#250B42] text-purple-200 border border-pink-500/30 text-xs cursor-pointer"
             >
-              <RotateCw className="h-3.5 w-3.5" />
+              <RotateCw className="h-3.5 w-3.5 text-pink-300" />
             </button>
             {monitoredHistory.length > 0 && (
               <button
@@ -612,7 +615,7 @@ export const ExtensionSimulator: React.FC<ExtensionSimulatorProps> = ({
           </div>
         </div>
 
-        <div className="bg-[#180F2F] border border-[#321E59] rounded-2xl overflow-hidden shadow-sm">
+        <div className="bg-[#130729] border border-[#29154A] rounded-2xl overflow-hidden">
           {monitoredHistory.length === 0 ? (
             <div className="text-center py-8 text-xs text-purple-300/60 font-mono">
               No website monitoring events recorded yet. Type any domain above to start auditing.
@@ -621,7 +624,7 @@ export const ExtensionSimulator: React.FC<ExtensionSimulatorProps> = ({
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs font-mono">
                 <thead>
-                  <tr className="border-b border-[#321E59] bg-[#21143D] text-[11px] text-purple-200 font-bold">
+                  <tr className="border-b border-[#29154A] bg-[#1A0935] text-[11px] text-purple-200 font-bold">
                     <th className="py-3 px-4">Domain / Website</th>
                     <th className="py-3 px-4">CMP Script Name</th>
                     <th className="py-3 px-4">Verification</th>
@@ -630,11 +633,11 @@ export const ExtensionSimulator: React.FC<ExtensionSimulatorProps> = ({
                     <th className="py-3 px-4">Timestamp</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-[#2B1B4B]">
+                <tbody className="divide-y divide-[#261445]">
                   {monitoredHistory.map((item) => (
-                    <tr key={item.id} className="hover:bg-[#251645] transition-colors">
+                    <tr key={item.id} className="hover:bg-[#1C0A3B] transition-colors">
                       <td className="py-2.5 px-4 text-purple-100 font-bold flex items-center gap-1.5">
-                        <Globe className="h-3.5 w-3.5 text-purple-300" />
+                        <Globe className="h-3.5 w-3.5 text-pink-400" />
                         <span>{item.domain}</span>
                       </td>
                       <td className="py-2.5 px-4 text-purple-300/70 max-w-[160px] truncate">{item.cmp_name}</td>

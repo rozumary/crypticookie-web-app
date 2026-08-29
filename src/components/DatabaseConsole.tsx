@@ -85,14 +85,14 @@ export const DatabaseConsole: React.FC<DatabaseConsoleProps> = ({ onRefreshData 
     <div className="space-y-8 pb-12">
       {/* Success Notification */}
       {successToast && (
-        <div className="p-4 rounded-2xl border border-emerald-400 bg-emerald-50 text-emerald-900 text-xs flex items-center justify-between shadow-sm animate-fadeIn">
+        <div className="p-4 rounded-2xl border border-emerald-400/40 bg-emerald-950/80 text-emerald-200 text-xs flex items-center justify-between animate-fadeIn">
           <div className="flex items-center gap-2 font-bold">
-            <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
+            <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0" />
             <span>{successToast}</span>
           </div>
           <button
             onClick={() => setSuccessToast(null)}
-            className="text-emerald-700 hover:text-emerald-900 p-1 cursor-pointer"
+            className="text-emerald-300 hover:text-white p-1 cursor-pointer"
           >
             <X className="h-3.5 w-3.5" />
           </button>
@@ -100,12 +100,15 @@ export const DatabaseConsole: React.FC<DatabaseConsoleProps> = ({ onRefreshData 
       )}
 
       {/* SECTION 1: Header Outer Container */}
-      <div className="bg-[#160E2A] border border-[#2E1C50] rounded-3xl p-6 sm:p-8 shadow-xl shadow-purple-950/40 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div className="bg-[#0F061F] border border-[#261445] rounded-3xl p-6 sm:p-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <div className="flex items-center gap-2">
-            <h1 className="text-2xl font-bold text-white tracking-tight">Backend Database Explorer</h1>
-            <span className="px-2.5 py-0.5 rounded-full bg-[#251545] text-purple-300 text-[11px] font-mono font-bold border border-[#4C2888] flex items-center gap-1">
-              <Cloud className="h-3 w-3 text-purple-300" />
+            <h1 className="text-2xl font-bold text-white tracking-tight flex items-center gap-2">
+              <span>Backend Database Explorer</span>
+              <span className="h-2 w-2 rounded-full bg-pink-500" />
+            </h1>
+            <span className="px-2.5 py-0.5 rounded-full bg-[#1A0935] text-pink-300 text-[11px] font-mono font-bold border border-pink-500/30 flex items-center gap-1">
+              <Cloud className="h-3 w-3 text-pink-400" />
               Firebase Firestore Active
             </span>
           </div>
@@ -117,9 +120,9 @@ export const DatabaseConsole: React.FC<DatabaseConsoleProps> = ({ onRefreshData 
         <div className="flex items-center gap-2">
           <button
             onClick={handleExportJSON}
-            className="flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-[#251545] hover:bg-[#2F1B56] text-purple-200 border border-[#4C2888] text-xs font-bold transition-colors cursor-pointer"
+            className="flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-[#1A0935] hover:bg-[#250B42] text-purple-200 border border-pink-500/30 text-xs font-bold transition-colors cursor-pointer"
           >
-            <Download className="h-3.5 w-3.5 text-purple-300" />
+            <Download className="h-3.5 w-3.5 text-pink-300" />
             <span>Export Database</span>
           </button>
           <button
@@ -134,17 +137,17 @@ export const DatabaseConsole: React.FC<DatabaseConsoleProps> = ({ onRefreshData 
       </div>
 
       {/* SECTION 2: Real Cloud Database Status Outer Container */}
-      <div className="bg-[#160E2A] border border-[#2E1C50] rounded-3xl p-6 sm:p-8 shadow-xl shadow-purple-950/40 flex flex-col md:flex-row md:items-center justify-between gap-4 text-xs text-purple-100">
+      <div className="bg-[#0F061F] border border-[#261445] rounded-3xl p-6 sm:p-8 flex flex-col md:flex-row md:items-center justify-between gap-4 text-xs text-purple-100">
         <div className="flex items-start gap-3">
-          <div className="h-10 w-10 rounded-2xl bg-[#251545] border border-[#4C2888] flex items-center justify-center text-purple-300 shrink-0 mt-0.5 shadow-sm">
-            <Cloud className="h-5 w-5" />
+          <div className="h-10 w-10 rounded-2xl bg-[#1A0935] border border-pink-500/30 flex items-center justify-center text-pink-300 shrink-0 mt-0.5">
+            <Cloud className="h-5 w-5 text-pink-400" />
           </div>
           <div>
             <div className="flex items-center gap-2 mb-0.5">
               <span className="font-bold text-white">
                 Live Google Cloud Firestore Database
               </span>
-              <span className="px-2 py-0.5 rounded-full bg-[#251545] text-purple-300 border border-[#4C2888] text-[10px] font-mono font-bold">
+              <span className="px-2 py-0.5 rounded-full bg-[#1A0935] text-pink-300 border border-pink-500/30 text-[10px] font-mono font-bold">
                 Developer / Admin View
               </span>
             </div>
@@ -154,7 +157,7 @@ export const DatabaseConsole: React.FC<DatabaseConsoleProps> = ({ onRefreshData 
           </div>
         </div>
 
-        <div className="bg-[#120B22] border border-[#35205F] p-3.5 rounded-2xl text-[11px] font-mono shrink-0 space-y-1.5 min-w-[260px]">
+        <div className="bg-[#130729] border border-[#29154A] p-3.5 rounded-2xl text-[11px] font-mono shrink-0 space-y-1.5 min-w-[260px]">
           <div className="flex items-center justify-between gap-4">
             <span className="text-purple-300/70 font-bold">GCP Project:</span>
             <span className="text-white font-bold">{firebaseConfigData.projectId}</span>
@@ -163,14 +166,14 @@ export const DatabaseConsole: React.FC<DatabaseConsoleProps> = ({ onRefreshData 
             <span className="text-purple-300/70 font-bold">Database ID:</span>
             <span className="text-emerald-400 font-bold truncate max-w-[160px]">{firebaseConfigData.firestoreDatabaseId || '(default)'}</span>
           </div>
-          <div className="pt-1.5 border-t border-[#35205F] text-[10px] text-purple-300/50">
+          <div className="pt-1.5 border-t border-[#29154A] text-[10px] text-purple-300/50">
             Console: console.firebase.google.com
           </div>
         </div>
       </div>
 
       {/* SECTION 3: Table Explorer Outer Container */}
-      <div className="bg-[#160E2A] border border-[#2E1C50] rounded-3xl p-6 sm:p-8 shadow-xl shadow-purple-950/40 space-y-4">
+      <div className="bg-[#0F061F] border border-[#261445] rounded-3xl p-6 sm:p-8 space-y-4">
         {/* Table Selector Tabs */}
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-2 overflow-x-auto pb-1">
@@ -187,8 +190,8 @@ export const DatabaseConsole: React.FC<DatabaseConsoleProps> = ({ onRefreshData 
                 onClick={() => setSelectedTable(tab.id as any)}
                 className={`px-3.5 py-2 rounded-xl text-xs font-mono transition-all cursor-pointer whitespace-nowrap ${
                   selectedTable === tab.id
-                    ? 'bg-purple-600 text-white font-bold shadow-sm'
-                    : 'bg-[#180F2F] text-purple-200 hover:bg-[#251545] border border-[#341F5C]'
+                    ? 'bg-gradient-to-r from-pink-600 to-purple-600 text-white font-bold'
+                    : 'bg-[#130729] text-purple-200 hover:bg-[#1C0A3B] border border-[#29154A]'
                 }`}
               >
                 {tab.label}
@@ -199,17 +202,17 @@ export const DatabaseConsole: React.FC<DatabaseConsoleProps> = ({ onRefreshData 
           <button
             onClick={loadTableData}
             title="Reload Table Data"
-            className="p-2 rounded-xl bg-[#251545] hover:bg-[#2F1B56] text-purple-200 border border-[#4C2888] transition-colors cursor-pointer shrink-0"
+            className="p-2 rounded-xl bg-[#1A0935] hover:bg-[#250B42] text-purple-200 border border-pink-500/30 transition-colors cursor-pointer shrink-0"
           >
-            <RotateCw className="h-3.5 w-3.5 text-purple-300" />
+            <RotateCw className="h-3.5 w-3.5 text-pink-300" />
           </button>
         </div>
 
         {/* Table Content */}
-        <div className="rounded-2xl border border-[#321E59] bg-[#180F2F] overflow-hidden shadow-sm">
-          <div className="p-3 bg-[#21143D] border-b border-[#321E59] flex items-center justify-between text-xs font-bold text-white">
+        <div className="rounded-2xl border border-[#29154A] bg-[#130729] overflow-hidden">
+          <div className="p-3 bg-[#1A0935] border-b border-[#29154A] flex items-center justify-between text-xs font-bold text-white">
             <span className="font-mono">Table: {selectedTable}</span>
-            <span className="font-mono text-purple-300/70">{tableData.length} records</span>
+            <span className="font-mono text-pink-300">{tableData.length} records</span>
           </div>
 
           <div className="overflow-x-auto max-h-[480px]">
@@ -219,7 +222,7 @@ export const DatabaseConsole: React.FC<DatabaseConsoleProps> = ({ onRefreshData 
               </div>
             ) : (
               <table className="w-full text-left text-xs font-mono">
-                <thead className="bg-[#21143D] text-purple-200 border-b border-[#321E59] sticky top-0">
+                <thead className="bg-[#1A0935] text-purple-200 border-b border-[#29154A] sticky top-0">
                   <tr>
                     {Object.keys(tableData[0] || {}).map((col) => (
                       <th key={col} className="py-2.5 px-4 font-bold uppercase text-[10px]">
@@ -228,9 +231,9 @@ export const DatabaseConsole: React.FC<DatabaseConsoleProps> = ({ onRefreshData 
                     ))}
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-[#2B1B4B] bg-[#140D27]">
+                <tbody className="divide-y divide-[#261445] bg-[#0F061F]">
                   {tableData.map((row, i) => (
-                    <tr key={row.id || i} className="hover:bg-[#251645] transition-colors">
+                    <tr key={row.id || i} className="hover:bg-[#1C0A3B] transition-colors">
                       {Object.keys(tableData[0] || {}).map((col) => {
                         const val = row[col];
                         const str = typeof val === 'object' ? JSON.stringify(val) : String(val);
@@ -253,9 +256,9 @@ export const DatabaseConsole: React.FC<DatabaseConsoleProps> = ({ onRefreshData 
 
       {/* Confirmation Modal for Reset */}
       {isResetModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#090514]/80 backdrop-blur-sm p-4 animate-fadeIn">
-          <div className="w-full max-w-md rounded-3xl border border-rose-500/40 bg-[#160E2A] p-6 shadow-2xl space-y-4 relative text-purple-100">
-            <div className="flex items-center gap-3 border-b border-[#341F5C] pb-3">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-fadeIn">
+          <div className="w-full max-w-md rounded-3xl border border-rose-500/40 bg-[#0F061F] p-6 space-y-4 relative text-purple-100">
+            <div className="flex items-center gap-3 border-b border-[#29154A] pb-3">
               <div className="h-10 w-10 rounded-2xl bg-rose-950/60 border border-rose-500/40 text-rose-400 flex items-center justify-center shrink-0">
                 <AlertTriangle className="h-5 w-5" />
               </div>
@@ -282,12 +285,12 @@ export const DatabaseConsole: React.FC<DatabaseConsoleProps> = ({ onRefreshData 
               </ul>
             </div>
 
-            <div className="pt-3 border-t border-[#341F5C] flex items-center justify-end gap-2.5">
+            <div className="pt-3 border-t border-[#29154A] flex items-center justify-end gap-2.5">
               <button
                 type="button"
                 onClick={() => setIsResetModalOpen(false)}
                 disabled={isResetting}
-                className="px-4 py-2 rounded-xl bg-[#251545] hover:bg-[#2F1B56] text-xs font-bold text-purple-200 border border-[#4C2888] cursor-pointer"
+                className="px-4 py-2 rounded-xl bg-[#1A0935] hover:bg-[#250B42] text-xs font-bold text-purple-200 border border-pink-500/30 cursor-pointer"
               >
                 Cancel
               </button>
@@ -295,7 +298,7 @@ export const DatabaseConsole: React.FC<DatabaseConsoleProps> = ({ onRefreshData 
                 type="button"
                 onClick={handleExecuteReset}
                 disabled={isResetting}
-                className="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-xs font-bold text-white shadow-sm cursor-pointer disabled:opacity-50 flex items-center gap-1.5"
+                className="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-xs font-bold text-white cursor-pointer disabled:opacity-50 flex items-center gap-1.5"
               >
                 <Trash2 className="h-3.5 w-3.5" />
                 <span>{isResetting ? 'Resetting Tables...' : 'Confirm Reset'}</span>

@@ -125,10 +125,10 @@ export const SettingsView: React.FC = () => {
   return (
     <div className="w-full space-y-8 pb-12">
       {/* SECTION 1: Header Outer Container */}
-      <div className="bg-[#160E2A] border border-[#2E1C50] rounded-3xl p-6 sm:p-8 shadow-xl shadow-purple-950/40 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="bg-[#0F061F] border border-[#261445] rounded-3xl p-6 sm:p-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-white tracking-tight flex items-center gap-2">
-            <SettingsIcon className="h-6 w-6 text-purple-300" />
+            <SettingsIcon className="h-6 w-6 text-pink-400" />
             <span>Settings</span>
           </h1>
           <p className="text-xs text-purple-300/70 mt-1">
@@ -149,15 +149,15 @@ export const SettingsView: React.FC = () => {
         {/* Left 2 Columns: Core Toggles Outer Containers */}
         <div className="lg:col-span-2 space-y-6">
           {/* Privacy & Tracker Protection Outer Container */}
-          <div className="bg-[#160E2A] border border-[#2E1C50] rounded-3xl p-6 shadow-xl shadow-purple-950/40 space-y-4">
+          <div className="bg-[#0F061F] border border-[#261445] rounded-3xl p-6 space-y-4">
             <div className="flex items-center gap-2 text-white font-bold text-sm">
-              <Shield className="h-4 w-4 text-purple-300" />
+              <Shield className="h-4 w-4 text-pink-400" />
               <span>Privacy & Tracker Protection</span>
             </div>
 
             <div className="space-y-3">
               {/* Setting Item 1 */}
-              <div className="flex items-center justify-between p-4 rounded-2xl bg-[#180F2F] border border-[#341F5C]">
+              <div className="flex items-center justify-between p-4 rounded-2xl bg-[#130729] border border-[#29154A]">
                 <div className="space-y-0.5 max-w-[80%]">
                   <div className="text-xs font-bold text-white">
                     Auto-Block Advertising & Marketing Pixels
@@ -173,12 +173,12 @@ export const SettingsView: React.FC = () => {
                     onChange={(e) => updateSetting('autoBlockAds', e.target.checked)}
                     className="sr-only peer"
                   />
-                  <div className="w-11 h-6 bg-[#251545] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
+                  <div className="w-11 h-6 bg-[#1A0935] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-pink-600"></div>
                 </label>
               </div>
 
               {/* Setting Item 2 */}
-              <div className="flex items-center justify-between p-4 rounded-2xl bg-[#180F2F] border border-[#341F5C]">
+              <div className="flex items-center justify-between p-4 rounded-2xl bg-[#130729] border border-[#29154A]">
                 <div className="space-y-0.5 max-w-[80%]">
                   <div className="text-xs font-bold text-white">
                     Block Browser Fingerprinting
@@ -194,12 +194,12 @@ export const SettingsView: React.FC = () => {
                     onChange={(e) => updateSetting('blockFingerprinting', e.target.checked)}
                     className="sr-only peer"
                   />
-                  <div className="w-11 h-6 bg-[#251545] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
+                  <div className="w-11 h-6 bg-[#1A0935] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-pink-600"></div>
                 </label>
               </div>
 
               {/* Setting Item 3 */}
-              <div className="flex items-center justify-between p-4 rounded-2xl bg-[#180F2F] border border-[#341F5C]">
+              <div className="flex items-center justify-between p-4 rounded-2xl bg-[#130729] border border-[#29154A]">
                 <div className="space-y-0.5 max-w-[80%]">
                   <div className="text-xs font-bold text-white">
                     Strict SHA-256 Script Verification
@@ -215,22 +215,22 @@ export const SettingsView: React.FC = () => {
                     onChange={(e) => updateSetting('strictScriptHashing', e.target.checked)}
                     className="sr-only peer"
                   />
-                  <div className="w-11 h-6 bg-[#251545] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
+                  <div className="w-11 h-6 bg-[#1A0935] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-pink-600"></div>
                 </label>
               </div>
             </div>
           </div>
 
           {/* General & Notifications Outer Container */}
-          <div className="bg-[#160E2A] border border-[#2E1C50] rounded-3xl p-6 shadow-xl shadow-purple-950/40 space-y-4">
+          <div className="bg-[#0F061F] border border-[#261445] rounded-3xl p-6 space-y-4">
             <div className="flex items-center gap-2 text-white font-bold text-sm">
-              <Sliders className="h-4 w-4 text-purple-300" />
+              <Sliders className="h-4 w-4 text-pink-400" />
               <span>General Preferences</span>
             </div>
 
             <div className="space-y-3">
               {/* Notification toggle */}
-              <div className="flex items-center justify-between p-4 rounded-2xl bg-[#180F2F] border border-[#341F5C]">
+              <div className="flex items-center justify-between p-4 rounded-2xl bg-[#130729] border border-[#29154A]">
                 <div className="space-y-0.5 max-w-[80%]">
                   <div className="text-xs font-bold text-white">
                     Show Extension Alert Badges
@@ -246,12 +246,12 @@ export const SettingsView: React.FC = () => {
                     onChange={(e) => updateSetting('enableNotifications', e.target.checked)}
                     className="sr-only peer"
                   />
-                  <div className="w-11 h-6 bg-[#251545] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
+                  <div className="w-11 h-6 bg-[#1A0935] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-pink-600"></div>
                 </label>
               </div>
 
               {/* Auto audit toggle */}
-              <div className="flex items-center justify-between p-4 rounded-2xl bg-[#180F2F] border border-[#341F5C]">
+              <div className="flex items-center justify-between p-4 rounded-2xl bg-[#130729] border border-[#29154A]">
                 <div className="space-y-0.5 max-w-[80%]">
                   <div className="text-xs font-bold text-white">
                     Automatic Background Audit
@@ -267,7 +267,7 @@ export const SettingsView: React.FC = () => {
                     onChange={(e) => updateSetting('autoAuditNewSites', e.target.checked)}
                     className="sr-only peer"
                   />
-                  <div className="w-11 h-6 bg-[#251545] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
+                  <div className="w-11 h-6 bg-[#1A0935] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-pink-600"></div>
                 </label>
               </div>
             </div>
@@ -277,9 +277,9 @@ export const SettingsView: React.FC = () => {
         {/* Right 1 Column: Data & Storage Actions Outer Containers */}
         <div className="space-y-6">
           {/* Export Data Outer Container */}
-          <div className="bg-[#160E2A] border border-[#2E1C50] rounded-3xl p-6 space-y-3.5 shadow-xl shadow-purple-950/40">
+          <div className="bg-[#0F061F] border border-[#261445] rounded-3xl p-6 space-y-3.5">
             <div className="flex items-center gap-2 text-white font-bold text-xs">
-              <Download className="h-4 w-4 text-purple-300" />
+              <Download className="h-4 w-4 text-pink-400" />
               <span>Export Audit Data</span>
             </div>
             <p className="text-[11px] text-purple-300/70">
@@ -288,7 +288,7 @@ export const SettingsView: React.FC = () => {
             <button
               onClick={handleExportData}
               disabled={isExporting}
-              className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs transition-all cursor-pointer shadow-md shadow-purple-900/30"
+              className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 text-white font-bold text-xs transition-all cursor-pointer"
             >
               {isExporting ? (
                 <RefreshCw className="h-3.5 w-3.5 animate-spin" />
@@ -300,7 +300,7 @@ export const SettingsView: React.FC = () => {
           </div>
 
           {/* Clear Browsing Data Outer Container */}
-          <div className="bg-[#160E2A] border border-[#2E1C50] rounded-3xl p-6 space-y-3.5 shadow-xl shadow-purple-950/40">
+          <div className="bg-[#0F061F] border border-[#261445] rounded-3xl p-6 space-y-3.5">
             <div className="flex items-center gap-2 text-white font-bold text-xs">
               <Trash2 className="h-4 w-4 text-rose-400" />
               <span>Clear Stored Data</span>
@@ -324,10 +324,10 @@ export const SettingsView: React.FC = () => {
           </div>
 
           {/* Reset Settings Outer Container */}
-          <div className="bg-[#160E2A] border border-[#2E1C50] rounded-3xl p-5 text-center shadow-xl shadow-purple-950/40">
+          <div className="bg-[#0F061F] border border-[#261445] rounded-3xl p-5 text-center">
             <button
               onClick={handleResetDefaults}
-              className="text-xs text-purple-300 hover:text-white font-bold underline cursor-pointer transition-colors"
+              className="text-xs text-pink-300 hover:text-white font-bold underline cursor-pointer transition-colors"
             >
               Reset Settings to Defaults
             </button>

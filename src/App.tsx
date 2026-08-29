@@ -102,7 +102,7 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen flex bg-[#0D0819] text-purple-100 font-sans selection:bg-purple-600 selection:text-white">
+    <div className="min-h-screen flex bg-[#0B0516] text-purple-100 font-sans selection:bg-pink-600 selection:text-white">
       {/* Left Sidebar Panel */}
       <Sidebar
         activeTab={activeTab}

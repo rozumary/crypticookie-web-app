@@ -56,7 +56,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             </div>
             <div className="flex items-center gap-2">
               <span className="text-base font-bold text-white tracking-tight flex items-center gap-1.5">
-                <span>Blockchain Ssystem</span>
+                <span>Crypticookie</span>
                 <span className="h-1.5 w-1.5 rounded-full bg-pink-500" />
               </span>
             </div>

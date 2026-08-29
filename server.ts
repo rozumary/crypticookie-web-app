@@ -428,14 +428,8 @@ When analyzing a website or answering questions:
             try {
               const response = await ai.models.generateContent({
                 model: modelName,
-                contents: [
-                  ...chatContents.slice(0, -1),
-                  {
-                    role: 'user',
-                    parts: [{ text: `${chatContents[chatContents.length - 1].parts[0].text} (System Salt: ${Math.random()})` }]
-                  }
-                ],
-                config: { systemInstruction, temperature: 0.8 },
+                contents: chatContents,
+                config: { systemInstruction, temperature: 0.7 },
               });
               if (response.text) {
                 replyText = response.text;

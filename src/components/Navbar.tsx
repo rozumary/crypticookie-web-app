@@ -56,10 +56,6 @@ export const Navbar: React.FC<NavbarProps> = ({
               <span className="text-base font-bold text-white tracking-tight bg-gradient-to-r from-blue-100 via-violet-100 to-white bg-clip-text text-transparent">
                 Crypticookie
               </span>
-              <span className="inline-flex items-center gap-1.5 px-2 py-0.5 bg-blue-500/10 text-blue-300 text-[11px] font-mono border border-blue-500/30 rounded-md">
-                <span className={`h-1.5 w-1.5 rounded-full ${isDbReady ? 'bg-blue-400 animate-pulse' : 'bg-slate-400'}`} />
-                <span>Backend Active</span>
-              </span>
             </div>
           </div>
         </div>

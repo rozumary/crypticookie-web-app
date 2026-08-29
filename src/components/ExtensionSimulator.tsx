@@ -22,6 +22,7 @@ import {
   ArrowRight,
   ExternalLink,
   Bot,
+  X,
 } from 'lucide-react';
 import {
   type User,
@@ -433,8 +434,8 @@ export const ExtensionSimulator: React.FC<ExtensionSimulatorProps> = ({
                   </div>
                 </div>
 
-                {/* Status Badge */}
-                <div className="shrink-0">
+                {/* Status Badge and Close Button */}
+                <div className="flex items-center gap-2 shrink-0">
                   <span
                     className={`px-3 py-1 rounded-full text-xs font-mono font-semibold flex items-center gap-1.5 ${
                       verificationResult === 'Verified'
@@ -461,6 +462,14 @@ export const ExtensionSimulator: React.FC<ExtensionSimulatorProps> = ({
                       </>
                     )}
                   </span>
+
+                  <button
+                    onClick={() => setBannerVisible(false)}
+                    className="p-1 rounded-lg text-blue-300/60 hover:text-white hover:bg-blue-900/40 transition-colors cursor-pointer"
+                    title="Dismiss Shield"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
                 </div>
               </div>
 

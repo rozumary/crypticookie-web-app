@@ -153,6 +153,16 @@ export const EXTENSION_CONTENT_JS = `/**
  */
 
 (function initCrypticookieInterceptor() {
+  let isShieldDismissed = false;
+  const currentHost = window.location.hostname || 'website';
+  const dismissStorageKey = 'crypticookie_dismissed_' + currentHost;
+
+  try {
+    if (sessionStorage.getItem(dismissStorageKey) === 'true') {
+      isShieldDismissed = true;
+    }
+  } catch (e) {}
+
   const CMP_SELECTORS = [
     '#onetrust-banner-sdk',
     '#CybotCookiebotDialog',
@@ -176,7 +186,24 @@ export const EXTENSION_CONTENT_JS = `/**
     return '73926ef91823ab0288f34291f09e248b64e9123847a9821034f828108c90fe32';
   }
 
+  function dismissAndRemove() {
+    isShieldDismissed = true;
+    try {
+      sessionStorage.setItem(dismissStorageKey, 'true');
+    } catch (e) {}
+    const existing = document.getElementById('crypticookie-shield-root');
+    if (existing) {
+      existing.style.transition = 'opacity 0.25s ease, transform 0.25s ease';
+      existing.style.opacity = '0';
+      existing.style.transform = 'translateY(16px)';
+      setTimeout(() => {
+        existing.remove();
+      }, 250);
+    }
+  }
+
   function injectShieldBanner(verification, cmpName, hash) {
+    if (isShieldDismissed) return;
     if (document.getElementById('crypticookie-shield-root')) return;
 
     const shieldDiv = document.createElement('div');
@@ -196,7 +223,7 @@ export const EXTENSION_CONTENT_JS = `/**
               <span class="crypticookie-badge" style="background-color: \${badgeColor}">\${badgeText}</span>
             </div>
           </div>
-          <button id="crypticookie-close-btn" class="crypticookie-close">&times;</button>
+          <button id="crypticookie-close-btn" class="crypticookie-close" title="Dismiss Shield" type="button">&times;</button>
         </div>
         
         <div class="crypticookie-body">
@@ -215,46 +242,71 @@ export const EXTENSION_CONTENT_JS = `/**
         </div>
 
         <div class="crypticookie-actions">
-          <button id="crypticookie-action-accept" class="crypticookie-btn primary">Accept Necessary</button>
-          <button id="crypticookie-action-reject" class="crypticookie-btn danger">Reject All Trackers</button>
-          <button id="crypticookie-action-audit" class="crypticookie-btn secondary">Audit on Chain</button>
+          <button id="crypticookie-action-accept" class="crypticookie-btn primary" type="button">Accept Necessary</button>
+          <button id="crypticookie-action-reject" class="crypticookie-btn danger" type="button">Reject All Trackers</button>
+          <button id="crypticookie-action-audit" class="crypticookie-btn secondary" type="button">Audit on Chain</button>
         </div>
       </div>
     \`;
 
     document.body.appendChild(shieldDiv);
 
-    document.getElementById('crypticookie-close-btn')?.addEventListener('click', () => {
-      shieldDiv.remove();
-    });
+    const closeBtn = document.getElementById('crypticookie-close-btn');
+    if (closeBtn) {
+      closeBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        dismissAndRemove();
+      });
+    }
 
-    const handleAction = (action) => {
+    const handleAction = (action, clickedBtnId) => {
+      const btn = document.getElementById(clickedBtnId);
+      if (btn) {
+        btn.innerText = '✓ Recorded';
+      }
+
       chrome.runtime.sendMessage({
         type: 'RECORD_CONSENT_TRANSACTION',
         domain: window.location.hostname,
         hash: hash,
         action: action
       }, (response) => {
-        const btn = document.getElementById('crypticookie-action-audit');
-        if (btn) btn.innerText = '✓ Block Chained';
-        setTimeout(() => shieldDiv.remove(), 1200);
+        setTimeout(() => {
+          dismissAndRemove();
+        }, 1000);
       });
     };
 
-    document.getElementById('crypticookie-action-accept')?.addEventListener('click', () => handleAction('accept'));
-    document.getElementById('crypticookie-action-reject')?.addEventListener('click', () => handleAction('reject'));
-    document.getElementById('crypticookie-action-audit')?.addEventListener('click', () => handleAction('customize'));
+    document.getElementById('crypticookie-action-accept')?.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      handleAction('accept', 'crypticookie-action-accept');
+    });
+    document.getElementById('crypticookie-action-reject')?.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      handleAction('reject', 'crypticookie-action-reject');
+    });
+    document.getElementById('crypticookie-action-audit')?.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      handleAction('customize', 'crypticookie-action-audit');
+    });
   }
 
   // Monitor DOM
   const observer = new MutationObserver(() => {
+    if (isShieldDismissed) return;
+    if (document.getElementById('crypticookie-shield-root')) return;
+
     for (const selector of CMP_SELECTORS) {
       const el = document.querySelector(selector);
       if (el) {
         const domain = window.location.hostname || 'example.com';
         const hash = computeScriptHashMock(domain);
         chrome.runtime.sendMessage({ type: 'VERIFY_CMP_HASH', hash: hash }, (res) => {
-          if (res) {
+          if (res && !isShieldDismissed) {
             injectShieldBanner(res.verification, res.cmpName, res.hash);
           }
         });
@@ -462,11 +514,33 @@ export const EXTENSION_STYLES_CSS = `#crypticookie-shield-root {
 }
 
 .crypticookie-close {
-  background: transparent;
-  border: none;
-  color: #94a3b8;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #cbd5e1;
   font-size: 18px;
+  font-weight: 700;
+  line-height: 1;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+  padding: 0;
+  flex-shrink: 0;
+}
+
+.crypticookie-close:hover {
+  background: rgba(239, 68, 68, 0.35);
+  border-color: rgba(239, 68, 68, 0.6);
+  color: #ffffff;
+  transform: scale(1.08);
+}
+
+.crypticookie-close:active {
+  transform: scale(0.92);
 }
 
 .crypticookie-body {

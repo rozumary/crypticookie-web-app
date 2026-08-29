@@ -232,10 +232,7 @@ export const OverviewDashboard: React.FC<OverviewDashboardProps> = ({
             </div>
           </div>
 
-          <div className="pt-2 flex items-center justify-between">
-            <span className="text-[11px] text-blue-400/80 font-mono">
-              Engine: WebCrypto SHA-256 &bull; Dexie IndexedDB
-            </span>
+          <div className="pt-2 flex items-center justify-end">
             <button
               type="submit"
               disabled={isSubmitting}

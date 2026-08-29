@@ -6,7 +6,6 @@ import {
   FileCheck,
   Settings as SettingsIcon,
   Bot,
-  Database,
   ChevronLeft,
   ChevronRight,
   UserCheck,
@@ -14,7 +13,6 @@ import {
   LogOut,
   Sparkles,
   Cookie,
-  Code2,
 } from 'lucide-react';
 import { type User } from '../types/database';
 
@@ -54,16 +52,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
   isDbReady,
   metrics,
 }) => {
-  const [devModeEnabled, setDevModeEnabled] = React.useState<boolean>(() => {
-    return localStorage.getItem('crypticookie_dev_mode') === 'true';
-  });
-
-  const toggleDevMode = () => {
-    const next = !devModeEnabled;
-    setDevModeEnabled(next);
-    localStorage.setItem('crypticookie_dev_mode', String(next));
-  };
-
   const navItems = [
     {
       id: 'overview',
@@ -95,15 +83,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
       label: 'Settings',
       icon: SettingsIcon,
     },
-    ...(devModeEnabled
-      ? [
-          {
-            id: 'database',
-            label: 'Database Console (Dev)',
-            icon: Database,
-          },
-        ]
-      : []),
   ];
 
   const handleNavClick = (tabId: string) => {
@@ -205,28 +184,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
           })}
         </div>
 
-        {/* Sidebar Footer User Card & Developer Mode switch */}
+        {/* Sidebar Footer User Card */}
         <div className="border-t border-violet-900/30 p-3 bg-[#060914] space-y-2">
-          {(!isCollapsed || isOpen) && (
-            <div className="flex items-center justify-between px-1 text-[11px] text-blue-300/60 font-mono">
-              <span className="flex items-center gap-1.5">
-                <Code2 className="h-3 w-3 text-blue-400" />
-                Dev Tools
-              </span>
-              <button
-                onClick={toggleDevMode}
-                className={`px-2 py-0.5 rounded-md text-[10px] font-semibold border transition-all cursor-pointer ${
-                  devModeEnabled
-                    ? 'bg-violet-600/30 text-violet-300 border-violet-500/50 shadow-sm'
-                    : 'bg-blue-950/40 text-blue-400/50 border-blue-900/40 hover:text-blue-200'
-                }`}
-                title="Toggle backend developer database console visibility"
-              >
-                {devModeEnabled ? 'Visible' : 'Hidden'}
-              </button>
-            </div>
-          )}
-
           {currentUser ? (
             <div className="flex items-center justify-between gap-2 rounded-xl bg-violet-950/40 border border-violet-900/40 p-2">
               <div className="flex items-center gap-2 min-w-0">

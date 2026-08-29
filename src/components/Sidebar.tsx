@@ -63,7 +63,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const navItems = [
     {
       id: 'overview',
-      label: 'Poster Overview',
+      label: 'Overview',
       icon: Activity,
     },
     {
@@ -146,7 +146,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   CRYPTICOOKIE
                 </span>
                 <span className={`text-[10px] font-mono font-medium ${isPurple ? 'text-pink-300' : 'text-blue-300/70'}`}>
-                  Science Fair Research
+                  Consent System
                 </span>
               </div>
             )}

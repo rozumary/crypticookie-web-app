@@ -84,7 +84,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                   ? 'bg-purple-500/20 text-pink-300 border-purple-400/40'
                   : 'bg-violet-500/10 text-violet-300 border-violet-500/20'
               }`}>
-                {isPurple ? 'Science Fair' : 'Live v2'}
+                {isPurple ? 'Privacy Shield' : 'Live v2'}
               </span>
             </div>
           </div>

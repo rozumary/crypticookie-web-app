@@ -126,7 +126,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   <span className="h-1.5 w-1.5 rounded-full bg-pink-500" />
                 </span>
                 <span className="text-[10px] text-purple-300/60 font-medium">
-                  Crypticookie
+                  Blockchain System
                 </span>
               </div>
             )}

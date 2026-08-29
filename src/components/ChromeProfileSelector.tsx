@@ -64,26 +64,26 @@ export const ChromeProfileSelector: React.FC<ChromeProfileSelectorProps> = ({
         onClick={() => setIsOpen(!isOpen)}
         className={`flex items-center gap-2 rounded-xl transition-all cursor-pointer font-mono font-semibold ${
           compact
-            ? 'px-2.5 py-1.5 bg-[#371661] hover:bg-[#471c7d] text-purple-100 border border-purple-400/40 text-xs shadow-sm'
-            : 'px-3.5 py-2 bg-[#371661] hover:bg-[#471c7d] text-white border border-purple-400/40 text-xs shadow-md'
+            ? 'px-2.5 py-1.5 bg-[#1A0935] hover:bg-[#250B42] text-purple-200 border border-pink-500/30 text-xs'
+            : 'px-3.5 py-2 bg-[#1A0935] hover:bg-[#250B42] text-white border border-pink-500/40 text-xs shadow-md'
         }`}
       >
         <span className="text-sm">{activeProfile.icon}</span>
         <span className="truncate max-w-[140px] text-pink-300 font-bold">{activeProfile.name}</span>
-        <span className="text-[10px] px-1.5 py-0.5 rounded bg-pink-950/80 text-pink-300 border border-pink-700/60 hidden sm:inline">
+        <span className="text-[10px] px-1.5 py-0.5 rounded bg-pink-950/80 text-pink-300 border border-pink-800/60 hidden sm:inline">
           ISOLATED
         </span>
-        <ChevronDown className="h-3.5 w-3.5 text-purple-200 shrink-0" />
+        <ChevronDown className="h-3.5 w-3.5 text-purple-300/70 shrink-0" />
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 sm:left-0 sm:right-auto mt-2 w-72 rounded-2xl bg-gradient-to-b from-[#2e124f] to-[#1e0a36] border border-purple-400/35 shadow-2xl z-50 p-3 space-y-2.5 animate-fadeIn backdrop-blur-md">
-          <div className="flex items-center justify-between pb-2 border-b border-purple-400/30 px-1">
+        <div className="absolute right-0 sm:left-0 sm:right-auto mt-2 w-72 rounded-2xl bg-[#14082B] border border-[#3A186B] shadow-2xl z-50 p-3 space-y-2.5 animate-fadeIn">
+          <div className="flex items-center justify-between pb-2 border-b border-[#29154A] px-1">
             <div className="flex items-center gap-1.5 text-xs font-bold text-white">
               <Laptop className="h-4 w-4 text-pink-400" />
               <span>Chrome Account Profiles</span>
             </div>
-            <span className="text-[10px] text-purple-200/80 font-mono">Profile Storage Isolated</span>
+            <span className="text-[10px] text-purple-300/70 font-mono">Profile Storage Isolated</span>
           </div>
 
           <div className="space-y-1 max-h-56 overflow-y-auto">
@@ -98,8 +98,8 @@ export const ChromeProfileSelector: React.FC<ChromeProfileSelectorProps> = ({
                   }}
                   className={`w-full flex items-center justify-between p-2.5 rounded-xl text-left text-xs transition-all cursor-pointer ${
                     isSelected
-                      ? 'bg-gradient-to-r from-pink-950/90 to-purple-950/90 border border-pink-500/50 text-white font-bold shadow-sm'
-                      : 'hover:bg-[#3b1764]/70 text-purple-200 border border-transparent'
+                      ? 'bg-gradient-to-r from-pink-950/80 to-purple-950/80 border border-pink-500/50 text-white font-bold'
+                      : 'hover:bg-[#1C0A3B] text-purple-200 border border-transparent'
                   }`}
                 >
                   <div className="flex items-center gap-2.5">
@@ -108,7 +108,7 @@ export const ChromeProfileSelector: React.FC<ChromeProfileSelectorProps> = ({
                       <div className="font-semibold text-purple-100 flex items-center gap-1.5">
                         <span>{p.name}</span>
                       </div>
-                      <p className="text-[10px] text-purple-200/70 leading-tight">{p.description}</p>
+                      <p className="text-[10px] text-purple-300/60 leading-tight">{p.description}</p>
                     </div>
                   </div>
                   {isSelected && <Check className="h-4 w-4 text-pink-400 shrink-0" />}
@@ -120,32 +120,32 @@ export const ChromeProfileSelector: React.FC<ChromeProfileSelectorProps> = ({
           {!isAddingNew ? (
             <button
               onClick={() => setIsAddingNew(true)}
-              className="w-full flex items-center justify-center gap-1.5 py-2 rounded-xl bg-[#371661] hover:bg-[#471c7d] text-pink-300 border border-purple-400/35 text-xs font-semibold transition-colors cursor-pointer shadow-sm"
+              className="w-full flex items-center justify-center gap-1.5 py-2 rounded-xl bg-[#1C0A3B] hover:bg-[#250B42] text-pink-300 border border-pink-500/30 text-xs font-semibold transition-colors cursor-pointer"
             >
               <Plus className="h-3.5 w-3.5" />
               <span>+ Create New Isolated Profile</span>
             </button>
           ) : (
-            <form onSubmit={handleAddNewProfile} className="p-2 bg-[#250d42] rounded-xl border border-purple-400/30 space-y-2 shadow-inner">
+            <form onSubmit={handleAddNewProfile} className="p-2 bg-[#0F061F] rounded-xl border border-[#29154A] space-y-2">
               <input
                 type="text"
                 value={newProfileName}
                 onChange={(e) => setNewProfileName(e.target.value)}
                 placeholder="Profile Name (e.g. Profile D)"
                 autoFocus
-                className="w-full bg-[#1e0a36] border border-purple-400/35 rounded-lg px-2.5 py-1.5 text-xs text-purple-100 focus:outline-none focus:border-pink-500"
+                className="w-full bg-[#1A0935] border border-[#3A186B] rounded-lg px-2.5 py-1.5 text-xs text-purple-100 focus:outline-none focus:border-pink-500"
               />
               <div className="flex items-center justify-end gap-1.5">
                 <button
                   type="button"
                   onClick={() => setIsAddingNew(false)}
-                  className="px-2.5 py-1 text-[11px] text-purple-200/80 hover:text-white cursor-pointer"
+                  className="px-2.5 py-1 text-[11px] text-purple-300/70 hover:text-white cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-3 py-1 bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 text-white text-[11px] font-bold rounded-lg cursor-pointer shadow-sm"
+                  className="px-3 py-1 bg-pink-600 hover:bg-pink-500 text-white text-[11px] font-bold rounded-lg cursor-pointer"
                 >
                   Add Profile
                 </button>
@@ -153,7 +153,7 @@ export const ChromeProfileSelector: React.FC<ChromeProfileSelectorProps> = ({
             </form>
           )}
 
-          <div className="pt-1.5 border-t border-purple-400/30 text-[10px] text-purple-200/70 font-mono text-center">
+          <div className="pt-1.5 border-t border-[#29154A] text-[10px] text-purple-300/60 font-mono text-center">
             💡 Switch profiles to test 100% independent logs, website state, and consent status.
           </div>
         </div>

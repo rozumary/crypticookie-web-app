@@ -8,15 +8,14 @@
 
 :root {
   font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Arial, sans-serif;
-  color-scheme: dark;
-  background-color: #260e44;
-  color: #f5edff;
+  color-scheme: light;
+  background-color: #F7F3FF;
+  color: #3B235C;
 }
 
 body {
-  background: linear-gradient(135deg, #3c1966 0%, #260e44 50%, #1a0730 100%);
-  min-height: 100vh;
-  color: #f5edff;
+  background-color: #F7F3FF;
+  color: #3B235C;
 }
 
 h1, h2, h3, h4, .font-display {

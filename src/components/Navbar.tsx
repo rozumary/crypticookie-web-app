@@ -35,7 +35,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   onToggleSidebar,
 }) => {
   return (
-    <header id="crypticookie-main-navbar" className="sticky top-0 z-30 w-full border-b border-purple-500/25 bg-[#250e42]/90 backdrop-blur-md text-purple-100 shadow-md shadow-purple-950/20">
+    <header id="crypticookie-main-navbar" className="sticky top-0 z-30 w-full border-b border-[#261445] bg-[#0A0414]/90 backdrop-blur-md text-purple-100">
       <div className="flex items-center justify-between px-4 py-3 sm:px-6">
         {/* Left Side: Sidebar Toggle & Cookie Brand */}
         <div className="flex items-center gap-3">
@@ -44,7 +44,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               id="btn-navbar-toggle-sidebar"
               onClick={onToggleSidebar}
               title="Toggle Sidebar"
-              className="p-2 rounded-xl text-purple-200 hover:text-white bg-[#35155d] border border-purple-400/40 hover:border-pink-500/60 transition-all cursor-pointer"
+              className="p-2 rounded-xl text-purple-300 hover:text-white bg-[#1A0935] border border-pink-500/30 hover:border-pink-500/60 transition-all cursor-pointer"
             >
               <Menu className="h-4 w-4" />
             </button>
@@ -54,7 +54,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             onClick={() => setActiveTab('overview')}
             className="flex items-center gap-2.5 cursor-pointer group"
           >
-            <div className="w-8 h-8 rounded-xl bg-[#371661] text-pink-400 border border-purple-400/40 flex items-center justify-center group-hover:scale-105 group-hover:border-pink-500/60 transition-all shadow-inner">
+            <div className="w-8 h-8 rounded-xl bg-[#1D0938] text-pink-400 border border-pink-500/30 flex items-center justify-center group-hover:scale-105 group-hover:border-pink-500/60 transition-all">
               <Cookie className="h-4 w-4 text-pink-400" />
             </div>
             <div className="flex items-center gap-2">
@@ -78,7 +78,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 
           <button
             onClick={() => setActiveTab('ai_bot')}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-[#371661] hover:bg-gradient-to-r hover:from-pink-600 hover:to-purple-600 text-pink-300 hover:text-white text-xs font-semibold rounded-xl border border-purple-400/40 hover:border-pink-500/50 transition-all cursor-pointer hover:scale-105 active:scale-95 shadow-sm"
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-[#1D0938] hover:bg-gradient-to-r hover:from-pink-600 hover:to-purple-600 text-pink-300 hover:text-white text-xs font-semibold rounded-xl border border-pink-500/40 transition-all cursor-pointer hover:scale-105 active:scale-95"
           >
             <Bot className="h-3.5 w-3.5 text-pink-400" />
             <span className="hidden sm:inline">AI Privacy Bot</span>
@@ -86,7 +86,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           </button>
 
           {currentUser && (
-            <div className="flex items-center gap-2 bg-[#311357] border border-purple-400/40 rounded-xl p-1.5 pl-3">
+            <div className="flex items-center gap-2 bg-[#170830] border border-pink-500/30 rounded-xl p-1.5 pl-3">
               <div className="h-6 w-6 rounded-lg bg-gradient-to-r from-pink-600 to-purple-600 text-white font-bold text-[11px] flex items-center justify-center">
                 {currentUser.username.charAt(0).toUpperCase()}
               </div>
@@ -95,7 +95,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 id="btn-navbar-logout"
                 onClick={onLogout}
                 title="Sign Out"
-                className="p-1 hover:bg-[#431b75] rounded-lg text-purple-300 hover:text-rose-400 transition-colors cursor-pointer"
+                className="p-1 hover:bg-[#2B0E44] rounded-lg text-purple-300/70 hover:text-rose-400 transition-colors cursor-pointer"
               >
                 <LogOut className="h-3.5 w-3.5" />
               </button>

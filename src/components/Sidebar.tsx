@@ -106,25 +106,25 @@ export const Sidebar: React.FC<SidebarProps> = ({
       {/* SIDEBAR PANEL */}
       <aside
         id="crypticookie-left-sidebar"
-        className={`fixed top-0 bottom-0 left-0 z-50 flex flex-col border-r border-[#B78AE8] bg-[#FFFFFF] shadow-md transition-all duration-200 ease-in-out ${
+        className={`fixed top-0 bottom-0 left-0 z-50 flex flex-col border-r border-[#2D1B4E] bg-[#140D27] text-purple-200 shadow-2xl transition-all duration-200 ease-in-out ${
           isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
         } ${isCollapsed ? 'lg:w-18 w-64' : 'w-64'}`}
       >
         {/* Sidebar Header / Cookie Logo */}
-        <div className="flex h-16 shrink-0 items-center justify-between border-b border-[#B78AE8]/40 px-4 bg-[#FCFAFF]">
+        <div className="flex h-16 shrink-0 items-center justify-between border-b border-[#2D1B4E] px-4 bg-[#180F2F]">
           <div
             onClick={() => handleNavClick('overview')}
             className="flex items-center gap-2.5 cursor-pointer overflow-hidden group"
           >
-            <div className="w-8 h-8 shrink-0 bg-[#EDE1FF] border border-[#B78AE8] rounded-xl flex items-center justify-center text-[#8B4ED8] shadow-sm group-hover:scale-105 transition-all">
-              <Cookie className="h-4 w-4 text-[#8B4ED8]" />
+            <div className="w-8 h-8 shrink-0 bg-[#241544] border border-[#482882] rounded-xl flex items-center justify-center text-purple-300 shadow-sm group-hover:scale-105 transition-all">
+              <Cookie className="h-4 w-4 text-purple-300" />
             </div>
             {(!isCollapsed || isOpen) && (
               <div className="flex flex-col min-w-0">
-                <span className="text-sm font-bold text-[#3B235C] tracking-tight">
+                <span className="text-sm font-bold text-white tracking-tight">
                   Crypticookie
                 </span>
-                <span className="text-[10px] text-[#6B528E]">
+                <span className="text-[10px] text-purple-300/70">
                   Consent System
                 </span>
               </div>
@@ -136,7 +136,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             id="btn-sidebar-collapse-toggle"
             onClick={() => setIsCollapsed(!isCollapsed)}
             title={isCollapsed ? 'Expand Sidebar' : 'Collapse Sidebar'}
-            className="hidden lg:flex p-1.5 rounded-lg text-[#6B528E] hover:text-[#3B235C] hover:bg-[#EDE1FF] transition-colors cursor-pointer"
+            className="hidden lg:flex p-1.5 rounded-lg text-purple-300/70 hover:text-white hover:bg-[#251545] transition-colors cursor-pointer"
           >
             {isCollapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
           </button>
@@ -145,7 +145,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           <button
             id="btn-sidebar-mobile-close"
             onClick={() => setIsOpen(false)}
-            className="lg:hidden p-1.5 rounded-lg text-[#6B528E] hover:text-[#3B235C] hover:bg-[#EDE1FF]"
+            className="lg:hidden p-1.5 rounded-lg text-purple-300/70 hover:text-white hover:bg-[#251545]"
           >
             <ChevronLeft className="h-5 w-5" />
           </button>
@@ -164,20 +164,20 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 title={item.label}
                 className={`group relative flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-xs font-medium transition-all cursor-pointer ${
                   isActive
-                    ? 'bg-[#EDE1FF] text-[#8B4ED8] font-bold border border-[#B78AE8] shadow-sm'
-                    : 'text-[#5A3F7A] hover:bg-[#F3ECFF] hover:text-[#3B235C] border border-transparent'
+                    ? 'bg-[#2A164E] text-white font-bold border border-[#6434B2] shadow-sm'
+                    : 'text-purple-300/70 hover:bg-[#1E1339] hover:text-white border border-transparent'
                 }`}
               >
                 <Icon
                   className={`h-4 w-4 shrink-0 transition-colors ${
-                    isActive ? 'text-[#8B4ED8]' : 'text-[#6B528E] group-hover:text-[#8B4ED8]'
+                    isActive ? 'text-purple-300' : 'text-purple-400/60 group-hover:text-purple-300'
                   }`}
                 />
                 {(!isCollapsed || isOpen) && (
                   <span className="truncate">{item.label}</span>
                 )}
                 {isActive && (!isCollapsed || isOpen) && (
-                  <span className="ml-auto w-1.5 h-1.5 rounded-full bg-[#8B4ED8] shadow-sm" />
+                  <span className="ml-auto w-1.5 h-1.5 rounded-full bg-purple-400 shadow-[0_0_8px_rgba(168,85,247,0.8)]" />
                 )}
               </button>
             );
@@ -185,17 +185,17 @@ export const Sidebar: React.FC<SidebarProps> = ({
         </div>
 
         {/* Sidebar Footer User Card */}
-        <div className="border-t border-[#B78AE8]/40 p-3 bg-[#FCFAFF] space-y-2">
+        <div className="border-t border-[#2D1B4E] p-3 bg-[#180F2F] space-y-2">
           {currentUser ? (
-            <div className="flex items-center justify-between gap-2 rounded-xl bg-[#EDE1FF]/50 border border-[#B78AE8]/50 p-2">
+            <div className="flex items-center justify-between gap-2 rounded-xl bg-[#241544] border border-[#482882] p-2">
               <div className="flex items-center gap-2 min-w-0">
-                <div className="h-7 w-7 shrink-0 rounded-lg bg-[#8B4ED8] border border-[#B78AE8] flex items-center justify-center text-white font-bold text-xs shadow-sm">
+                <div className="h-7 w-7 shrink-0 rounded-lg bg-purple-600 border border-purple-400/40 flex items-center justify-center text-white font-bold text-xs shadow-sm">
                   {currentUser.username.charAt(0).toUpperCase()}
                 </div>
                 {(!isCollapsed || isOpen) && (
                   <div className="min-w-0 flex-1">
-                    <span className="text-xs font-semibold text-[#3B235C] block truncate">{currentUser.username}</span>
-                    <span className="text-[10px] text-[#6B528E] block truncate">{currentUser.email}</span>
+                    <span className="text-xs font-semibold text-purple-100 block truncate">{currentUser.username}</span>
+                    <span className="text-[10px] text-purple-300/60 block truncate">{currentUser.email}</span>
                   </div>
                 )}
               </div>
@@ -205,7 +205,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   id="btn-sidebar-logout"
                   onClick={onLogout}
                   title="Sign Out"
-                  className="p-1.5 text-[#6B528E] hover:text-rose-600 hover:bg-[#EDE1FF] rounded-lg transition-colors cursor-pointer"
+                  className="p-1.5 text-purple-300/70 hover:text-rose-400 hover:bg-[#2F1B56] rounded-lg transition-colors cursor-pointer"
                 >
                   <LogOut className="h-3.5 w-3.5" />
                 </button>
@@ -219,14 +219,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     <button
                       id="btn-sidebar-sign-in"
                       onClick={onOpenSignIn}
-                      className="w-full flex items-center justify-center py-2 rounded-xl bg-[#EDE1FF] hover:bg-[#EDE1FF]/80 border border-[#B78AE8] text-xs font-medium text-[#3B235C] transition-colors cursor-pointer"
+                      className="w-full flex items-center justify-center py-2 rounded-xl bg-[#1F123A] hover:bg-[#2A184E] border border-[#3E246E] text-xs font-medium text-purple-200 transition-colors cursor-pointer"
                     >
                       Sign In
                     </button>
                     <button
                       id="btn-sidebar-sign-up"
                       onClick={onOpenSignUp}
-                      className="w-full flex items-center justify-center py-2 rounded-xl bg-[#8B4ED8] hover:bg-[#783ec0] text-xs font-semibold text-white transition-all shadow-sm cursor-pointer"
+                      className="w-full flex items-center justify-center py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-xs font-semibold text-white transition-all shadow-sm cursor-pointer"
                     >
                       Sign Up
                     </button>
@@ -234,7 +234,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   <button
                     id="btn-sidebar-one-click-demo"
                     onClick={onOneClickDemo}
-                    className="w-full flex items-center justify-center gap-1.5 rounded-xl bg-[#EDE1FF] hover:bg-[#8B4ED8] hover:text-white border border-[#B78AE8] py-1.5 text-xs font-semibold text-[#8B4ED8] transition-colors cursor-pointer"
+                    className="w-full flex items-center justify-center gap-1.5 rounded-xl bg-[#251545] hover:bg-purple-600 hover:text-white border border-[#4C2888] py-1.5 text-xs font-semibold text-purple-300 transition-colors cursor-pointer"
                   >
                     <Sparkles className="h-3.5 w-3.5" />
                     <span>Demo Login</span>
@@ -245,7 +245,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   id="btn-sidebar-collapsed-login"
                   onClick={onOpenSignIn}
                   title="Sign In"
-                  className="w-full flex items-center justify-center p-2 rounded-xl bg-[#8B4ED8] text-white cursor-pointer"
+                  className="w-full flex items-center justify-center p-2 rounded-xl bg-purple-600 text-white cursor-pointer"
                 >
                   <UserCheck className="h-4 w-4" />
                 </button>

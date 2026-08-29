@@ -100,16 +100,16 @@ export const DatabaseConsole: React.FC<DatabaseConsoleProps> = ({ onRefreshData 
       )}
 
       {/* SECTION 1: Header Outer Container */}
-      <div className="bg-[#FFFFFF] border border-[#B78AE8] rounded-3xl p-6 sm:p-8 shadow-md shadow-purple-900/5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div className="bg-[#160E2A] border border-[#2E1C50] rounded-3xl p-6 sm:p-8 shadow-xl shadow-purple-950/40 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <div className="flex items-center gap-2">
-            <h1 className="text-2xl font-bold text-[#3B235C] tracking-tight">Backend Database Explorer</h1>
-            <span className="px-2.5 py-0.5 rounded-full bg-[#EDE1FF] text-[#8B4ED8] text-[11px] font-mono font-bold border border-[#B78AE8] flex items-center gap-1">
-              <Cloud className="h-3 w-3 text-[#8B4ED8]" />
+            <h1 className="text-2xl font-bold text-white tracking-tight">Backend Database Explorer</h1>
+            <span className="px-2.5 py-0.5 rounded-full bg-[#251545] text-purple-300 text-[11px] font-mono font-bold border border-[#4C2888] flex items-center gap-1">
+              <Cloud className="h-3 w-3 text-purple-300" />
               Firebase Firestore Active
             </span>
           </div>
-          <p className="text-xs text-[#6B528E] mt-1">
+          <p className="text-xs text-purple-300/70 mt-1">
             Real cloud database and local Dexie persistence powering CMP whitelists, consent events, monitored websites, and blockchain ledgers.
           </p>
         </div>
@@ -117,15 +117,15 @@ export const DatabaseConsole: React.FC<DatabaseConsoleProps> = ({ onRefreshData 
         <div className="flex items-center gap-2">
           <button
             onClick={handleExportJSON}
-            className="flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-[#EDE1FF] hover:bg-[#EDE1FF]/80 text-[#3B235C] border border-[#B78AE8] text-xs font-bold transition-colors cursor-pointer"
+            className="flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-[#251545] hover:bg-[#2F1B56] text-purple-200 border border-[#4C2888] text-xs font-bold transition-colors cursor-pointer"
           >
-            <Download className="h-3.5 w-3.5 text-[#8B4ED8]" />
+            <Download className="h-3.5 w-3.5 text-purple-300" />
             <span>Export Database</span>
           </button>
           <button
             onClick={() => setIsResetModalOpen(true)}
             disabled={isResetting}
-            className="flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-300 text-xs font-bold transition-colors cursor-pointer"
+            className="flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-rose-950/40 hover:bg-rose-900/50 text-rose-300 border border-rose-500/30 text-xs font-bold transition-colors cursor-pointer"
           >
             <Trash2 className="h-3.5 w-3.5" />
             <span>{isResetting ? 'Resetting...' : 'Reset Database'}</span>
@@ -134,43 +134,43 @@ export const DatabaseConsole: React.FC<DatabaseConsoleProps> = ({ onRefreshData 
       </div>
 
       {/* SECTION 2: Real Cloud Database Status Outer Container */}
-      <div className="bg-[#FFFFFF] border border-[#B78AE8] rounded-3xl p-6 sm:p-8 shadow-md shadow-purple-900/5 flex flex-col md:flex-row md:items-center justify-between gap-4 text-xs text-[#3B235C]">
+      <div className="bg-[#160E2A] border border-[#2E1C50] rounded-3xl p-6 sm:p-8 shadow-xl shadow-purple-950/40 flex flex-col md:flex-row md:items-center justify-between gap-4 text-xs text-purple-100">
         <div className="flex items-start gap-3">
-          <div className="h-10 w-10 rounded-2xl bg-[#EDE1FF] border border-[#B78AE8] flex items-center justify-center text-[#8B4ED8] shrink-0 mt-0.5 shadow-sm">
+          <div className="h-10 w-10 rounded-2xl bg-[#251545] border border-[#4C2888] flex items-center justify-center text-purple-300 shrink-0 mt-0.5 shadow-sm">
             <Cloud className="h-5 w-5" />
           </div>
           <div>
             <div className="flex items-center gap-2 mb-0.5">
-              <span className="font-bold text-[#3B235C]">
+              <span className="font-bold text-white">
                 Live Google Cloud Firestore Database
               </span>
-              <span className="px-2 py-0.5 rounded-full bg-[#EDE1FF] text-[#8B4ED8] border border-[#B78AE8] text-[10px] font-mono font-bold">
+              <span className="px-2 py-0.5 rounded-full bg-[#251545] text-purple-300 border border-[#4C2888] text-[10px] font-mono font-bold">
                 Developer / Admin View
               </span>
             </div>
-            <p className="text-[#6B528E] leading-relaxed">
-              All consent events, registered CMP hashes, monitored domains, and blockchain blocks write directly to <strong>Google Cloud Firestore</strong>. You can inspect tables below or view them directly in your Google Cloud / Firebase console.
+            <p className="text-purple-300/70 leading-relaxed">
+              All consent events, registered CMP hashes, monitored domains, and blockchain blocks write directly to <strong className="text-white">Google Cloud Firestore</strong>. You can inspect tables below or view them directly in your Google Cloud / Firebase console.
             </p>
           </div>
         </div>
 
-        <div className="bg-[#FCFAFF] border border-[#CBA3F5] p-3.5 rounded-2xl text-[11px] font-mono shrink-0 space-y-1.5 min-w-[260px]">
+        <div className="bg-[#120B22] border border-[#35205F] p-3.5 rounded-2xl text-[11px] font-mono shrink-0 space-y-1.5 min-w-[260px]">
           <div className="flex items-center justify-between gap-4">
-            <span className="text-[#6B528E] font-bold">GCP Project:</span>
-            <span className="text-[#3B235C] font-bold">{firebaseConfigData.projectId}</span>
+            <span className="text-purple-300/70 font-bold">GCP Project:</span>
+            <span className="text-white font-bold">{firebaseConfigData.projectId}</span>
           </div>
           <div className="flex items-center justify-between gap-4">
-            <span className="text-[#6B528E] font-bold">Database ID:</span>
-            <span className="text-emerald-700 font-bold truncate max-w-[160px]">{firebaseConfigData.firestoreDatabaseId || '(default)'}</span>
+            <span className="text-purple-300/70 font-bold">Database ID:</span>
+            <span className="text-emerald-400 font-bold truncate max-w-[160px]">{firebaseConfigData.firestoreDatabaseId || '(default)'}</span>
           </div>
-          <div className="pt-1.5 border-t border-[#CBA3F5] text-[10px] text-[#6B528E]">
+          <div className="pt-1.5 border-t border-[#35205F] text-[10px] text-purple-300/50">
             Console: console.firebase.google.com
           </div>
         </div>
       </div>
 
       {/* SECTION 3: Table Explorer Outer Container */}
-      <div className="bg-[#FFFFFF] border border-[#B78AE8] rounded-3xl p-6 sm:p-8 shadow-md shadow-purple-900/5 space-y-4">
+      <div className="bg-[#160E2A] border border-[#2E1C50] rounded-3xl p-6 sm:p-8 shadow-xl shadow-purple-950/40 space-y-4">
         {/* Table Selector Tabs */}
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-2 overflow-x-auto pb-1">
@@ -187,8 +187,8 @@ export const DatabaseConsole: React.FC<DatabaseConsoleProps> = ({ onRefreshData 
                 onClick={() => setSelectedTable(tab.id as any)}
                 className={`px-3.5 py-2 rounded-xl text-xs font-mono transition-all cursor-pointer whitespace-nowrap ${
                   selectedTable === tab.id
-                    ? 'bg-[#8B4ED8] text-white font-bold shadow-sm'
-                    : 'bg-[#FCFAFF] text-[#3B235C] hover:bg-[#EDE1FF] border border-[#CBA3F5]'
+                    ? 'bg-purple-600 text-white font-bold shadow-sm'
+                    : 'bg-[#180F2F] text-purple-200 hover:bg-[#251545] border border-[#341F5C]'
                 }`}
               >
                 {tab.label}
@@ -199,27 +199,27 @@ export const DatabaseConsole: React.FC<DatabaseConsoleProps> = ({ onRefreshData 
           <button
             onClick={loadTableData}
             title="Reload Table Data"
-            className="p-2 rounded-xl bg-[#EDE1FF] hover:bg-[#EDE1FF]/80 text-[#3B235C] border border-[#B78AE8] transition-colors cursor-pointer shrink-0"
+            className="p-2 rounded-xl bg-[#251545] hover:bg-[#2F1B56] text-purple-200 border border-[#4C2888] transition-colors cursor-pointer shrink-0"
           >
-            <RotateCw className="h-3.5 w-3.5 text-[#8B4ED8]" />
+            <RotateCw className="h-3.5 w-3.5 text-purple-300" />
           </button>
         </div>
 
         {/* Table Content */}
-        <div className="rounded-2xl border border-[#CBA3F5] bg-[#FCFAFF] overflow-hidden shadow-sm">
-          <div className="p-3 bg-[#EDE1FF] border-b border-[#CBA3F5] flex items-center justify-between text-xs font-bold text-[#3B235C]">
+        <div className="rounded-2xl border border-[#321E59] bg-[#180F2F] overflow-hidden shadow-sm">
+          <div className="p-3 bg-[#21143D] border-b border-[#321E59] flex items-center justify-between text-xs font-bold text-white">
             <span className="font-mono">Table: {selectedTable}</span>
-            <span className="font-mono text-[#6B528E]">{tableData.length} records</span>
+            <span className="font-mono text-purple-300/70">{tableData.length} records</span>
           </div>
 
           <div className="overflow-x-auto max-h-[480px]">
             {tableData.length === 0 ? (
-              <div className="p-8 text-center text-xs text-[#6B528E] font-mono">
+              <div className="p-8 text-center text-xs text-purple-300/60 font-mono">
                 Table is empty.
               </div>
             ) : (
               <table className="w-full text-left text-xs font-mono">
-                <thead className="bg-[#EDE1FF]/50 text-[#3B235C] border-b border-[#CBA3F5] sticky top-0">
+                <thead className="bg-[#21143D] text-purple-200 border-b border-[#321E59] sticky top-0">
                   <tr>
                     {Object.keys(tableData[0] || {}).map((col) => (
                       <th key={col} className="py-2.5 px-4 font-bold uppercase text-[10px]">
@@ -228,16 +228,16 @@ export const DatabaseConsole: React.FC<DatabaseConsoleProps> = ({ onRefreshData 
                     ))}
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-[#CBA3F5]/40 bg-[#FFFFFF]">
+                <tbody className="divide-y divide-[#2B1B4B] bg-[#140D27]">
                   {tableData.map((row, i) => (
-                    <tr key={row.id || i} className="hover:bg-[#EDE1FF]/30 transition-colors">
+                    <tr key={row.id || i} className="hover:bg-[#251645] transition-colors">
                       {Object.keys(tableData[0] || {}).map((col) => {
                         const val = row[col];
                         const str = typeof val === 'object' ? JSON.stringify(val) : String(val);
                         const isLongHash = typeof val === 'string' && val.length === 64;
 
                         return (
-                          <td key={col} className="py-2.5 px-4 text-[#3B235C] max-w-xs truncate">
+                          <td key={col} className="py-2.5 px-4 text-purple-100 max-w-xs truncate">
                             {isLongHash ? truncateHash(str, 8, 8) : str}
                           </td>
                         );
@@ -253,41 +253,41 @@ export const DatabaseConsole: React.FC<DatabaseConsoleProps> = ({ onRefreshData 
 
       {/* Confirmation Modal for Reset */}
       {isResetModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#3B235C]/60 backdrop-blur-sm p-4 animate-fadeIn">
-          <div className="w-full max-w-md rounded-3xl border border-rose-300 bg-[#FFFFFF] p-6 shadow-2xl space-y-4 relative">
-            <div className="flex items-center gap-3 border-b border-[#CBA3F5] pb-3">
-              <div className="h-10 w-10 rounded-2xl bg-rose-100 border border-rose-300 text-rose-600 flex items-center justify-center shrink-0">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#090514]/80 backdrop-blur-sm p-4 animate-fadeIn">
+          <div className="w-full max-w-md rounded-3xl border border-rose-500/40 bg-[#160E2A] p-6 shadow-2xl space-y-4 relative text-purple-100">
+            <div className="flex items-center gap-3 border-b border-[#341F5C] pb-3">
+              <div className="h-10 w-10 rounded-2xl bg-rose-950/60 border border-rose-500/40 text-rose-400 flex items-center justify-center shrink-0">
                 <AlertTriangle className="h-5 w-5" />
               </div>
               <div>
-                <h3 className="text-base font-bold text-[#3B235C]">Reset Database to Default?</h3>
-                <p className="text-xs text-[#6B528E] mt-0.5">This action will reseed all tables</p>
+                <h3 className="text-base font-bold text-white">Reset Database to Default?</h3>
+                <p className="text-xs text-purple-300/70 mt-0.5">This action will reseed all tables</p>
               </div>
               <button
                 onClick={() => setIsResetModalOpen(false)}
-                className="absolute right-4 top-4 text-[#6B528E] hover:text-[#3B235C] p-1 cursor-pointer"
+                className="absolute right-4 top-4 text-purple-300/70 hover:text-white p-1 cursor-pointer"
               >
                 <X className="h-4 w-4" />
               </button>
             </div>
 
-            <div className="space-y-2 text-xs text-[#3B235C]">
+            <div className="space-y-2 text-xs text-purple-100">
               <p className="font-semibold">
                 Resetting the database will:
               </p>
-              <ul className="list-disc list-inside space-y-1 text-[#6B528E] pl-1 font-mono text-[11px]">
+              <ul className="list-disc list-inside space-y-1 text-purple-300/70 pl-1 font-mono text-[11px]">
                 <li>Clear custom recorded cookie events & monitored domain logs</li>
                 <li>Restore canonical CMP registry whitelist/blacklist</li>
                 <li>Re-initialize Genesis Block #0 for public & private ledgers</li>
               </ul>
             </div>
 
-            <div className="pt-3 border-t border-[#CBA3F5] flex items-center justify-end gap-2.5">
+            <div className="pt-3 border-t border-[#341F5C] flex items-center justify-end gap-2.5">
               <button
                 type="button"
                 onClick={() => setIsResetModalOpen(false)}
                 disabled={isResetting}
-                className="px-4 py-2 rounded-xl bg-[#EDE1FF] hover:bg-[#EDE1FF]/80 text-xs font-bold text-[#3B235C] border border-[#B78AE8] cursor-pointer"
+                className="px-4 py-2 rounded-xl bg-[#251545] hover:bg-[#2F1B56] text-xs font-bold text-purple-200 border border-[#4C2888] cursor-pointer"
               >
                 Cancel
               </button>
@@ -295,7 +295,7 @@ export const DatabaseConsole: React.FC<DatabaseConsoleProps> = ({ onRefreshData 
                 type="button"
                 onClick={handleExecuteReset}
                 disabled={isResetting}
-                className="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-xs font-bold text-white shadow-sm cursor-pointer disabled:opacity-50 flex items-center gap-1.5"
+                className="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-xs font-bold text-white shadow-sm cursor-pointer disabled:opacity-50 flex items-center gap-1.5"
               >
                 <Trash2 className="h-3.5 w-3.5" />
                 <span>{isResetting ? 'Resetting Tables...' : 'Confirm Reset'}</span>

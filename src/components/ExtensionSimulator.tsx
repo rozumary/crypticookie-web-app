@@ -287,16 +287,16 @@ export const ExtensionSimulator: React.FC<ExtensionSimulatorProps> = ({
   return (
     <div className="space-y-8 pb-12">
       {/* SECTION 1: Top Header Outer Container */}
-      <div className="bg-[#FFFFFF] border border-[#B78AE8] rounded-3xl p-6 sm:p-8 shadow-md shadow-purple-900/5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="bg-[#160E2A] border border-[#2E1C50] rounded-3xl p-6 sm:p-8 shadow-xl shadow-purple-950/40 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2">
-            <h1 className="text-2xl font-bold text-[#3B235C] tracking-tight">Active Website & CMP Monitor</h1>
-            <span className="flex items-center gap-1 px-3 py-1 rounded-full bg-[#EDE1FF] text-[#8B4ED8] border border-[#B78AE8] text-[11px] font-mono font-semibold">
-              <Radio className="h-3 w-3 text-[#8B4ED8] animate-pulse" />
+            <h1 className="text-2xl font-bold text-white tracking-tight">Active Website & CMP Monitor</h1>
+            <span className="flex items-center gap-1 px-3 py-1 rounded-full bg-[#251545] text-purple-300 border border-[#4C2888] text-[11px] font-mono font-semibold">
+              <Radio className="h-3 w-3 text-purple-300 animate-pulse" />
               Live Audit Active
             </span>
           </div>
-          <p className="text-xs text-[#6B528E] mt-1">
+          <p className="text-xs text-purple-300/70 mt-1">
             Type any website domain below to audit its real cookies, verify CMP hash on-chain, or install to Chrome.
           </p>
         </div>
@@ -304,7 +304,7 @@ export const ExtensionSimulator: React.FC<ExtensionSimulatorProps> = ({
         <div className="flex items-center gap-3">
           <button
             onClick={() => setIsInstallModalOpen(true)}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#8B4ED8] hover:bg-[#783ec0] text-white text-xs font-bold shadow-sm transition-all cursor-pointer hover:scale-105 active:scale-95"
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold shadow-md shadow-purple-900/30 transition-all cursor-pointer hover:scale-105 active:scale-95"
           >
             <Sparkles className="h-4 w-4 text-white" />
             <span>Install to Real Browser</span>
@@ -313,42 +313,42 @@ export const ExtensionSimulator: React.FC<ExtensionSimulatorProps> = ({
       </div>
 
       {/* SECTION 2: Interactive Browser Window Outer Container */}
-      <div className="bg-[#FFFFFF] border border-[#B78AE8] rounded-3xl p-6 sm:p-8 shadow-md shadow-purple-900/5 space-y-4">
+      <div className="bg-[#160E2A] border border-[#2E1C50] rounded-3xl p-6 sm:p-8 shadow-xl shadow-purple-950/40 space-y-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-base font-bold text-[#3B235C] flex items-center gap-2">
-            <Globe className="h-4 w-4 text-[#8B4ED8]" />
+          <h2 className="text-base font-bold text-white flex items-center gap-2">
+            <Globe className="h-4 w-4 text-purple-300" />
             <span>Simulator Browser Frame</span>
           </h2>
-          <span className="text-xs font-mono font-semibold text-[#8B4ED8] bg-[#EDE1FF] px-3 py-1 rounded-full border border-[#B78AE8]">
+          <span className="text-xs font-mono font-semibold text-purple-300 bg-[#251545] px-3 py-1 rounded-full border border-[#4C2888]">
             {currentDomain}
           </span>
         </div>
 
         {/* Clean Interactive Browser Window Frame */}
-        <div className="rounded-2xl border border-[#CBA3F5] bg-[#FCFAFF] shadow-sm overflow-hidden">
+        <div className="rounded-2xl border border-[#341F5C] bg-[#140D27] shadow-sm overflow-hidden">
           {/* Browser Top Navigation Toolbar */}
-          <div className="flex items-center gap-3 border-b border-[#CBA3F5] bg-[#F3ECFF] px-4 py-3">
+          <div className="flex items-center gap-3 border-b border-[#341F5C] bg-[#1C1233] px-4 py-3">
             {/* Window dots */}
             <div className="flex items-center gap-1.5 shrink-0">
-              <span className="h-3 w-3 rounded-full bg-rose-400 inline-block" />
-              <span className="h-3 w-3 rounded-full bg-amber-400 inline-block" />
-              <span className="h-3 w-3 rounded-full bg-emerald-400 inline-block" />
+              <span className="h-3 w-3 rounded-full bg-rose-500 inline-block" />
+              <span className="h-3 w-3 rounded-full bg-amber-500 inline-block" />
+              <span className="h-3 w-3 rounded-full bg-emerald-500 inline-block" />
             </div>
 
             {/* Clean URL Input Bar */}
-            <form onSubmit={handleNavigateManualDomain} className="flex flex-1 items-center gap-2 rounded-xl bg-[#FFFFFF] px-3.5 py-2 border border-[#B78AE8] text-xs shadow-inner">
-              <Globe className="h-4 w-4 text-[#8B4ED8] shrink-0" />
-              <span className="text-[#6B528E] font-mono">https://</span>
+            <form onSubmit={handleNavigateManualDomain} className="flex flex-1 items-center gap-2 rounded-xl bg-[#120B22] px-3.5 py-2 border border-[#35205F] text-xs shadow-inner">
+              <Globe className="h-4 w-4 text-purple-300 shrink-0" />
+              <span className="text-purple-300/60 font-mono">https://</span>
               <input
                 type="text"
                 value={currentDomain}
                 onChange={(e) => setCurrentDomain(e.target.value)}
-                className="w-full bg-transparent text-[#3B235C] font-mono focus:outline-none placeholder-[#6B528E]/40"
+                className="w-full bg-transparent text-purple-100 font-mono focus:outline-none placeholder-purple-400/40"
                 placeholder="Type any website (e.g. google.com, lazada.com, shopee.ph, cnn.com)"
               />
               <button
                 type="submit"
-                className="px-3 py-1 rounded-lg bg-[#8B4ED8] hover:bg-[#783ec0] text-white font-medium text-xs shrink-0 transition-colors cursor-pointer"
+                className="px-3 py-1 rounded-lg bg-purple-600 hover:bg-purple-500 text-white font-medium text-xs shrink-0 transition-colors cursor-pointer"
               >
                 Open Site
               </button>
@@ -362,29 +362,29 @@ export const ExtensionSimulator: React.FC<ExtensionSimulatorProps> = ({
                 handleNavigateManualDomain();
               }}
               title="Re-audit website"
-              className="p-2 text-[#6B528E] hover:text-[#3B235C] hover:bg-[#EDE1FF] rounded-xl transition-colors cursor-pointer shrink-0"
+              className="p-2 text-purple-300/70 hover:text-white hover:bg-[#2A184E] rounded-xl transition-colors cursor-pointer shrink-0"
             >
-              <RotateCw className={`h-4 w-4 ${isAuditingDomain ? 'animate-spin text-[#8B4ED8]' : ''}`} />
+              <RotateCw className={`h-4 w-4 ${isAuditingDomain ? 'animate-spin text-purple-300' : ''}`} />
             </button>
           </div>
 
           {/* Browser Page Viewport */}
-          <div className="p-6 sm:p-8 bg-[#FFFFFF] min-h-[380px] flex flex-col justify-between space-y-6">
+          <div className="p-6 sm:p-8 bg-[#180F2F] min-h-[380px] flex flex-col justify-between space-y-6">
             {/* Simulated Webpage Header & Sniffed Trackers Bar */}
             <div className="space-y-4">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-xl bg-[#FCFAFF] border border-[#CBA3F5]">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-xl bg-[#1B1133] border border-[#341F5C]">
                 <div className="flex items-center gap-3">
-                  <div className="h-10 w-10 rounded-xl bg-[#EDE1FF] border border-[#B78AE8] flex items-center justify-center text-[#8B4ED8] font-mono font-bold text-base shrink-0">
+                  <div className="h-10 w-10 rounded-xl bg-[#251545] border border-[#4C2888] flex items-center justify-center text-purple-300 font-mono font-bold text-base shrink-0">
                     {currentDomain.charAt(0).toUpperCase()}
                   </div>
                   <div>
                     <div className="flex items-center gap-2">
-                      <span className="font-mono text-sm font-bold text-[#3B235C]">{currentDomain}</span>
-                      <span className="px-2 py-0.5 rounded text-[10px] font-mono bg-[#EDE1FF] text-[#8B4ED8] border border-[#B78AE8]">
+                      <span className="font-mono text-sm font-bold text-purple-100">{currentDomain}</span>
+                      <span className="px-2 py-0.5 rounded text-[10px] font-mono bg-[#251545] text-purple-300 border border-[#4C2888]">
                         {detectedTrackers.length} Trackers Sniffed
                       </span>
                     </div>
-                    <p className="text-xs text-[#6B528E] mt-0.5">
+                    <p className="text-xs text-purple-300/70 mt-0.5">
                       Live DOM intercepted • SHA-256 Digest verified against registry
                     </p>
                   </div>
@@ -397,10 +397,10 @@ export const ExtensionSimulator: React.FC<ExtensionSimulatorProps> = ({
                       key={idx}
                       className={`text-[10px] px-2.5 py-1 rounded-lg font-mono flex items-center gap-1 ${
                         t.category === 'Fingerprinting' || t.blocked
-                          ? 'bg-rose-100 text-rose-800 border border-rose-300'
+                          ? 'bg-rose-950/80 text-rose-300 border border-rose-800/60'
                           : t.category === 'Advertising'
-                          ? 'bg-amber-100 text-amber-800 border border-amber-300'
-                          : 'bg-purple-100 text-purple-800 border border-purple-300'
+                          ? 'bg-amber-950/80 text-amber-300 border border-amber-800/60'
+                          : 'bg-purple-950/80 text-purple-300 border border-purple-800/60'
                       }`}
                     >
                       <Cookie className="h-3 w-3" />
@@ -414,15 +414,15 @@ export const ExtensionSimulator: React.FC<ExtensionSimulatorProps> = ({
               <div className="flex items-center justify-between">
                 <button
                   onClick={() => onNavigateTab('ai_bot')}
-                  className="text-xs text-[#8B4ED8] hover:text-[#3B235C] bg-[#EDE1FF] hover:bg-[#EDE1FF]/80 border border-[#B78AE8] rounded-xl px-3 py-1.5 flex items-center gap-1.5 cursor-pointer transition-all shadow-sm font-semibold"
+                  className="text-xs text-purple-300 hover:text-white bg-[#251545] hover:bg-[#2F1B56] border border-[#4C2888] rounded-xl px-3 py-1.5 flex items-center gap-1.5 cursor-pointer transition-all shadow-sm font-semibold"
                 >
-                  <Bot className="h-3.5 w-3.5 text-[#8B4ED8]" />
+                  <Bot className="h-3.5 w-3.5 text-purple-300" />
                   <span>Ask AI Bot About {currentDomain}</span>
                 </button>
 
                 <button
                   onClick={() => setShowTechnicalDetails(!showTechnicalDetails)}
-                  className="text-xs text-[#6B528E] hover:text-[#3B235C] flex items-center gap-1 inline-flex cursor-pointer font-medium"
+                  className="text-xs text-purple-300/70 hover:text-white flex items-center gap-1 inline-flex cursor-pointer font-medium"
                 >
                   <span>{showTechnicalDetails ? 'Hide' : 'Inspect'} Raw Script & Hash</span>
                   {showTechnicalDetails ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
@@ -430,26 +430,26 @@ export const ExtensionSimulator: React.FC<ExtensionSimulatorProps> = ({
               </div>
 
               {showTechnicalDetails && (
-                <div className="p-4 rounded-xl bg-[#FCFAFF] border border-[#CBA3F5] space-y-3 text-xs animate-fadeIn">
+                <div className="p-4 rounded-xl bg-[#1B1133] border border-[#341F5C] space-y-3 text-xs animate-fadeIn">
                   <div>
-                    <label className="block text-[11px] font-semibold text-[#3B235C] mb-1">CMP Script URL / Intercepted Payload</label>
+                    <label className="block text-[11px] font-semibold text-purple-200 mb-1">CMP Script URL / Intercepted Payload</label>
                     <input
                       type="text"
                       value={scriptInput}
                       onChange={(e) => setScriptInput(e.target.value)}
-                      className="w-full bg-[#FFFFFF] border border-[#CBA3F5] rounded-lg px-3 py-2 text-[#3B235C] font-mono text-xs focus:outline-none"
+                      className="w-full bg-[#120B22] border border-[#35205F] rounded-lg px-3 py-2 text-purple-100 font-mono text-xs focus:outline-none"
                     />
                   </div>
-                  <div className="flex items-center justify-between font-mono text-[11px] text-[#6B528E]">
+                  <div className="flex items-center justify-between font-mono text-[11px] text-purple-300/70">
                     <div className="flex items-center gap-2">
                       <span>SHA-256 Digest:</span>
-                      <span className="text-[#8B4ED8] font-bold">{truncateHash(currentScriptHash, 16, 16)}</span>
+                      <span className="text-purple-300 font-bold">{truncateHash(currentScriptHash, 16, 16)}</span>
                     </div>
                     <button
                       onClick={handleCopyHash}
-                      className="flex items-center gap-1 text-[#8B4ED8] hover:text-[#3B235C] cursor-pointer font-semibold"
+                      className="flex items-center gap-1 text-purple-300 hover:text-white cursor-pointer font-semibold"
                     >
-                      {copiedHash ? <Check className="h-3 w-3 text-emerald-600" /> : <Copy className="h-3 w-3" />}
+                      {copiedHash ? <Check className="h-3 w-3 text-emerald-400" /> : <Copy className="h-3 w-3" />}
                       <span>{copiedHash ? 'Copied' : 'Copy'}</span>
                     </button>
                   </div>
@@ -459,19 +459,19 @@ export const ExtensionSimulator: React.FC<ExtensionSimulatorProps> = ({
 
             {/* Unified Smart Consent Shield Banner (Single, Clean Prompt) */}
             {bannerVisible ? (
-              <div className="rounded-2xl border border-[#B78AE8] bg-[#EDE1FF]/80 p-5 sm:p-6 shadow-sm space-y-4 animate-fadeIn">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#B78AE8]/40 pb-3">
+              <div className="rounded-2xl border border-[#4C2888] bg-[#251545] p-5 sm:p-6 shadow-md space-y-4 animate-fadeIn">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#3E246E] pb-3">
                   <div className="flex items-center gap-2.5">
-                    <div className="h-9 w-9 rounded-xl bg-[#8B4ED8] text-white flex items-center justify-center shrink-0 shadow-sm">
+                    <div className="h-9 w-9 rounded-xl bg-purple-600 text-white flex items-center justify-center shrink-0 shadow-sm">
                       <Shield className="h-5 w-5" />
                     </div>
                     <div>
-                      <h3 className="text-sm font-bold text-[#3B235C] flex items-center gap-2">
+                      <h3 className="text-sm font-bold text-white flex items-center gap-2">
                         <span>Cookie Consent Shield</span>
-                        <span className="text-xs font-normal text-[#6B528E] font-mono">({cmpItemName})</span>
+                        <span className="text-xs font-normal text-purple-300/70 font-mono">({cmpItemName})</span>
                       </h3>
-                      <p className="text-xs text-[#6B528E] mt-0.5">
-                        Recommendation Engine: <strong className="text-[#8B4ED8] font-bold">{guidanceRec}</strong>
+                      <p className="text-xs text-purple-300/70 mt-0.5">
+                        Recommendation Engine: <strong className="text-purple-300 font-bold">{guidanceRec}</strong>
                       </p>
                     </div>
                   </div>
@@ -481,25 +481,25 @@ export const ExtensionSimulator: React.FC<ExtensionSimulatorProps> = ({
                     <span
                       className={`px-3 py-1 rounded-full text-xs font-mono font-bold flex items-center gap-1.5 ${
                         verificationResult === 'Verified'
-                          ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
+                          ? 'bg-emerald-950/70 text-emerald-300 border border-emerald-500/30'
                           : verificationResult === 'Warning'
-                          ? 'bg-rose-100 text-rose-800 border border-rose-300'
-                          : 'bg-purple-100 text-purple-800 border border-purple-300'
+                          ? 'bg-rose-950/70 text-rose-300 border border-rose-500/30'
+                          : 'bg-purple-950/70 text-purple-300 border border-purple-500/30'
                       }`}
                     >
                       {verificationResult === 'Verified' ? (
                         <>
-                          <ShieldCheck className="h-3.5 w-3.5 text-emerald-700" />
+                          <ShieldCheck className="h-3.5 w-3.5 text-emerald-400" />
                           <span>✓ Whitelist Verified</span>
                         </>
                       ) : verificationResult === 'Warning' ? (
                         <>
-                          <ShieldAlert className="h-3.5 w-3.5 text-rose-700" />
+                          <ShieldAlert className="h-3.5 w-3.5 text-rose-400" />
                           <span>⚠ Dark Pattern Risk</span>
                         </>
                       ) : (
                         <>
-                          <Shield className="h-3.5 w-3.5 text-purple-700" />
+                          <Shield className="h-3.5 w-3.5 text-purple-400" />
                           <span>ℹ Unverified CMP</span>
                         </>
                       )}
@@ -507,7 +507,7 @@ export const ExtensionSimulator: React.FC<ExtensionSimulatorProps> = ({
 
                     <button
                       onClick={() => setBannerVisible(false)}
-                      className="p-1 rounded-lg text-[#6B528E] hover:text-[#3B235C] hover:bg-[#FFFFFF] transition-colors cursor-pointer"
+                      className="p-1 rounded-lg text-purple-300/70 hover:text-white hover:bg-[#3E246E] transition-colors cursor-pointer"
                       title="Dismiss Shield"
                     >
                       <X className="h-4 w-4" />
@@ -517,26 +517,26 @@ export const ExtensionSimulator: React.FC<ExtensionSimulatorProps> = ({
 
                 {/* Action Buttons */}
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1">
-                  <span className="text-xs text-[#6B528E]">
+                  <span className="text-xs text-purple-300/70">
                     Choose your consent preference to record this decision on the hybrid blockchain:
                   </span>
 
                   <div className="flex items-center gap-2.5 shrink-0">
                     <button
                       onClick={() => handleExecuteConsentAction('reject')}
-                      className="px-4 py-2 rounded-xl bg-rose-100 hover:bg-rose-200 text-rose-800 border border-rose-300 text-xs font-bold cursor-pointer transition-all hover:scale-105 active:scale-95"
+                      className="px-4 py-2 rounded-xl bg-rose-950/80 hover:bg-rose-900 text-rose-200 border border-rose-800/60 text-xs font-bold cursor-pointer transition-all hover:scale-105 active:scale-95"
                     >
                       Reject Trackers
                     </button>
                     <button
                       onClick={() => handleExecuteConsentAction('customize')}
-                      className="px-4 py-2 rounded-xl bg-[#FFFFFF] hover:bg-[#FCFAFF] text-[#3B235C] border border-[#B78AE8] text-xs font-semibold cursor-pointer transition-all"
+                      className="px-4 py-2 rounded-xl bg-[#1B1133] hover:bg-[#251645] text-purple-200 border border-[#3E246E] text-xs font-semibold cursor-pointer transition-all"
                     >
                       Customize
                     </button>
                     <button
                       onClick={() => handleExecuteConsentAction('accept')}
-                      className="px-5 py-2 rounded-xl bg-[#8B4ED8] hover:bg-[#783ec0] text-white text-xs font-bold shadow-sm cursor-pointer transition-all hover:scale-105 active:scale-95"
+                      className="px-5 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold shadow-md cursor-pointer transition-all hover:scale-105 active:scale-95"
                     >
                       Accept Verified
                     </button>
@@ -544,15 +544,15 @@ export const ExtensionSimulator: React.FC<ExtensionSimulatorProps> = ({
                 </div>
               </div>
             ) : (
-              <div className="p-6 rounded-2xl bg-[#EDE1FF]/50 border border-[#B78AE8] text-center space-y-2">
-                <CheckCircle2 className="h-8 w-8 text-emerald-600 mx-auto" />
-                <h4 className="text-sm font-bold text-[#3B235C]">Consent Decision Logged</h4>
-                <p className="text-xs text-[#6B528E]">
+              <div className="p-6 rounded-2xl bg-[#251545]/60 border border-[#4C2888] text-center space-y-2">
+                <CheckCircle2 className="h-8 w-8 text-emerald-400 mx-auto" />
+                <h4 className="text-sm font-bold text-white">Consent Decision Logged</h4>
+                <p className="text-xs text-purple-300/70">
                   Decision committed to local block and synchronized with Firebase Firestore.
                 </p>
                 <button
                   onClick={() => setBannerVisible(true)}
-                  className="mt-2 text-xs text-[#8B4ED8] hover:text-[#3B235C] underline cursor-pointer font-semibold"
+                  className="mt-2 text-xs text-purple-300 hover:text-white underline cursor-pointer font-semibold"
                 >
                   Reset & Change Consent Decision
                 </button>
@@ -561,16 +561,16 @@ export const ExtensionSimulator: React.FC<ExtensionSimulatorProps> = ({
 
             {/* Transaction Success Toast */}
             {lastCommittedBlock && (
-              <div className="rounded-xl border border-[#B78AE8] bg-[#EDE1FF] p-3.5 flex items-center justify-between animate-fadeIn">
-                <div className="flex items-center gap-2 text-xs text-[#3B235C] font-medium">
-                  <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
+              <div className="rounded-xl border border-[#4C2888] bg-[#251545] p-3.5 flex items-center justify-between animate-fadeIn">
+                <div className="flex items-center gap-2 text-xs text-purple-200 font-medium">
+                  <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0" />
                   <span>
                     Block #{lastCommittedBlock.publicIndex} synced to Blockchain ({truncateHash(lastCommittedBlock.hash, 8, 8)})
                   </span>
                 </div>
                 <button
                   onClick={() => onNavigateTab('blockchain')}
-                  className="text-xs font-bold text-[#8B4ED8] hover:text-[#3B235C] flex items-center gap-1 cursor-pointer"
+                  className="text-xs font-bold text-purple-300 hover:text-white flex items-center gap-1 cursor-pointer"
                 >
                   <span>View on Blockchain</span>
                   <Layers className="h-3 w-3" />
@@ -582,12 +582,12 @@ export const ExtensionSimulator: React.FC<ExtensionSimulatorProps> = ({
       </div>
 
       {/* SECTION 3: Live Monitored Domains History Table Outer Container */}
-      <div className="bg-[#FFFFFF] border border-[#B78AE8] rounded-3xl p-6 sm:p-8 shadow-md shadow-purple-900/5 space-y-4">
+      <div className="bg-[#160E2A] border border-[#2E1C50] rounded-3xl p-6 sm:p-8 shadow-xl shadow-purple-950/40 space-y-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Eye className="h-4 w-4 text-[#8B4ED8]" />
-            <h3 className="text-sm font-bold text-[#3B235C]">Live Monitored Domains History</h3>
-            <span className="text-[10px] px-2.5 py-0.5 rounded-full bg-[#EDE1FF] text-[#8B4ED8] border border-[#B78AE8] font-mono font-semibold">
+            <Eye className="h-4 w-4 text-purple-300" />
+            <h3 className="text-sm font-bold text-white">Live Monitored Domains History</h3>
+            <span className="text-[10px] px-2.5 py-0.5 rounded-full bg-[#251545] text-purple-300 border border-[#4C2888] font-mono font-semibold">
               {monitoredHistory.length} Logged
             </span>
           </div>
@@ -596,14 +596,14 @@ export const ExtensionSimulator: React.FC<ExtensionSimulatorProps> = ({
             <button
               onClick={refreshMonitoredHistory}
               title="Refresh logs"
-              className="p-1.5 rounded-lg bg-[#EDE1FF] hover:bg-[#EDE1FF]/80 text-[#3B235C] border border-[#B78AE8] text-xs cursor-pointer"
+              className="p-1.5 rounded-lg bg-[#251545] hover:bg-[#2F1B56] text-purple-200 border border-[#4C2888] text-xs cursor-pointer"
             >
               <RotateCw className="h-3.5 w-3.5" />
             </button>
             {monitoredHistory.length > 0 && (
               <button
                 onClick={handleClearHistory}
-                className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-rose-100 hover:bg-rose-200 text-rose-800 border border-rose-300 text-xs font-semibold cursor-pointer"
+                className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-rose-950/80 hover:bg-rose-900 text-rose-200 border border-rose-800/60 text-xs font-semibold cursor-pointer"
               >
                 <Trash2 className="h-3 w-3" />
                 <span>Clear</span>
@@ -612,16 +612,16 @@ export const ExtensionSimulator: React.FC<ExtensionSimulatorProps> = ({
           </div>
         </div>
 
-        <div className="bg-[#FCFAFF] border border-[#CBA3F5] rounded-2xl overflow-hidden shadow-sm">
+        <div className="bg-[#180F2F] border border-[#321E59] rounded-2xl overflow-hidden shadow-sm">
           {monitoredHistory.length === 0 ? (
-            <div className="text-center py-8 text-xs text-[#6B528E] font-mono">
+            <div className="text-center py-8 text-xs text-purple-300/60 font-mono">
               No website monitoring events recorded yet. Type any domain above to start auditing.
             </div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs font-mono">
                 <thead>
-                  <tr className="border-b border-[#CBA3F5] bg-[#EDE1FF] text-[11px] text-[#3B235C] font-bold">
+                  <tr className="border-b border-[#321E59] bg-[#21143D] text-[11px] text-purple-200 font-bold">
                     <th className="py-3 px-4">Domain / Website</th>
                     <th className="py-3 px-4">CMP Script Name</th>
                     <th className="py-3 px-4">Verification</th>
@@ -630,38 +630,38 @@ export const ExtensionSimulator: React.FC<ExtensionSimulatorProps> = ({
                     <th className="py-3 px-4">Timestamp</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-[#CBA3F5]/40">
+                <tbody className="divide-y divide-[#2B1B4B]">
                   {monitoredHistory.map((item) => (
-                    <tr key={item.id} className="hover:bg-[#F3ECFF] transition-colors">
-                      <td className="py-2.5 px-4 text-[#3B235C] font-bold flex items-center gap-1.5">
-                        <Globe className="h-3.5 w-3.5 text-[#8B4ED8]" />
+                    <tr key={item.id} className="hover:bg-[#251645] transition-colors">
+                      <td className="py-2.5 px-4 text-purple-100 font-bold flex items-center gap-1.5">
+                        <Globe className="h-3.5 w-3.5 text-purple-300" />
                         <span>{item.domain}</span>
                       </td>
-                      <td className="py-2.5 px-4 text-[#6B528E] max-w-[160px] truncate">{item.cmp_name}</td>
+                      <td className="py-2.5 px-4 text-purple-300/70 max-w-[160px] truncate">{item.cmp_name}</td>
                       <td className="py-2.5 px-4">
                         <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
                           item.verification_result === 'Verified'
-                            ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
+                            ? 'bg-emerald-950/70 text-emerald-300 border border-emerald-500/30'
                             : item.verification_result === 'Warning'
-                            ? 'bg-rose-100 text-rose-800 border border-rose-300'
-                            : 'bg-purple-100 text-purple-800 border border-purple-300'
+                            ? 'bg-rose-950/70 text-rose-300 border border-rose-500/30'
+                            : 'bg-purple-950/70 text-purple-300 border border-purple-500/30'
                         }`}>
                           {item.verification_result}
                         </span>
                       </td>
-                      <td className="py-2.5 px-4 text-[#3B235C]">{item.trackers_count} trackers</td>
+                      <td className="py-2.5 px-4 text-purple-200">{item.trackers_count} trackers</td>
                       <td className="py-2.5 px-4">
                         <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
                           item.privacy_risk_level === 'Critical' || item.privacy_risk_level === 'High'
-                            ? 'text-rose-800 bg-rose-100'
+                            ? 'text-rose-300 bg-rose-950/80 border border-rose-800/60'
                             : item.privacy_risk_level === 'Moderate'
-                            ? 'text-amber-800 bg-amber-100'
-                            : 'text-emerald-800 bg-emerald-100'
+                            ? 'text-amber-300 bg-amber-950/80 border border-amber-800/60'
+                            : 'text-emerald-300 bg-emerald-950/80 border border-emerald-800/60'
                         }`}>
                           {item.privacy_risk_level}
                         </span>
                       </td>
-                      <td className="py-2.5 px-4 text-[#6B528E] text-[10px]">
+                      <td className="py-2.5 px-4 text-purple-300/60 text-[10px]">
                         {new Date(item.timestamp).toLocaleTimeString()}
                       </td>
                     </tr>

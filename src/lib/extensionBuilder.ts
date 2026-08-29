@@ -11,8 +11,8 @@ export interface ExtensionFile {
 export const EXTENSION_MANIFEST_JSON = `{
   "manifest_version": 3,
   "name": "Crypticookie: Live Website & CMP Consent Shield",
-  "version": "1.1.0",
-  "description": "Real-time active website detection, cookie & tracker sniffer, CMP verification, and hybrid blockchain consent auditing.",
+  "version": "1.2.0",
+  "description": "Real-time active website monitoring, cookie & tracker sniffer, CMP verification, and hybrid blockchain consent auditing with cloud database sync.",
   "permissions": [
     "activeTab",
     "tabs",
@@ -41,10 +41,15 @@ export const EXTENSION_MANIFEST_JSON = `{
   }
 }`;
 
-export const EXTENSION_BACKGROUND_JS = `/**
+export function getExtensionFiles(serverOrigin: string): ExtensionFile[] {
+  const apiOrigin = serverOrigin || (typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000');
+
+  const backgroundJs = `/**
  * Crypticookie Background Service Worker (Manifest V3)
- * Monitors active tab navigation, detects websites, checks CMP script hashes, and manages blockchain logs.
+ * Monitors active tab navigation, checks CMP script hashes, and syncs consent transactions to Cloud Database in real-time.
  */
+
+const SERVER_API_URL = "${apiOrigin}";
 
 const CMP_REGISTRY_CACHE = new Map([
   ["9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08", { name: "OneTrust Privacy v6.32", status: "whitelist" }],
@@ -65,16 +70,16 @@ async function sha256(message) {
 
 // 1. Live Website Navigation Detector
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
-  if (changeInfo.status === 'complete' && tab.url && !tab.url.startsWith('chrome://')) {
+  if (changeInfo.status === 'complete' && tab.url && !tab.url.startsWith('chrome://') && !tab.url.startsWith('chrome-extension://')) {
     try {
       const urlObj = new URL(tab.url);
       const domain = urlObj.hostname;
       
       // Update badge indicator
-      chrome.action.setBadgeText({ tabId: tabId, text: "AUDIT" });
-      chrome.action.setBadgeBackgroundColor({ tabId: tabId, color: "#6366f1" });
+      chrome.action.setBadgeText({ tabId: tabId, text: "PROT" });
+      chrome.action.setBadgeBackgroundColor({ tabId: tabId, color: "#10b981" });
 
-      // Save visit to local monitored domains log
+      // Save visit locally
       chrome.storage.local.get({ monitored_sessions: [] }, (result) => {
         const list = result.monitored_sessions;
         const entry = {
@@ -87,6 +92,18 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
         if (list.length > 50) list.pop();
         chrome.storage.local.set({ monitored_sessions: list });
       });
+
+      // Real-time sync domain visit to Central Server & Firestore
+      fetch(SERVER_API_URL + "/api/domains/record", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          domain: domain,
+          url: tab.url,
+          title: tab.title || domain,
+          privacy_risk_level: domain.includes('track') || domain.includes('pirate') ? "High" : "Low"
+        })
+      }).catch(err => console.warn("Server domain sync note:", err));
     } catch (e) {
       console.warn("Navigation parse error:", e);
     }
@@ -104,7 +121,6 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       verification = entry.status === "whitelist" ? "Verified" : "Warning";
     }
 
-    // Set badge based on verification
     if (sender.tab && sender.tab.id) {
       const badgeColor = verification === 'Verified' ? '#10b981' : (verification === 'Warning' ? '#ef4444' : '#f59e0b');
       const badgeText = verification === 'Verified' ? 'SAFE' : (verification === 'Warning' ? 'RISK' : 'UNV');
@@ -115,7 +131,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     sendResponse({
       status: "success",
       verification: verification,
-      cmpName: entry ? entry.name : "Unregistered CMP Script",
+      cmpName: entry ? entry.name : "Crypticookie Auto-Inspector",
       hash: hash
     });
     return true;
@@ -127,6 +143,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       const payload = \`\${request.domain}|\${request.hash}|\${request.action}|\${timestamp}\`;
       const blockHash = await sha256(payload);
 
+      // 1. Save to Chrome local storage
       chrome.storage.local.get({ consent_ledger: [] }, (result) => {
         const ledger = result.consent_ledger;
         const block = {
@@ -140,71 +157,86 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         chrome.storage.local.set({ consent_ledger: ledger });
       });
 
+      // 2. REAL-TIME HTTP post to Central Server & Firestore Database
+      try {
+        const resp = await fetch(SERVER_API_URL + "/api/consent/record", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            domain: request.domain,
+            hash: request.hash,
+            action: request.action,
+            userId: request.userId || "u_chrome_extension_user",
+            timestamp: timestamp
+          })
+        });
+        const data = await resp.json();
+        console.log("Real-time Consent Sync Success:", data);
+      } catch (err) {
+        console.warn("Failed to reach central server, stored locally:", err);
+      }
+
       sendResponse({ status: "committed", blockHash: blockHash });
+    })();
+    return true;
+  }
+
+  if (request.type === "DOMAIN_VISITED") {
+    (async () => {
+      try {
+        await fetch(SERVER_API_URL + "/api/domains/record", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            domain: request.domain,
+            url: request.url,
+            title: request.title,
+            privacy_risk_level: request.privacy_risk_level || "Low"
+          })
+        });
+      } catch (e) {}
+      sendResponse({ status: "logged" });
     })();
     return true;
   }
 });
 `;
 
-export const EXTENSION_CONTENT_JS = `/**
- * Crypticookie Content Script (Live Website DOM Interceptor & Shield Injector)
- * Detects cookie dialogs, extracts script SHA-256 hashes, and renders the Crypticookie Privacy Shield.
+  const contentJs = `/**
+ * Crypticookie Content Script (Live Website Inspector & Privacy Shield Overlay)
+ * Runs on EVERY website to inspect cookies, verify CMP scripts, and render the Crypticookie Privacy Shield.
  */
 
 (function initCrypticookieInterceptor() {
-  let isShieldDismissed = false;
   const currentHost = window.location.hostname || 'website';
-  const dismissStorageKey = 'crypticookie_dismissed_' + currentHost;
-
-  try {
-    if (sessionStorage.getItem(dismissStorageKey) === 'true') {
-      isShieldDismissed = true;
-    }
-  } catch (e) {}
-
-  const CMP_SELECTORS = [
-    '#onetrust-banner-sdk',
-    '#CybotCookiebotDialog',
-    '#klaro',
-    '.cc-banner',
-    '.cookie-consent-banner',
-    '[aria-label*="cookie" i]',
-    '[id*="cookie" i]'
-  ];
+  
+  // Do not run on internal extension or local pages
+  if (!currentHost || currentHost === 'localhost' || currentHost === '127.0.0.1') return;
 
   function computeScriptHashMock(domain) {
     if (domain.includes('mit.edu') || domain.includes('onetrust') || domain.includes('theverge')) {
       return '9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08';
     }
-    if (domain.includes('cookiebot') || domain.includes('bbc') || domain.includes('github')) {
+    if (domain.includes('cookiebot') || domain.includes('bbc') || domain.includes('github') || domain.includes('google')) {
       return '5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8';
     }
-    if (domain.includes('pirate') || domain.includes('track') || domain.includes('stream')) {
+    if (domain.includes('pirate') || domain.includes('track') || domain.includes('stream') || domain.includes('casino')) {
       return 'a591a6d40bf420404a011733cfb7b190d62c65bf0bcda32b57b277d9ad9f146e';
     }
     return '73926ef91823ab0288f34291f09e248b64e9123847a9821034f828108c90fe32';
   }
 
-  function dismissAndRemove() {
-    isShieldDismissed = true;
-    try {
-      sessionStorage.setItem(dismissStorageKey, 'true');
-    } catch (e) {}
-    const existing = document.getElementById('crypticookie-shield-root');
-    if (existing) {
-      existing.style.transition = 'opacity 0.25s ease, transform 0.25s ease';
-      existing.style.opacity = '0';
-      existing.style.transform = 'translateY(16px)';
-      setTimeout(() => {
-        existing.remove();
-      }, 250);
-    }
-  }
+  // Notify background script about website visit
+  chrome.runtime.sendMessage({
+    type: 'DOMAIN_VISITED',
+    domain: currentHost,
+    url: window.location.href,
+    title: document.title || currentHost,
+  });
 
-  function injectShieldBanner(verification, cmpName, hash) {
-    if (isShieldDismissed) return;
-    if (document.getElementById('crypticookie-shield-root')) return;
+  function renderShieldBanner(verification, cmpName, hash) {
+    let existing = document.getElementById('crypticookie-shield-root');
+    if (existing) existing.remove();
 
     const shieldDiv = document.createElement('div');
     shieldDiv.id = 'crypticookie-shield-root';
@@ -214,7 +246,7 @@ export const EXTENSION_CONTENT_JS = `/**
     const guidance = verification === 'Verified' ? 'Accept Necessary?' : (verification === 'Warning' ? 'Warning: Reject All' : 'Opt for Necessary?');
 
     shieldDiv.innerHTML = \`
-      <div class="crypticookie-banner-container">
+      <div class="crypticookie-banner-container" id="crypticookie-banner-box">
         <div class="crypticookie-header">
           <div class="crypticookie-brand">
             <div class="crypticookie-icon">🛡️</div>
@@ -223,18 +255,21 @@ export const EXTENSION_CONTENT_JS = `/**
               <span class="crypticookie-badge" style="background-color: \${badgeColor}">\${badgeText}</span>
             </div>
           </div>
-          <button id="crypticookie-close-btn" class="crypticookie-close" title="Dismiss Shield" type="button">&times;</button>
+          <div style="display:flex; align-items:center; gap:6px;">
+            <button id="crypticookie-minimize-btn" class="crypticookie-close" title="Minimize to Floating Icon" type="button">─</button>
+            <button id="crypticookie-close-btn" class="crypticookie-close" title="Dismiss Shield" type="button">&times;</button>
+          </div>
         </div>
         
         <div class="crypticookie-body">
           <div class="crypticookie-detail">
-            <strong>Website:</strong> <span class="crypticookie-rec-tag">\${window.location.hostname}</span>
+            <strong>Monitored Website:</strong> <span class="crypticookie-rec-tag">\${currentHost}</span>
           </div>
           <div class="crypticookie-detail">
-            <strong>CMP Name:</strong> \${cmpName}
+            <strong>Consent Framework:</strong> \${cmpName || 'Crypticookie Auto Inspector'}
           </div>
           <div class="crypticookie-detail">
-            <strong>Script Hash:</strong> <code class="crypticookie-code">\${hash.substring(0, 16)}...</code>
+            <strong>Script SHA-256:</strong> <code class="crypticookie-code">\${hash.substring(0, 16)}...</code>
           </div>
           <div class="crypticookie-recommendation">
             <strong>Guidance Engine:</strong> <span class="crypticookie-rec-tag">\${guidance}</span>
@@ -247,89 +282,106 @@ export const EXTENSION_CONTENT_JS = `/**
           <button id="crypticookie-action-audit" class="crypticookie-btn secondary" type="button">Audit on Chain</button>
         </div>
       </div>
+
+      <!-- Floating Minimized Badge -->
+      <div id="crypticookie-mini-badge" class="crypticookie-mini-badge" style="display:none;" title="Click to expand Crypticookie Privacy Shield">
+        <span style="font-size:14px;">🛡️</span>
+        <span style="font-weight:700; font-size:11px;">Crypticookie Shield</span>
+      </div>
     \`;
 
     document.body.appendChild(shieldDiv);
 
-    const closeBtn = document.getElementById('crypticookie-close-btn');
-    if (closeBtn) {
-      closeBtn.addEventListener('click', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        dismissAndRemove();
-      });
-    }
+    const bannerBox = document.getElementById('crypticookie-banner-box');
+    const miniBadge = document.getElementById('crypticookie-mini-badge');
+
+    const minimize = () => {
+      if (bannerBox) bannerBox.style.display = 'none';
+      if (miniBadge) miniBadge.style.display = 'flex';
+    };
+
+    const expand = () => {
+      if (bannerBox) bannerBox.style.display = 'block';
+      if (miniBadge) miniBadge.style.display = 'none';
+    };
+
+    document.getElementById('crypticookie-minimize-btn')?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      minimize();
+    });
+
+    document.getElementById('crypticookie-close-btn')?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      shieldDiv.remove();
+    });
+
+    miniBadge?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      expand();
+    });
 
     const handleAction = (action, clickedBtnId) => {
       const btn = document.getElementById(clickedBtnId);
       if (btn) {
-        btn.innerText = '✓ Recorded';
+        btn.innerText = '✓ Recorded to DB!';
+        btn.style.backgroundColor = '#10b981';
       }
 
       chrome.runtime.sendMessage({
         type: 'RECORD_CONSENT_TRANSACTION',
-        domain: window.location.hostname,
+        domain: currentHost,
         hash: hash,
         action: action
       }, (response) => {
         setTimeout(() => {
-          dismissAndRemove();
-        }, 1000);
+          minimize();
+        }, 1200);
       });
     };
 
     document.getElementById('crypticookie-action-accept')?.addEventListener('click', (e) => {
       e.preventDefault();
-      e.stopPropagation();
       handleAction('accept', 'crypticookie-action-accept');
     });
     document.getElementById('crypticookie-action-reject')?.addEventListener('click', (e) => {
       e.preventDefault();
-      e.stopPropagation();
       handleAction('reject', 'crypticookie-action-reject');
     });
     document.getElementById('crypticookie-action-audit')?.addEventListener('click', (e) => {
       e.preventDefault();
-      e.stopPropagation();
       handleAction('customize', 'crypticookie-action-audit');
     });
   }
 
-  // Monitor DOM
-  const observer = new MutationObserver(() => {
-    if (isShieldDismissed) return;
-    if (document.getElementById('crypticookie-shield-root')) return;
-
-    for (const selector of CMP_SELECTORS) {
-      const el = document.querySelector(selector);
-      if (el) {
-        const domain = window.location.hostname || 'example.com';
-        const hash = computeScriptHashMock(domain);
-        chrome.runtime.sendMessage({ type: 'VERIFY_CMP_HASH', hash: hash }, (res) => {
-          if (res && !isShieldDismissed) {
-            injectShieldBanner(res.verification, res.cmpName, res.hash);
-          }
-        });
-        break;
-      }
-    }
+  // Auto Inspection on website open
+  const scriptHash = computeScriptHashMock(currentHost);
+  chrome.runtime.sendMessage({ type: 'VERIFY_CMP_HASH', hash: scriptHash }, (res) => {
+    const verification = res ? res.verification : 'Unverified';
+    const cmpName = res ? res.cmpName : 'Auto Detected Web Inspector';
+    renderShieldBanner(verification, cmpName, scriptHash);
   });
 
-  observer.observe(document.body || document.documentElement, { childList: true, subtree: true });
+  // Listen for toolbar popup commands
+  chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
+    if (msg.type === 'SHOW_SHIELD_OVERLAY') {
+      renderShieldBanner('Verified', 'Crypticookie Manual Trigger', scriptHash);
+      sendResponse({ status: 'shown' });
+    }
+  });
 })();
 `;
 
-export const EXTENSION_POPUP_HTML = `<!DOCTYPE html>
+  const popupHtml = `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <title>Crypticookie Shield</title>
   <style>
     body {
-      width: 330px;
+      width: 320px;
       margin: 0;
       padding: 16px;
-      background: #070b19;
+      background: #0B0516;
       color: #f8fafc;
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       font-size: 13px;
@@ -339,23 +391,23 @@ export const EXTENSION_POPUP_HTML = `<!DOCTYPE html>
       align-items: center;
       justify-content: space-between;
       padding-bottom: 12px;
-      border-bottom: 1px solid #1e293b;
+      border-bottom: 1px solid #251545;
       margin-bottom: 14px;
     }
     .title {
       font-weight: 700;
       font-size: 14px;
-      color: #a78bfa;
+      color: #c084fc;
       display: flex;
       align-items: center;
       gap: 6px;
     }
     .status-card {
-      background: #0b1026;
-      border-radius: 10px;
+      background: #160E2A;
+      border-radius: 12px;
       padding: 12px;
       margin-bottom: 10px;
-      border: 1px solid #1e293b;
+      border: 1px solid #341F5C;
     }
     .badge {
       display: inline-block;
@@ -371,7 +423,7 @@ export const EXTENSION_POPUP_HTML = `<!DOCTYPE html>
       justify-content: space-between;
       margin-top: 6px;
       font-size: 11px;
-      color: #94a3b8;
+      color: #a78bfa;
     }
     .metric-val {
       font-weight: 600;
@@ -380,34 +432,39 @@ export const EXTENSION_POPUP_HTML = `<!DOCTYPE html>
     }
     .btn {
       width: 100%;
-      background: linear-gradient(135deg, #7c3aed, #2563eb);
+      background: #7c3aed;
       color: white;
       border: none;
-      padding: 10px;
-      border-radius: 8px;
-      font-weight: 600;
-      font-size: 12px;
+      padding: 9px;
+      border-radius: 10px;
+      font-weight: 700;
+      font-size: 11px;
       cursor: pointer;
       margin-top: 6px;
+      transition: all 0.15s ease;
     }
     .btn:hover {
-      opacity: 0.95;
+      opacity: 0.9;
+      transform: translateY(-1px);
     }
+    .btn.accept { background: #10b981; }
+    .btn.reject { background: #ef4444; }
+    .btn.dashboard { background: #4c2888; border: 1px solid #7c3aed; }
   </style>
 </head>
 <body>
   <div class="header">
     <div class="title">
       <span>🛡️</span>
-      <span>Crypticookie Shield v1.1</span>
+      <span>Crypticookie Shield v1.2</span>
     </div>
-    <span class="badge" id="site-status">Protected</span>
+    <span class="badge">REAL-TIME</span>
   </div>
 
   <div class="status-card">
-    <div style="color:#94a3b8; font-size:11px;">Active Monitored Website:</div>
+    <div style="color:#a78bfa; font-size:11px;">Active Monitored Website:</div>
     <div id="domain-name" style="font-weight:700; font-size:13px; margin-top:4px; word-break:break-all; color:#38bdf8; font-family:monospace;">
-      Detecting URL...
+      Detecting Tab...
     </div>
   </div>
 
@@ -417,40 +474,72 @@ export const EXTENSION_POPUP_HTML = `<!DOCTYPE html>
       <span class="metric-val" style="color:#34d399;">Active (Auto-Scan)</span>
     </div>
     <div class="metric-row">
-      <span>Cloud Firestore Sync</span>
+      <span>Firestore DB Sync</span>
       <span class="metric-val" style="color:#38bdf8;">Connected</span>
-    </div>
-    <div class="metric-row">
-      <span>CMP Whitelist Validation</span>
-      <span class="metric-val" id="cmp-state">SHA-256 Verified</span>
     </div>
   </div>
 
-  <button class="btn" id="open-dashboard-btn">Open Real-Time Web Dashboard</button>
+  <button class="btn" id="show-shield-btn">🛡️ Show Privacy Shield Overlay</button>
+  <button class="btn accept" id="quick-accept-btn">⚡ Record "Accept Necessary"</button>
+  <button class="btn reject" id="quick-reject-btn">🚫 Record "Reject All Trackers"</button>
+  <button class="btn dashboard" id="open-dashboard-btn">🌐 Open Web Dashboard</button>
 
   <script src="popup.js"></script>
 </body>
 </html>`;
 
-export const EXTENSION_POPUP_JS = `document.addEventListener('DOMContentLoaded', () => {
+  const popupJs = `document.addEventListener('DOMContentLoaded', () => {
+  let currentDomain = 'website';
+
   chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
     if (tabs[0] && tabs[0].url) {
       try {
         const url = new URL(tabs[0].url);
-        document.getElementById('domain-name').innerText = url.hostname;
+        currentDomain = url.hostname;
+        document.getElementById('domain-name').innerText = currentDomain;
       } catch (e) {
-        document.getElementById('domain-name').innerText = 'Local Browser Session';
+        document.getElementById('domain-name').innerText = 'Browser Session';
       }
     }
   });
 
-  document.getElementById('open-dashboard-btn').addEventListener('click', () => {
-    chrome.tabs.create({ url: 'http://localhost:3000' });
+  document.getElementById('show-shield-btn')?.addEventListener('click', () => {
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+      if (tabs[0] && tabs[0].id) {
+        chrome.tabs.sendMessage(tabs[0].id, { type: 'SHOW_SHIELD_OVERLAY' });
+      }
+    });
+  });
+
+  document.getElementById('quick-accept-btn')?.addEventListener('click', () => {
+    const btn = document.getElementById('quick-accept-btn');
+    if (btn) btn.innerText = '✓ Recorded!';
+    chrome.runtime.sendMessage({
+      type: 'RECORD_CONSENT_TRANSACTION',
+      domain: currentDomain,
+      hash: '5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8',
+      action: 'accept'
+    });
+  });
+
+  document.getElementById('quick-reject-btn')?.addEventListener('click', () => {
+    const btn = document.getElementById('quick-reject-btn');
+    if (btn) btn.innerText = '✓ Recorded!';
+    chrome.runtime.sendMessage({
+      type: 'RECORD_CONSENT_TRANSACTION',
+      domain: currentDomain,
+      hash: 'a591a6d40bf420404a011733cfb7b190d62c65bf0bcda32b57b277d9ad9f146e',
+      action: 'reject'
+    });
+  });
+
+  document.getElementById('open-dashboard-btn')?.addEventListener('click', () => {
+    chrome.tabs.create({ url: "${apiOrigin}" });
   });
 });
 `;
 
-export const EXTENSION_STYLES_CSS = `#crypticookie-shield-root {
+  const stylesCss = `#crypticookie-shield-root {
   position: fixed;
   bottom: 24px;
   right: 24px;
@@ -466,10 +555,10 @@ export const EXTENSION_STYLES_CSS = `#crypticookie-shield-root {
 }
 
 .crypticookie-banner-container {
-  background: #070b19;
-  border: 1px solid #1e293b;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.6), 0 8px 10px -6px rgba(0, 0, 0, 0.5);
-  border-radius: 14px;
+  background: #160E2A;
+  border: 1px solid #4C2888;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.7), 0 8px 10px -6px rgba(0, 0, 0, 0.6);
+  border-radius: 16px;
   padding: 16px;
   color: #f8fafc;
 }
@@ -500,7 +589,7 @@ export const EXTENSION_STYLES_CSS = `#crypticookie-shield-root {
 .crypticookie-title {
   font-weight: 700;
   font-size: 14px;
-  color: #a78bfa;
+  color: #c084fc;
 }
 
 .crypticookie-badge {
@@ -514,10 +603,10 @@ export const EXTENSION_STYLES_CSS = `#crypticookie-shield-root {
 }
 
 .crypticookie-close {
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  color: #cbd5e1;
-  font-size: 18px;
+  background: #251545;
+  border: 1px solid #4C2888;
+  color: #d8b4fe;
+  font-size: 16px;
   font-weight: 700;
   line-height: 1;
   width: 28px;
@@ -533,38 +622,32 @@ export const EXTENSION_STYLES_CSS = `#crypticookie-shield-root {
 }
 
 .crypticookie-close:hover {
-  background: rgba(239, 68, 68, 0.35);
-  border-color: rgba(239, 68, 68, 0.6);
+  background: #7c3aed;
   color: #ffffff;
-  transform: scale(1.08);
-}
-
-.crypticookie-close:active {
-  transform: scale(0.92);
 }
 
 .crypticookie-body {
-  background: #0b1026;
-  border-radius: 10px;
+  background: #0B0516;
+  border-radius: 12px;
   padding: 12px;
   font-size: 12px;
   margin-bottom: 12px;
   display: flex;
   flex-direction: column;
   gap: 6px;
-  border: 1px solid #1e293b;
+  border: 1px solid #251545;
 }
 
 .crypticookie-code {
-  background: #060a17;
-  padding: 2px 4px;
+  background: #160E2A;
+  padding: 2px 5px;
   border-radius: 4px;
   color: #38bdf8;
   font-family: monospace;
 }
 
 .crypticookie-rec-tag {
-  color: #a78bfa;
+  color: #c084fc;
   font-weight: 600;
 }
 
@@ -576,17 +659,18 @@ export const EXTENSION_STYLES_CSS = `#crypticookie-shield-root {
 
 .crypticookie-btn {
   padding: 8px 4px;
-  border-radius: 8px;
+  border-radius: 10px;
   border: none;
   font-size: 11px;
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
   text-align: center;
-  transition: opacity 0.15s;
+  transition: all 0.15s ease;
 }
 
 .crypticookie-btn:hover {
   opacity: 0.9;
+  transform: translateY(-1px);
 }
 
 .crypticookie-btn.primary {
@@ -603,9 +687,28 @@ export const EXTENSION_STYLES_CSS = `#crypticookie-shield-root {
   background: #334155;
   color: white;
 }
+
+.crypticookie-mini-badge {
+  background: #160E2A;
+  border: 1px solid #4C2888;
+  border-radius: 9999px;
+  padding: 8px 16px;
+  color: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+  transition: all 0.15s ease;
+}
+
+.crypticookie-mini-badge:hover {
+  border-color: #c084fc;
+  transform: scale(1.04);
+}
 `;
 
-export const EXTENSION_README_MD = `# Crypticookie: Live Website & CMP Consent Shield (Manifest V3)
+  const readmeMd = `# Crypticookie: Live Website & CMP Consent Shield (Manifest V3)
 
 ## How to Install Unpacked in Chrome, Brave, Edge:
 1. Extract this \`crypticookie-manifest-v3-extension.zip\` archive into a folder on your computer.
@@ -613,73 +716,81 @@ export const EXTENSION_README_MD = `# Crypticookie: Live Website & CMP Consent S
 3. Toggle ON **"Developer mode"** in the top-right corner.
 4. Click **"Load unpacked"** in the top-left toolbar.
 5. Select the extracted folder containing \`manifest.json\`.
-6. The Crypticookie extension is now active, actively detecting websites you open, evaluating CMP popups, and recording consent proofs!
+6. Every real website you open will now be automatically monitored, shielded, and synchronized in real-time with your Cloud Firestore Database!
 `;
 
-export const ALL_EXTENSION_FILES: ExtensionFile[] = [
-  {
-    name: 'manifest.json',
-    path: 'manifest.json',
-    language: 'json',
-    description: 'Manifest V3 configuration with activeTab, webNavigation, scripting, and storage permissions.',
-    content: EXTENSION_MANIFEST_JSON,
-  },
-  {
-    name: 'background.js',
-    path: 'background.js',
-    language: 'javascript',
-    description: 'Service worker monitoring website navigation, CMP hash lookups, SHA-256 cryptographic hashing, and local ledger storage.',
-    content: EXTENSION_BACKGROUND_JS,
-  },
-  {
-    name: 'content.js',
-    path: 'content.js',
-    language: 'javascript',
-    description: 'DOM Interceptor scanning for deceptive cookie banners, sniffing tracking tags, and injecting the Privacy Shield overlay.',
-    content: EXTENSION_CONTENT_JS,
-  },
-  {
-    name: 'popup.html',
-    path: 'popup.html',
-    language: 'html',
-    description: 'Extension toolbar popup UI displaying active detected website, tracker count, and cloud sync status.',
-    content: EXTENSION_POPUP_HTML,
-  },
-  {
-    name: 'popup.js',
-    path: 'popup.js',
-    language: 'javascript',
-    description: 'Popup script querying active browser tab details.',
-    content: EXTENSION_POPUP_JS,
-  },
-  {
-    name: 'styles.css',
-    path: 'styles.css',
-    language: 'css',
-    description: 'Crisp dark-mode styling for the injected DOM privacy shield.',
-    content: EXTENSION_STYLES_CSS,
-  },
-  {
-    name: 'README.md',
-    path: 'README.md',
-    language: 'markdown',
-    description: 'Installation and developer instructions for running unpacked in Chromium browsers.',
-    content: EXTENSION_README_MD,
-  },
-];
+  return [
+    {
+      name: 'manifest.json',
+      path: 'manifest.json',
+      language: 'json',
+      description: 'Manifest V3 configuration with activeTab, webNavigation, scripting, and storage permissions.',
+      content: EXTENSION_MANIFEST_JSON,
+    },
+    {
+      name: 'background.js',
+      path: 'background.js',
+      language: 'javascript',
+      description: 'Service worker monitoring website navigation, CMP hash lookups, SHA-256 cryptographic hashing, and cloud database sync.',
+      content: backgroundJs,
+    },
+    {
+      name: 'content.js',
+      path: 'content.js',
+      language: 'javascript',
+      description: 'DOM Interceptor running on every website to scan for trackers and render the Crypticookie Privacy Shield overlay.',
+      content: contentJs,
+    },
+    {
+      name: 'popup.html',
+      path: 'popup.html',
+      language: 'html',
+      description: 'Extension toolbar popup UI displaying active detected website and real-time database controls.',
+      content: popupHtml,
+    },
+    {
+      name: 'popup.js',
+      path: 'popup.js',
+      language: 'javascript',
+      description: 'Popup script enabling toolbar quick actions and page overlay triggers.',
+      content: popupJs,
+    },
+    {
+      name: 'styles.css',
+      path: 'styles.css',
+      language: 'css',
+      description: 'Crisp dark-mode styling for the injected DOM privacy shield.',
+      content: stylesCss,
+    },
+    {
+      name: 'README.md',
+      path: 'README.md',
+      language: 'markdown',
+      description: 'Installation and developer instructions for running unpacked in Chromium browsers.',
+      content: readmeMd,
+    },
+  ];
+}
+
+export const ALL_EXTENSION_FILES: ExtensionFile[] = getExtensionFiles(
+  typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000'
+);
 
 /**
  * Generate a downloadable .zip archive of the complete working Chrome Extension
  */
 export async function downloadExtensionZip(): Promise<void> {
+  const origin = typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000';
+  const files = getExtensionFiles(origin);
+
   const zip = new JSZip();
   
-  for (const file of ALL_EXTENSION_FILES) {
+  for (const file of files) {
     zip.file(file.name, file.content);
   }
 
-  // Create an icons folder with placeholder data URIs or SVG text
-  const iconSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 24 24" fill="none" stroke="#6366f1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>`;
+  // Create an icons folder
+  const iconSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>`;
   zip.file('icons/icon.svg', iconSvg);
 
   const content = await zip.generateAsync({ type: 'blob' });

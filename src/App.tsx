@@ -9,7 +9,7 @@ import { SettingsView } from './components/SettingsView';
 import { AIPrivacyBot } from './components/AIPrivacyBot';
 import { DatabaseConsole } from './components/DatabaseConsole';
 import { AuthModal } from './components/AuthModal';
-import { initializeDatabase, getDatabaseMetrics, db } from './lib/db';
+import { initializeDatabase, getDatabaseMetrics, db, setupFirestoreRealtimeListeners } from './lib/db';
 import { type User, type CookieEvent } from './types/database';
 
 export default function App() {
@@ -52,11 +52,17 @@ export default function App() {
 
   // Initial Boot
   useEffect(() => {
+    let unsubListeners: (() => void) | null = null;
     const boot = async () => {
       try {
         await initializeDatabase();
         setIsDbReady(true);
         await refreshDatabaseState();
+
+        // Start real-time Firestore listeners
+        unsubListeners = setupFirestoreRealtimeListeners(() => {
+          refreshDatabaseState();
+        });
 
         const storedUserId = localStorage.getItem('crypticookie_active_user_id');
         if (storedUserId) {
@@ -68,6 +74,10 @@ export default function App() {
       }
     };
     boot();
+
+    return () => {
+      if (unsubListeners) unsubListeners();
+    };
   }, []);
 
   const handleLogout = () => {

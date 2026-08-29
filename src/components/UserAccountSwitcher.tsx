@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { User, Users, Check, Plus, LogOut, ChevronDown, Sparkles, ShieldCheck } from 'lucide-react';
+import { Users, Check, ChevronDown } from 'lucide-react';
 import { type User as UserType } from '../types/database';
-import { db, broadcastDbUpdate, INITIAL_DEMO_USERS } from '../lib/db';
+import { db, INITIAL_DEMO_USERS } from '../lib/db';
 
 interface UserAccountSwitcherProps {
   currentUser: UserType | null;
@@ -17,7 +17,6 @@ export const UserAccountSwitcher: React.FC<UserAccountSwitcherProps> = ({
   onSelectUser,
   onOpenSignIn,
   onOpenSignUp,
-  onLogout,
   compact = false,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -53,28 +52,28 @@ export const UserAccountSwitcher: React.FC<UserAccountSwitcherProps> = ({
         onClick={() => setIsOpen(!isOpen)}
         className={`flex items-center gap-2 rounded-xl transition-all cursor-pointer font-medium ${
           compact
-            ? 'px-3 py-1.5 bg-[#170830] hover:bg-[#250B42] text-purple-200 border border-pink-500/30 text-xs'
-            : 'px-3.5 py-2 bg-[#170830] hover:bg-[#250B42] text-white border border-pink-500/40 text-xs shadow-md'
+            ? 'px-3 py-1.5 bg-[#140529] hover:bg-[#20093e] text-[#d8b4fe] border border-[#7e22ce]/40 text-xs'
+            : 'px-3.5 py-2 bg-[#140529] hover:bg-[#20093e] text-white border border-[#7e22ce]/50 text-xs shadow-md'
         }`}
       >
-        <div className="w-5 h-5 rounded-lg bg-gradient-to-r from-pink-600 to-purple-600 flex items-center justify-center text-white text-[10px] font-bold">
+        <div className="w-5 h-5 rounded-lg bg-[#6b21a8] border border-[#a855f7]/50 flex items-center justify-center text-white text-[10px] font-bold">
           {activeUser.username.charAt(0).toUpperCase()}
         </div>
         <span className="truncate max-w-[130px] font-semibold text-purple-100">{activeUser.username}</span>
-        <span className="text-[10px] px-1.5 py-0.5 rounded bg-purple-950 text-pink-300 border border-pink-500/30 hidden sm:inline font-mono">
+        <span className="text-[10px] px-1.5 py-0.5 rounded bg-[#1e0838] text-[#e879f9] border border-[#7e22ce]/40 hidden sm:inline font-mono">
           Account
         </span>
         <ChevronDown className="h-3.5 w-3.5 text-purple-300/70 shrink-0" />
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-72 rounded-2xl bg-[#14082B] border border-[#3A186B] shadow-2xl z-50 p-3 space-y-2.5 animate-fadeIn">
-          <div className="flex items-center justify-between pb-2 border-b border-[#29154A] px-1">
+        <div className="absolute right-0 mt-2 w-72 rounded-2xl bg-[#0f041e] border border-[#3b1366] shadow-2xl z-50 p-3 space-y-2.5 animate-fadeIn">
+          <div className="flex items-center justify-between pb-2 border-b border-[#22093e] px-1">
             <div className="flex items-center gap-1.5 text-xs font-bold text-white">
-              <Users className="h-4 w-4 text-pink-400" />
+              <Users className="h-4 w-4 text-[#e879f9]" />
               <span>Switch User Account</span>
             </div>
-            <span className="text-[10px] text-pink-400 font-mono">Logs & Status Isolated</span>
+            <span className="text-[10px] text-[#c084fc] font-mono">Logs Isolated</span>
           </div>
 
           <div className="space-y-1 max-h-56 overflow-y-auto">
@@ -89,12 +88,12 @@ export const UserAccountSwitcher: React.FC<UserAccountSwitcherProps> = ({
                   }}
                   className={`w-full flex items-center justify-between p-2.5 rounded-xl text-left text-xs transition-all cursor-pointer ${
                     isSelected
-                      ? 'bg-gradient-to-r from-pink-950/80 to-purple-950/80 border border-pink-500/50 text-white font-bold'
-                      : 'hover:bg-[#1C0A3B] text-purple-200 border border-transparent'
+                      ? 'bg-[#20093e] border border-[#9333ea]/60 text-white font-bold'
+                      : 'hover:bg-[#16052b] text-purple-200 border border-transparent'
                   }`}
                 >
                   <div className="flex items-center gap-2.5 min-w-0">
-                    <div className="w-6 h-6 rounded-lg bg-gradient-to-r from-pink-600 to-purple-600 flex items-center justify-center text-white text-[11px] font-bold shrink-0">
+                    <div className="w-6 h-6 rounded-lg bg-[#6b21a8] border border-[#a855f7]/50 flex items-center justify-center text-white text-[11px] font-bold shrink-0">
                       {u.username.charAt(0).toUpperCase()}
                     </div>
                     <div className="min-w-0 flex-1">
@@ -102,19 +101,19 @@ export const UserAccountSwitcher: React.FC<UserAccountSwitcherProps> = ({
                       <p className="text-[10px] text-purple-300/60 truncate">{u.email}</p>
                     </div>
                   </div>
-                  {isSelected && <Check className="h-4 w-4 text-pink-400 shrink-0 ml-1.5" />}
+                  {isSelected && <Check className="h-4 w-4 text-[#e879f9] shrink-0 ml-1.5" />}
                 </button>
               );
             })}
           </div>
 
-          <div className="pt-2 border-t border-[#29154A] grid grid-cols-2 gap-1.5">
+          <div className="pt-2 border-t border-[#22093e] grid grid-cols-2 gap-1.5">
             <button
               onClick={() => {
                 onOpenSignIn();
                 setIsOpen(false);
               }}
-              className="py-1.5 px-2 rounded-xl bg-[#1A0935] hover:bg-[#250B42] text-purple-200 hover:text-white border border-pink-500/30 text-[11px] font-semibold text-center transition-colors cursor-pointer"
+              className="py-1.5 px-2 rounded-xl bg-[#140529] hover:bg-[#20093e] text-purple-200 hover:text-white border border-[#7e22ce]/40 text-[11px] font-semibold text-center transition-colors cursor-pointer"
             >
               Sign In
             </button>
@@ -123,13 +122,13 @@ export const UserAccountSwitcher: React.FC<UserAccountSwitcherProps> = ({
                 onOpenSignUp();
                 setIsOpen(false);
               }}
-              className="py-1.5 px-2 rounded-xl bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 text-white text-[11px] font-bold text-center transition-all cursor-pointer"
+              className="py-1.5 px-2 rounded-xl bg-[#7e22ce] hover:bg-[#6b21a8] text-white text-[11px] font-bold text-center transition-all cursor-pointer shadow-sm"
             >
               + New Account
             </button>
           </div>
 
-          <div className="pt-1 text-[10px] text-purple-300/60 font-mono text-center">
+          <div className="pt-1 text-[10px] text-[#c084fc]/70 font-mono text-center">
             💡 Each account has its own isolated cookie logs, audits, and private ledger.
           </div>
         </div>
@@ -137,3 +136,4 @@ export const UserAccountSwitcher: React.FC<UserAccountSwitcherProps> = ({
     </div>
   );
 };
+

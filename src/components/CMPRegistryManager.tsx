@@ -108,200 +108,203 @@ export const CMPRegistryManager: React.FC<CMPRegistryManagerProps> = ({ onRefres
   });
 
   return (
-    <div className="space-y-6 pb-12">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <div className="space-y-8 pb-12">
+      {/* SECTION 1: Top Header Outer Container */}
+      <div className="bg-[#FFFFFF] border border-[#B78AE8] rounded-3xl p-6 sm:p-8 shadow-md shadow-purple-900/5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <div className="flex items-center gap-2">
-            <h1 className="text-2xl font-bold text-white tracking-tight">CMP Script Registry</h1>
-            <span className="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-300 text-[10px] font-mono border border-emerald-500/20 flex items-center gap-1">
-              <Cloud className="h-3 w-3" />
+            <h1 className="text-2xl font-bold text-[#3B235C] tracking-tight">CMP Script Registry</h1>
+            <span className="px-2.5 py-0.5 rounded-full bg-[#EDE1FF] text-[#8B4ED8] text-[10px] font-mono font-bold border border-[#B78AE8] flex items-center gap-1">
+              <Cloud className="h-3 w-3 text-[#8B4ED8]" />
               Firestore Cloud Synced
             </span>
           </div>
-          <p className="text-sm text-slate-400 mt-1">
+          <p className="text-xs text-[#6B528E] mt-1">
             Database of verified Consent Management Platform SHA-256 script hashes.
           </p>
         </div>
 
         <button
           onClick={() => setIsAddModalOpen(true)}
-          className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-gradient-to-r from-violet-600 to-blue-600 hover:from-violet-500 hover:to-blue-500 text-xs font-semibold text-white shadow-md shadow-violet-950/50 transition-all cursor-pointer"
+          className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-[#8B4ED8] hover:bg-[#783ec0] text-xs font-bold text-white shadow-sm transition-all cursor-pointer"
         >
           <Plus className="h-4 w-4" />
           <span>Add CMP Script</span>
         </button>
       </div>
 
-      {/* Filter & Search Bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <div className="flex items-center gap-2">
-          {['all', 'whitelist', 'blacklist'].map((tab) => (
-            <button
-              key={tab}
-              onClick={() => setActiveFilter(tab)}
-              className={`px-3.5 py-1.5 rounded-xl text-xs capitalize transition-all cursor-pointer ${
-                activeFilter === tab
-                  ? 'bg-gradient-to-r from-violet-600 to-blue-600 text-white font-semibold shadow-sm'
-                  : 'bg-[#0b1026] text-blue-300/70 hover:text-white border border-blue-900/40'
-              }`}
-            >
-              {tab === 'all' ? `All (${items.length})` : tab}
-            </button>
-          ))}
+      {/* SECTION 2: Main Registry Outer Container */}
+      <div className="bg-[#FFFFFF] border border-[#B78AE8] rounded-3xl p-6 sm:p-8 shadow-md shadow-purple-900/5 space-y-6">
+        {/* Filter & Search Bar */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#CBA3F5]/40 pb-4">
+          <div className="flex items-center gap-2">
+            {['all', 'whitelist', 'blacklist'].map((tab) => (
+              <button
+                key={tab}
+                onClick={() => setActiveFilter(tab)}
+                className={`px-4 py-2 rounded-xl text-xs font-bold capitalize transition-all cursor-pointer ${
+                  activeFilter === tab
+                    ? 'bg-[#8B4ED8] text-white shadow-sm'
+                    : 'bg-[#EDE1FF] text-[#3B235C] hover:bg-[#EDE1FF]/80 border border-[#B78AE8]'
+                }`}
+              >
+                {tab === 'all' ? `All (${items.length})` : tab}
+              </button>
+            ))}
+          </div>
+
+          <div className="relative w-full sm:w-64">
+            <Search className="absolute left-3 top-2.5 h-3.5 w-3.5 text-[#8B4ED8]" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search CMP name or hash..."
+              className="w-full rounded-xl bg-[#FCFAFF] pl-9 pr-3 py-1.5 text-xs text-[#3B235C] border border-[#CBA3F5] focus:outline-none focus:border-[#8B4ED8] font-mono placeholder-[#6B528E]/40"
+            />
+          </div>
         </div>
 
-        <div className="relative w-full sm:w-64">
-          <Search className="absolute left-3 top-2.5 h-3.5 w-3.5 text-blue-400/50" />
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search CMP name or hash..."
-            className="w-full rounded-xl bg-[#0b1026] pl-9 pr-3 py-1.5 text-xs text-blue-100 border border-blue-900/40 focus:outline-none focus:border-violet-500 font-mono placeholder-blue-300/30"
-          />
-        </div>
-      </div>
-
-      {/* Registry Table */}
-      <div className="rounded-2xl border border-blue-900/40 bg-[#0b1026]/90 overflow-hidden shadow-sm">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs">
-            <thead className="bg-[#060a17] text-blue-300/70 border-b border-blue-900/40 font-mono text-[11px]">
-              <tr>
-                <th className="py-3 px-4">CMP Name</th>
-                <th className="py-3 px-4">SHA-256 Script Hash</th>
-                <th className="py-3 px-4">Status</th>
-                <th className="py-3 px-4 text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-blue-900/30">
-              {filteredItems.length === 0 ? (
+        {/* Registry Table Container */}
+        <div className="bg-[#FCFAFF] border border-[#CBA3F5] rounded-2xl overflow-hidden shadow-sm">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs font-mono">
+              <thead className="bg-[#EDE1FF] text-[#3B235C] border-b border-[#CBA3F5] text-[11px] font-bold">
                 <tr>
-                  <td colSpan={4} className="py-8 text-center text-blue-300/50 text-xs">
-                    No CMP registry items match your query.
-                  </td>
+                  <th className="py-3.5 px-4">CMP Name</th>
+                  <th className="py-3.5 px-4">SHA-256 Script Hash</th>
+                  <th className="py-3.5 px-4">Status</th>
+                  <th className="py-3.5 px-4 text-right">Actions</th>
                 </tr>
-              ) : (
-                filteredItems.map((item) => (
-                  <tr key={item.id} className="hover:bg-violet-950/20 transition-colors">
-                    <td className="py-3 px-4 font-medium text-white">{item.cmp_name}</td>
-                    <td className="py-3 px-4 font-mono text-blue-300/70">
-                      <div className="flex items-center gap-2">
-                        <span title={item.script_hash}>{truncateHash(item.script_hash, 8, 8)}</span>
-                        <button
-                          onClick={() => handleCopy(item.script_hash)}
-                          className="text-blue-400/60 hover:text-white"
-                        >
-                          {copiedHash === item.script_hash ? (
-                            <Check className="h-3 w-3 text-emerald-400" />
-                          ) : (
-                            <Copy className="h-3 w-3" />
-                          )}
-                        </button>
-                      </div>
-                    </td>
-                    <td className="py-3 px-4">
-                      <select
-                        value={item.status}
-                        onChange={(e) => handleUpdateStatus(item.id, e.target.value as CMPStatus)}
-                        className={`text-[11px] font-mono px-2 py-0.5 rounded border focus:outline-none cursor-pointer ${
-                          item.status === 'whitelist'
-                            ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
-                            : 'bg-rose-500/10 text-rose-400 border-rose-500/20'
-                        }`}
-                      >
-                        <option value="whitelist">whitelist</option>
-                        <option value="blacklist">blacklist</option>
-                      </select>
-                    </td>
-                    <td className="py-3 px-4 text-right">
-                      <button
-                        onClick={() => handleDeleteItem(item.id)}
-                        className="p-1 text-blue-400/50 hover:text-rose-400 transition-colors cursor-pointer"
-                        title="Delete CMP"
-                      >
-                        <Trash2 className="h-3.5 w-3.5" />
-                      </button>
+              </thead>
+              <tbody className="divide-y divide-[#CBA3F5]/40">
+                {filteredItems.length === 0 ? (
+                  <tr>
+                    <td colSpan={4} className="py-8 text-center text-[#6B528E] text-xs">
+                      No CMP registry items match your query.
                     </td>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+                ) : (
+                  filteredItems.map((item) => (
+                    <tr key={item.id} className="hover:bg-[#F3ECFF] transition-colors">
+                      <td className="py-3 px-4 font-bold text-[#3B235C]">{item.cmp_name}</td>
+                      <td className="py-3 px-4 font-mono text-[#6B528E]">
+                        <div className="flex items-center gap-2">
+                          <span title={item.script_hash}>{truncateHash(item.script_hash, 8, 8)}</span>
+                          <button
+                            onClick={() => handleCopy(item.script_hash)}
+                            className="text-[#8B4ED8] hover:text-[#3B235C]"
+                          >
+                            {copiedHash === item.script_hash ? (
+                              <Check className="h-3 w-3 text-emerald-600" />
+                            ) : (
+                              <Copy className="h-3 w-3" />
+                            )}
+                          </button>
+                        </div>
+                      </td>
+                      <td className="py-3 px-4">
+                        <select
+                          value={item.status}
+                          onChange={(e) => handleUpdateStatus(item.id, e.target.value as CMPStatus)}
+                          className={`text-[11px] font-mono font-bold px-2.5 py-1 rounded-lg border focus:outline-none cursor-pointer ${
+                            item.status === 'whitelist'
+                              ? 'bg-emerald-100 text-emerald-800 border-emerald-300'
+                              : 'bg-rose-100 text-rose-800 border-rose-300'
+                          }`}
+                        >
+                          <option value="whitelist">whitelist</option>
+                          <option value="blacklist">blacklist</option>
+                        </select>
+                      </td>
+                      <td className="py-3 px-4 text-right">
+                        <button
+                          onClick={() => handleDeleteItem(item.id)}
+                          className="p-1 text-[#6B528E] hover:text-rose-600 transition-colors cursor-pointer"
+                          title="Delete CMP"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
 
       {/* Add Modal */}
       {isAddModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-          <div className="w-full max-w-md rounded-2xl border border-blue-900/40 bg-[#0b1026] p-6 shadow-2xl space-y-4">
-            <div className="flex items-center justify-between border-b border-blue-900/40 pb-3">
-              <h3 className="text-base font-bold text-white">Add CMP Script Hash</h3>
-              <button onClick={() => setIsAddModalOpen(false)} className="text-blue-400 hover:text-white">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#3B235C]/60 backdrop-blur-sm p-4">
+          <div className="w-full max-w-md rounded-3xl border border-[#B78AE8] bg-[#FFFFFF] p-6 shadow-2xl space-y-4">
+            <div className="flex items-center justify-between border-b border-[#CBA3F5] pb-3">
+              <h3 className="text-base font-bold text-[#3B235C]">Add CMP Script Hash</h3>
+              <button onClick={() => setIsAddModalOpen(false)} className="text-[#6B528E] hover:text-[#3B235C] text-lg font-bold">
                 &times;
               </button>
             </div>
 
             <form onSubmit={handleAddItem} className="space-y-3.5 text-xs">
               <div>
-                <label className="block text-blue-200 font-medium mb-1">CMP / Framework Name</label>
+                <label className="block text-[#3B235C] font-semibold mb-1">CMP / Framework Name</label>
                 <input
                   type="text"
                   value={newCmpName}
                   onChange={(e) => setNewCmpName(e.target.value)}
                   placeholder="e.g. Cookiebot v4.2"
                   required
-                  className="w-full rounded-xl bg-[#060a17] border border-blue-900/50 p-2.5 text-white focus:outline-none focus:border-violet-500 placeholder-blue-400/30"
+                  className="w-full rounded-xl bg-[#FCFAFF] border border-[#CBA3F5] p-2.5 text-[#3B235C] focus:outline-none focus:border-[#8B4ED8] placeholder-[#6B528E]/40"
                 />
               </div>
 
               <div>
-                <label className="block text-blue-200 font-medium mb-1">Script URL or Raw JS (Hashed)</label>
+                <label className="block text-[#3B235C] font-semibold mb-1">Script URL or Raw JS (Hashed)</label>
                 <input
                   type="text"
                   value={newScriptInput}
                   onChange={(e) => handleComputeHash(e.target.value)}
                   placeholder="Paste script content or URL to hash"
-                  className="w-full rounded-xl bg-[#060a17] border border-blue-900/50 p-2.5 text-white focus:outline-none focus:border-violet-500 font-mono placeholder-blue-400/30"
+                  className="w-full rounded-xl bg-[#FCFAFF] border border-[#CBA3F5] p-2.5 text-[#3B235C] focus:outline-none focus:border-[#8B4ED8] font-mono placeholder-[#6B528E]/40"
                 />
               </div>
 
               <div>
-                <label className="block text-blue-200 font-medium mb-1">SHA-256 Hash</label>
+                <label className="block text-[#3B235C] font-semibold mb-1">SHA-256 Hash</label>
                 <input
                   type="text"
                   value={newScriptHash}
                   onChange={(e) => setNewScriptHash(e.target.value)}
                   placeholder="64-character hex hash"
                   required
-                  className="w-full rounded-xl bg-[#060a17] border border-blue-900/50 p-2.5 text-white focus:outline-none focus:border-violet-500 font-mono text-[11px] placeholder-blue-400/30"
+                  className="w-full rounded-xl bg-[#FCFAFF] border border-[#CBA3F5] p-2.5 text-[#3B235C] focus:outline-none focus:border-[#8B4ED8] font-mono text-[11px] placeholder-[#6B528E]/40"
                 />
               </div>
 
               <div>
-                <label className="block text-blue-200 font-medium mb-1">Registry Classification</label>
+                <label className="block text-[#3B235C] font-semibold mb-1">Registry Classification</label>
                 <select
                   value={newStatus}
                   onChange={(e) => setNewStatus(e.target.value as CMPStatus)}
-                  className="w-full rounded-xl bg-[#060a17] border border-blue-900/50 p-2.5 text-white focus:outline-none focus:border-violet-500 cursor-pointer"
+                  className="w-full rounded-xl bg-[#FCFAFF] border border-[#CBA3F5] p-2.5 text-[#3B235C] focus:outline-none focus:border-[#8B4ED8] cursor-pointer font-semibold"
                 >
                   <option value="whitelist">Whitelist (Trusted)</option>
                   <option value="blacklist">Blacklist (Deceptive / Threat)</option>
                 </select>
               </div>
 
-              <div className="pt-2 border-t border-blue-900/40 flex items-center justify-end gap-2">
+              <div className="pt-3 border-t border-[#CBA3F5] flex items-center justify-end gap-2">
                 <button
                   type="button"
                   onClick={() => setIsAddModalOpen(false)}
-                  className="px-4 py-2 rounded-xl bg-blue-950/60 hover:bg-blue-900/60 text-blue-200 border border-blue-800/40 cursor-pointer"
+                  className="px-4 py-2 rounded-xl bg-[#EDE1FF] hover:bg-[#EDE1FF]/80 text-[#3B235C] border border-[#B78AE8] text-xs font-semibold cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 rounded-xl bg-gradient-to-r from-violet-600 to-blue-600 hover:from-violet-500 hover:to-blue-500 text-white font-semibold cursor-pointer shadow-sm"
+                  className="px-4 py-2 rounded-xl bg-[#8B4ED8] hover:bg-[#783ec0] text-white font-bold text-xs cursor-pointer shadow-sm"
                 >
                   Add to Registry
                 </button>

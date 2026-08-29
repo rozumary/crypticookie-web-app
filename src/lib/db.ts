@@ -102,9 +102,9 @@ const INITIAL_CMP_REGISTRY: Omit<CMPRegistryItem, 'id'>[] = [
 export const INITIAL_DEMO_USERS: User[] = [
   {
     id: 'u_auditor_primary',
-    username: 'Auditor Rose',
-    email: 'rosedecastromontesa@gmail.com',
-    password_hash: 'demo_pass_hash_rose',
+    username: 'Test Auditor',
+    email: 'test@crypticookie.io',
+    password_hash: 'demo_pass_hash_test',
     created_at: new Date(Date.now() - 86400000 * 10).toISOString(),
   },
 ];

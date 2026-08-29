@@ -356,7 +356,7 @@ export const ExtensionSimulator: React.FC<ExtensionSimulatorProps> = ({
                 value={currentDomain}
                 onChange={(e) => setCurrentDomain(e.target.value)}
                 className="w-full bg-transparent text-purple-100 font-mono focus:outline-none placeholder-purple-400/40"
-                placeholder="Type any website (e.g. shopee.ph, lazada.com.ph, gcash.com, cnn.com)"
+                placeholder="Type any website (e.g. shopee.ph, lazada.com.ph, gcash.com, abs-cbn.com)"
               />
               <button
                 type="submit"

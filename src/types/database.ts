@@ -18,14 +18,6 @@ export interface User {
   created_at: string;
 }
 
-export interface ChromeProfile {
-  id: string;
-  name: string;
-  icon: string;
-  color: string;
-  description: string;
-}
-
 export interface CMPRegistryItem {
   id: string;
   script_hash: string;
@@ -38,7 +30,6 @@ export interface CMPRegistryItem {
 export interface CookieEvent {
   id: string;
   user_id: string;
-  profile_id?: string;
   site_domain: string;
   cookie_hash: string;
   cookie_type: CookieType;
@@ -53,7 +44,6 @@ export interface PrivateLedgerBlock {
   prev_hash: string;
   hash: string;
   user_id: string;
-  profile_id?: string;
   cookie_event_id: string;
   consent_action: ConsentAction;
   audit_output: AuditOutput;
@@ -66,8 +56,6 @@ export interface PublicLedgerBlock {
   prev_hash: string;
   hash: string;
   site_domain: string;
-  user_id?: string;
-  profile_id?: string;
   cookie_hash: string;
   verification_result: VerificationResult;
   consent_action: ConsentAction;
@@ -85,7 +73,6 @@ export interface DetectedTracker {
 
 export interface MonitoredDomain {
   id: string;
-  user_id?: string;
   domain: string;
   url: string;
   title: string;

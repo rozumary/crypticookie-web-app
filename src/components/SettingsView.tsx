@@ -12,7 +12,7 @@ import {
   Lock,
   Globe,
 } from 'lucide-react';
-import { db, clearUserHistory } from '../lib/db';
+import { db } from '../lib/db';
 
 interface AppSettings {
   autoBlockAds: boolean;
@@ -32,12 +32,7 @@ const DEFAULT_SETTINGS: AppSettings = {
   themeMode: 'midnight',
 };
 
-interface SettingsViewProps {
-  currentUser: any;
-  onRefreshData: () => void;
-}
-
-export const SettingsView: React.FC<SettingsViewProps> = ({ currentUser, onRefreshData }) => {
+export const SettingsView: React.FC = () => {
   const [settings, setSettings] = useState<AppSettings>(() => {
     const saved = localStorage.getItem('crypticookie_user_settings');
     if (saved) {
@@ -101,15 +96,14 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ currentUser, onRefre
   };
 
   const handleClearHistory = async () => {
-    if (!window.confirm('Are you sure you want to clear your remote and local browsing tracker history and monitored domains?')) {
+    if (!window.confirm('Are you sure you want to clear your local browsing tracker history and monitored domains?')) {
       return;
     }
 
     setIsPurging(true);
     try {
-      const activeUserId = currentUser ? currentUser.id : 'u_auditor_primary';
-      await clearUserHistory(activeUserId);
-      onRefreshData();
+      await db.monitored_domains.clear();
+      await db.cookie_events.clear();
       setPurgeSuccess(true);
       setTimeout(() => setPurgeSuccess(false), 3000);
     } catch (e) {

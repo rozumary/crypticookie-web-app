@@ -36,9 +36,6 @@ export const CMPRegistryManager: React.FC<CMPRegistryManagerProps> = ({ onRefres
 
   useEffect(() => {
     loadItems();
-    const handleSync = () => loadItems();
-    window.addEventListener('crypticookie_db_sync', handleSync);
-    return () => window.removeEventListener('crypticookie_db_sync', handleSync);
   }, []);
 
   const handleCopy = (hash: string) => {

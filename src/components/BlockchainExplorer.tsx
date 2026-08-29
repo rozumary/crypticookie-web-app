@@ -16,7 +16,6 @@ import {
   type PublicLedgerBlock,
   type PrivateLedgerBlock,
   type ChainVerificationResult,
-  type User,
 } from '../types/database';
 import {
   db,
@@ -27,11 +26,10 @@ import {
 import { truncateHash } from '../lib/crypto';
 
 interface BlockchainExplorerProps {
-  currentUser: User | null;
   onRefreshData: () => void;
 }
 
-export const BlockchainExplorer: React.FC<BlockchainExplorerProps> = ({ currentUser, onRefreshData }) => {
+export const BlockchainExplorer: React.FC<BlockchainExplorerProps> = ({ onRefreshData }) => {
   const [activeLedgerTab, setActiveLedgerTab] = useState<'public' | 'private'>('public');
   const [publicBlocks, setPublicBlocks] = useState<PublicLedgerBlock[]>([]);
   const [privateBlocks, setPrivateBlocks] = useState<PrivateLedgerBlock[]>([]);
@@ -47,28 +45,17 @@ export const BlockchainExplorer: React.FC<BlockchainExplorerProps> = ({ currentU
   const [copiedHash, setCopiedHash] = useState<string | null>(null);
 
   const loadLedgers = async () => {
-    const activeUserId = currentUser ? currentUser.id : 'u_auditor_primary';
     const pub = await db.public_ledger.orderBy('block_index').toArray();
     const priv = await db.private_ledger.orderBy('block_index').toArray();
-
-    // Filter public blocks by user_id or block_index === 0 (Genesis block)
-    const filteredPub = pub.filter((b) => b.block_index === 0 || b.user_id === activeUserId);
-    // Filter private blocks by user_id or block_index === 0 (Genesis block)
-    const filteredPriv = priv.filter((b) => b.block_index === 0 || b.user_id === activeUserId);
-
-    setPublicBlocks(filteredPub);
-    setPrivateBlocks(filteredPriv);
-
-    const integrity = await verifyPublicChainIntegrity(activeUserId);
+    setPublicBlocks(pub);
+    setPrivateBlocks(priv);
+    const integrity = await verifyPublicChainIntegrity();
     setVerificationResult(integrity);
   };
 
   useEffect(() => {
     loadLedgers();
-    const handleSync = () => loadLedgers();
-    window.addEventListener('crypticookie_db_sync', handleSync);
-    return () => window.removeEventListener('crypticookie_db_sync', handleSync);
-  }, [currentUser]);
+  }, []);
 
   const handleCopy = (text: string) => {
     navigator.clipboard.writeText(text);

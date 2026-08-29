@@ -23,11 +23,10 @@ import {
   collection,
   doc,
   setDoc,
-  getDocs,
   deleteDoc,
+  onSnapshot,
   query,
-  orderBy,
-  limit,
+  where,
 } from 'firebase/firestore';
 
 export class CrypticookieDatabase extends Dexie {
@@ -40,13 +39,13 @@ export class CrypticookieDatabase extends Dexie {
 
   constructor() {
     super('CrypticookieDB');
-    this.version(2).stores({
+    this.version(4).stores({
       users: 'id, email, username',
       cmp_registry: 'id, &script_hash, cmp_name, status',
       cookie_events: 'id, user_id, site_domain, cookie_hash, cookie_type, verification_result, created_at',
       private_ledger: 'id, block_index, hash, user_id, cookie_event_id, timestamp',
       public_ledger: 'id, block_index, hash, site_domain, cookie_hash, timestamp',
-      monitored_domains: 'id, domain, url, privacy_risk_level, timestamp',
+      monitored_domains: 'id, user_id, domain, url, privacy_risk_level, timestamp',
     });
   }
 }
@@ -101,6 +100,26 @@ const INITIAL_CMP_REGISTRY: Omit<CMPRegistryItem, 'id'>[] = [
   },
 ];
 
+// Initial Real User Accounts for persistent database logs
+export const INITIAL_DEMO_USERS: User[] = [
+  {
+    id: 'u_auditor_primary',
+    username: 'Test Auditor',
+    email: 'test@crypticookie.io',
+    password_hash: 'demo_pass_hash_test',
+    created_at: new Date(Date.now() - 86400000 * 10).toISOString(),
+  },
+];
+
+/**
+ * Broadcast event for instant UI synchronization across all components and windows
+ */
+export function broadcastDbUpdate(): void {
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new CustomEvent('crypticookie_db_sync'));
+  }
+}
+
 /**
  * Helper to sync a single document to Firebase Firestore safely
  */
@@ -128,12 +147,17 @@ export async function deleteFromFirestore(collectionName: string, docId: string)
 }
 
 /**
- * Initialize Database and Seed Canonical CMP entries and Genesis Block
+ * Initialize Database, seed initial demo accounts, CMPs and Genesis Block
  */
 export async function initializeDatabase(): Promise<void> {
+  // 1. Seed or update demo user accounts to ensure "Test Auditor" replaces any stale cached profiles
+  await db.users.put(INITIAL_DEMO_USERS[0]);
+  await syncToFirestore('users', INITIAL_DEMO_USERS[0].id, INITIAL_DEMO_USERS[0]);
+
+  // 2. Seed CMP Registry
   const cmpCount = await db.cmp_registry.count();
   if (cmpCount === 0) {
-    const items: CMPRegistryItem[] = INITIAL_CMP_REGISTRY.map(item => ({
+    const items: CMPRegistryItem[] = INITIAL_CMP_REGISTRY.map((item) => ({
       ...item,
       id: 'cmp_' + Math.random().toString(36).substring(2, 10),
     }));
@@ -145,7 +169,7 @@ export async function initializeDatabase(): Promise<void> {
     }
   }
 
-  // Check if public and private ledgers have genesis blocks
+  // 3. Check if public and private ledgers have genesis blocks
   const publicCount = await db.public_ledger.count();
   if (publicCount === 0) {
     const genesisTime = new Date().toISOString();
@@ -176,7 +200,7 @@ export async function initializeDatabase(): Promise<void> {
     const genesisPrivateHash = await computePrivateBlockHash(
       GENESIS_PREV_HASH,
       0,
-      'u_genesis_root',
+      'u_auditor_primary',
       'event_genesis_0',
       'accept',
       'Consent Recorded',
@@ -188,7 +212,7 @@ export async function initializeDatabase(): Promise<void> {
       block_index: 0,
       prev_hash: GENESIS_PREV_HASH,
       hash: genesisPrivateHash,
-      user_id: 'u_genesis_root',
+      user_id: 'u_auditor_primary',
       cookie_event_id: 'event_genesis_0',
       consent_action: 'accept',
       audit_output: 'Consent Recorded',
@@ -254,6 +278,7 @@ export function determineAuditOutput(consentAction: ConsentAction): AuditOutput 
 
 /**
  * Record a full consent transaction across cookie_events, private_ledger, public_ledger & Firestore
+ * with instantaneous real-time UI synchronization
  */
 export async function recordConsentTransaction(params: {
   userId: string;
@@ -274,7 +299,7 @@ export async function recordConsentTransaction(params: {
   const guidanceShown = determineGuidance(params.cookieType, verificationResult);
   const auditOutput = determineAuditOutput(params.consentAction);
 
-  // 2. Insert into cookie_events
+  // 2. Insert into cookie_events for this specific user account
   const eventId = 'ev_' + Math.random().toString(36).substring(2, 11);
   const cookieEvent: CookieEvent = {
     id: eventId,
@@ -289,8 +314,9 @@ export async function recordConsentTransaction(params: {
   await db.cookie_events.add(cookieEvent);
   await syncToFirestore('cookie_events', cookieEvent.id, cookieEvent);
 
-  // 3. Chained Block in private_ledger
-  const lastPrivateBlock = await db.private_ledger.orderBy('block_index').last();
+  // 3. Chained Block in private_ledger for this user account
+  const lastPrivateBlock = await db.private_ledger.where('user_id').equals(params.userId).last() ||
+    await db.private_ledger.orderBy('block_index').last();
   const nextPrivateIndex = lastPrivateBlock ? lastPrivateBlock.block_index + 1 : 0;
   const prevPrivateHash = lastPrivateBlock ? lastPrivateBlock.hash : GENESIS_PREV_HASH;
   
@@ -339,6 +365,7 @@ export async function recordConsentTransaction(params: {
     prev_hash: prevPublicHash,
     hash: publicBlockHash,
     site_domain: params.siteDomain.toLowerCase().trim(),
+    user_id: params.userId,
     cookie_hash: params.cookieHash.trim(),
     verification_result: verificationResult,
     consent_action: params.consentAction,
@@ -347,44 +374,110 @@ export async function recordConsentTransaction(params: {
   await db.public_ledger.add(publicBlock);
   await syncToFirestore('public_ledger', publicBlock.id, publicBlock);
 
+  // Trigger immediate live broadcast to all subscribers
+  broadcastDbUpdate();
+
   return { cookieEvent, privateBlock, publicBlock };
 }
 
 /**
- * Record a Live Monitored Website domain inspection event
+ * Record a Live Monitored Website domain inspection event for the active User Account
  */
-export async function recordMonitoredDomain(domainData: Omit<MonitoredDomain, 'id' | 'timestamp'>): Promise<MonitoredDomain> {
+export async function recordMonitoredDomain(
+  domainData: Omit<MonitoredDomain, 'id' | 'timestamp'>,
+  userId: string = 'u_auditor_primary'
+): Promise<MonitoredDomain> {
   const item: MonitoredDomain = {
     ...domainData,
+    user_id: userId,
     id: 'mon_' + Math.random().toString(36).substring(2, 11),
     timestamp: new Date().toISOString(),
   };
 
   await db.monitored_domains.add(item);
   await syncToFirestore('monitored_domains', item.id, item);
+
+  // Trigger immediate live broadcast
+  broadcastDbUpdate();
+
   return item;
 }
 
 /**
- * Fetch all monitored domains (most recent first)
+ * Fetch monitored domains for a specific User Account (most recent first)
  */
-export async function getMonitoredDomains(limitCount: number = 50): Promise<MonitoredDomain[]> {
+export async function getMonitoredDomains(
+  limitCount: number = 50,
+  userId?: string
+): Promise<MonitoredDomain[]> {
   const list = await db.monitored_domains.toArray();
-  return list.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()).slice(0, limitCount);
+  const filtered = userId ? list.filter((item) => item.user_id === userId) : list;
+  return filtered.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()).slice(0, limitCount);
 }
 
 /**
- * Clear Monitored Domains log
+ * Clear Monitored Domains log for a specific User Account
  */
-export async function clearMonitoredDomains(): Promise<void> {
-  await db.monitored_domains.clear();
+export async function clearMonitoredDomains(userId?: string): Promise<void> {
+  const all = await db.monitored_domains.toArray();
+  const idsToDelete = userId
+    ? all.filter((item) => item.user_id === userId).map((item) => item.id)
+    : all.map((item) => item.id);
+
+  await db.monitored_domains.bulkDelete(idsToDelete);
+  for (const id of idsToDelete) {
+    await deleteFromFirestore('monitored_domains', id);
+  }
+  broadcastDbUpdate();
+}
+
+/**
+ * Clear all cookie events, monitored domains, and private ledger blocks for a specific User Account from both Dexie and Firestore
+ */
+export async function clearUserHistory(userId: string): Promise<void> {
+  // 1. Clear monitored_domains
+  const monitored = await db.monitored_domains.toArray();
+  const monitoredToDelete = monitored.filter((m) => m.user_id === userId);
+  await db.monitored_domains.bulkDelete(monitoredToDelete.map((m) => m.id));
+  for (const m of monitoredToDelete) {
+    await deleteFromFirestore('monitored_domains', m.id);
+  }
+
+  // 2. Clear cookie_events
+  const events = await db.cookie_events.toArray();
+  const eventsToDelete = events.filter((e) => e.user_id === userId);
+  await db.cookie_events.bulkDelete(eventsToDelete.map((e) => e.id));
+  for (const e of eventsToDelete) {
+    await deleteFromFirestore('cookie_events', e.id);
+  }
+
+  // 3. Clear private_ledger blocks
+  const privateBlocks = await db.private_ledger.toArray();
+  const privateToDelete = privateBlocks.filter((p) => p.user_id === userId);
+  await db.private_ledger.bulkDelete(privateToDelete.map((p) => p.id));
+  for (const p of privateToDelete) {
+    await deleteFromFirestore('private_ledger', p.id);
+  }
+
+  // 4. Clear public_ledger blocks
+  const publicBlocks = await db.public_ledger.toArray();
+  const publicToDelete = publicBlocks.filter((pb) => pb.user_id === userId);
+  await db.public_ledger.bulkDelete(publicToDelete.map((pb) => pb.id));
+  for (const pb of publicToDelete) {
+    await deleteFromFirestore('public_ledger', pb.id);
+  }
+
+  broadcastDbUpdate();
 }
 
 /**
  * Verify cryptographic integrity of the Public Ledger Chain
  */
-export async function verifyPublicChainIntegrity(): Promise<ChainVerificationResult> {
-  const blocks = await db.public_ledger.orderBy('block_index').toArray();
+export async function verifyPublicChainIntegrity(userId?: string): Promise<ChainVerificationResult> {
+  let blocks = await db.public_ledger.orderBy('block_index').toArray();
+  if (userId) {
+    blocks = blocks.filter((b) => b.block_index === 0 || b.user_id === userId);
+  }
   if (blocks.length === 0) {
     return { isValid: true, brokenBlockIndex: null, expectedHash: null, actualHash: null, totalBlocks: 0 };
   }
@@ -447,6 +540,7 @@ export async function tamperPublicBlock(blockIndex: number, alteredDomain: strin
     site_domain: alteredDomain,
     ...(alteredAction ? { consent_action: alteredAction } : {}),
   });
+  broadcastDbUpdate();
 }
 
 /**
@@ -478,28 +572,35 @@ export async function repairPublicChain(fromIndex: number = 0): Promise<void> {
     block.prev_hash = validPrevHash;
     block.hash = recalculatedHash;
   }
+  broadcastDbUpdate();
 }
 
 /**
- * Query real database statistics directly using Dexie/SQL queries
+ * Query real database statistics directly for a specific User Account
  */
-export async function getDatabaseMetrics() {
-  const events = await db.cookie_events.toArray();
-  const publicBlocks = await db.public_ledger.toArray();
-  const privateBlocks = await db.private_ledger.toArray();
+export async function getDatabaseMetrics(userId?: string) {
+  const allEvents = await db.cookie_events.toArray();
+  const allPublic = await db.public_ledger.toArray();
+  const allPrivate = await db.private_ledger.toArray();
   const cmpItems = await db.cmp_registry.toArray();
-  const monitored = await db.monitored_domains.toArray();
+  const allMonitored = await db.monitored_domains.toArray();
 
-  const uniqueDomains = new Set(events.map(e => e.site_domain));
-  const threatsBlocked = events.filter(e => e.verification_result === 'Warning' || e.cookie_type === 'suspicious').length +
-    monitored.filter(m => m.auto_blocked || m.privacy_risk_level === 'High' || m.privacy_risk_level === 'Critical').length;
-  
-  const verifiedCount = events.filter(e => e.verification_result === 'Verified').length;
-  const unverifiedCount = events.filter(e => e.verification_result === 'Unverified').length;
+  const events = userId ? allEvents.filter((e) => e.user_id === userId) : allEvents;
+  const privateBlocks = userId ? allPrivate.filter((pv) => pv.id === 'pv_genesis_0' || pv.user_id === userId) : allPrivate;
+  const monitored = userId ? allMonitored.filter((m) => m.user_id === userId) : allMonitored;
+  const publicBlocks = userId ? allPublic.filter((pb) => pb.id === 'pb_genesis_0' || pb.user_id === userId) : allPublic;
 
-  const whitelistedCMPs = cmpItems.filter(c => c.status === 'whitelist').length;
-  const blacklistedCMPs = cmpItems.filter(c => c.status === 'blacklist').length;
-  const unlistedCMPs = cmpItems.filter(c => c.status === 'unlisted').length;
+  const uniqueDomains = new Set([...events.map((e) => e.site_domain), ...monitored.map((m) => m.domain)]);
+  const threatsBlocked =
+    events.filter((e) => e.verification_result === 'Warning' || e.cookie_type === 'suspicious').length +
+    monitored.filter((m) => m.auto_blocked || m.privacy_risk_level === 'High' || m.privacy_risk_level === 'Critical').length;
+
+  const verifiedCount = events.filter((e) => e.verification_result === 'Verified').length;
+  const unverifiedCount = events.filter((e) => e.verification_result === 'Unverified').length;
+
+  const whitelistedCMPs = cmpItems.filter((c) => c.status === 'whitelist').length;
+  const blacklistedCMPs = cmpItems.filter((c) => c.status === 'blacklist').length;
+  const unlistedCMPs = cmpItems.filter((c) => c.status === 'unlisted').length;
 
   return {
     protectedPlatformsCount: uniqueDomains.size,
@@ -531,4 +632,151 @@ export async function resetDatabaseToDefault(): Promise<void> {
   await db.public_ledger.clear();
   await db.monitored_domains.clear();
   await initializeDatabase();
+  broadcastDbUpdate();
 }
+
+/**
+ * Setup Real-time Firestore Listeners to mirror Cloud Database writes to local Dexie & UI
+ */
+export function setupFirestoreRealtimeListeners(userId: string, onUpdate: () => void): () => void {
+  if (!firestoreDb) return () => {};
+
+  const qEvents = query(collection(firestoreDb, 'cookie_events'), where('user_id', '==', userId));
+  const qPublic = query(collection(firestoreDb, 'public_ledger'), where('user_id', '==', userId));
+  const qPrivate = query(collection(firestoreDb, 'private_ledger'), where('user_id', '==', userId));
+  const qMonitored = query(collection(firestoreDb, 'monitored_domains'), where('user_id', '==', userId));
+
+  const unsub1 = onSnapshot(qEvents, async (snapshot) => {
+    let hasChanges = false;
+    for (const change of snapshot.docChanges()) {
+      if (change.type === 'added' || change.type === 'modified') {
+        const data = { id: change.doc.id, ...change.doc.data() } as CookieEvent;
+        await db.cookie_events.put(data);
+        hasChanges = true;
+      } else if (change.type === 'removed') {
+        await db.cookie_events.delete(change.doc.id);
+        hasChanges = true;
+      }
+    }
+    if (hasChanges) onUpdate();
+  }, (err) => {
+    console.error('Firestore cookie_events subscription error:', err);
+  });
+
+  const unsub2 = onSnapshot(qPublic, async (snapshot) => {
+    let hasChanges = false;
+    for (const change of snapshot.docChanges()) {
+      if (change.type === 'added' || change.type === 'modified') {
+        const data = { id: change.doc.id, ...change.doc.data() } as PublicLedgerBlock;
+        await db.public_ledger.put(data);
+        hasChanges = true;
+      } else if (change.type === 'removed') {
+        await db.public_ledger.delete(change.doc.id);
+        hasChanges = true;
+      }
+    }
+    if (hasChanges) onUpdate();
+  }, (err) => {
+    console.error('Firestore public_ledger subscription error:', err);
+  });
+
+  const unsub3 = onSnapshot(qMonitored, async (snapshot) => {
+    let hasChanges = false;
+    for (const change of snapshot.docChanges()) {
+      if (change.type === 'added' || change.type === 'modified') {
+        const data = { id: change.doc.id, ...change.doc.data() } as MonitoredDomain;
+        await db.monitored_domains.put(data);
+        hasChanges = true;
+      } else if (change.type === 'removed') {
+        await db.monitored_domains.delete(change.doc.id);
+        hasChanges = true;
+      }
+    }
+    if (hasChanges) onUpdate();
+  }, (err) => {
+    console.error('Firestore monitored_domains subscription error:', err);
+  });
+
+  const unsub4 = onSnapshot(qPrivate, async (snapshot) => {
+    let hasChanges = false;
+    for (const change of snapshot.docChanges()) {
+      if (change.type === 'added' || change.type === 'modified') {
+        const data = { id: change.doc.id, ...change.doc.data() } as PrivateLedgerBlock;
+        await db.private_ledger.put(data);
+        hasChanges = true;
+      } else if (change.type === 'removed') {
+        await db.private_ledger.delete(change.doc.id);
+        hasChanges = true;
+      }
+    }
+    if (hasChanges) onUpdate();
+  }, (err) => {
+    console.error('Firestore private_ledger subscription error:', err);
+  });
+
+  return () => {
+    unsub1();
+    unsub2();
+    unsub3();
+    unsub4();
+  };
+}
+
+/**
+ * Fully robust REST-based backup synchronization from central Cloud Database.
+ * Bypasses iframe WebSocket/long-poll restrictions to ensure no data is lost on reload.
+ */
+export async function syncAllFromCentralServer(userId: string): Promise<void> {
+  try {
+    const apiOrigin = window.location.origin;
+
+    // 1. Sync Cookie Events
+    try {
+      const res = await fetch(`${apiOrigin}/api/consent/history?userId=${userId}`);
+      const body = await res.json();
+      if (body.status === "success" && Array.isArray(body.data)) {
+        await db.cookie_events.bulkPut(body.data);
+      }
+    } catch (e) {
+      console.warn("Rest sync cookie_events note:", e);
+    }
+
+    // 2. Sync Public Ledger
+    try {
+      const res = await fetch(`${apiOrigin}/api/ledger/public?userId=${userId}`);
+      const body = await res.json();
+      if (body.status === "success" && Array.isArray(body.data)) {
+        await db.public_ledger.bulkPut(body.data);
+      }
+    } catch (e) {
+      console.warn("Rest sync public_ledger note:", e);
+    }
+
+    // 3. Sync Private Ledger
+    try {
+      const res = await fetch(`${apiOrigin}/api/ledger/private?userId=${userId}`);
+      const body = await res.json();
+      if (body.status === "success" && Array.isArray(body.data)) {
+        await db.private_ledger.bulkPut(body.data);
+      }
+    } catch (e) {
+      console.warn("Rest sync private_ledger note:", e);
+    }
+
+    // 4. Sync Monitored Domains
+    try {
+      const res = await fetch(`${apiOrigin}/api/domains/history?userId=${userId}`);
+      const body = await res.json();
+      if (body.status === "success" && Array.isArray(body.data)) {
+        await db.monitored_domains.bulkPut(body.data);
+      }
+    } catch (e) {
+      console.warn("Rest sync monitored_domains note:", e);
+    }
+
+    broadcastDbUpdate();
+  } catch (err) {
+    console.error("Critical error in REST database sync fallback:", err);
+  }
+}
+

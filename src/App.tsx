@@ -46,7 +46,7 @@ export default function App() {
       setMetrics(stats);
 
       const allEvents = await db.cookie_events.orderBy('created_at').reverse().toArray();
-      const userEvents = allEvents.filter((e) => !e.user_id || e.user_id === activeUserId);
+      const userEvents = allEvents.filter((e) => e.user_id === activeUserId);
       setRecentEvents(userEvents);
     } catch (err) {
       console.error('Error refreshing DB metrics:', err);

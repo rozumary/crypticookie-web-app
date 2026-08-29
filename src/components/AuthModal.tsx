@@ -87,7 +87,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       let user = await db.users.where('email').equals('test@crypticookie.io').first();
       if (!user) {
         user = {
-          id: 'u_test_auditor',
+          id: 'u_auditor_primary',
           username: 'Test Auditor',
           email: 'test@crypticookie.io',
           password_hash: await sha256('test123_secure'),

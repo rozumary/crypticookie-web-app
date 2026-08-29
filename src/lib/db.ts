@@ -411,7 +411,7 @@ export async function getMonitoredDomains(
   userId?: string
 ): Promise<MonitoredDomain[]> {
   const list = await db.monitored_domains.toArray();
-  const filtered = userId ? list.filter((item) => !item.user_id || item.user_id === userId) : list;
+  const filtered = userId ? list.filter((item) => item.user_id === userId) : list;
   return filtered.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()).slice(0, limitCount);
 }
 
@@ -421,7 +421,7 @@ export async function getMonitoredDomains(
 export async function clearMonitoredDomains(userId?: string): Promise<void> {
   const all = await db.monitored_domains.toArray();
   const idsToDelete = userId
-    ? all.filter((item) => !item.user_id || item.user_id === userId).map((item) => item.id)
+    ? all.filter((item) => item.user_id === userId).map((item) => item.id)
     : all.map((item) => item.id);
 
   await db.monitored_domains.bulkDelete(idsToDelete);
@@ -585,9 +585,9 @@ export async function getDatabaseMetrics(userId?: string) {
   const cmpItems = await db.cmp_registry.toArray();
   const allMonitored = await db.monitored_domains.toArray();
 
-  const events = userId ? allEvents.filter((e) => !e.user_id || e.user_id === userId) : allEvents;
+  const events = userId ? allEvents.filter((e) => e.user_id === userId) : allEvents;
   const privateBlocks = userId ? allPrivate.filter((pv) => pv.block_index === 0 || pv.user_id === userId) : allPrivate;
-  const monitored = userId ? allMonitored.filter((m) => !m.user_id || m.user_id === userId) : allMonitored;
+  const monitored = userId ? allMonitored.filter((m) => m.user_id === userId) : allMonitored;
   const publicBlocks = userId ? allPublic.filter((pb) => pb.block_index === 0 || pb.user_id === userId) : allPublic;
 
   const uniqueDomains = new Set([...events.map((e) => e.site_domain), ...monitored.map((m) => m.domain)]);
@@ -659,6 +659,8 @@ export function setupFirestoreRealtimeListeners(userId: string, onUpdate: () => 
       }
     }
     if (hasChanges) onUpdate();
+  }, (err) => {
+    console.error('Firestore cookie_events subscription error:', err);
   });
 
   const unsub2 = onSnapshot(qPublic, async (snapshot) => {
@@ -674,6 +676,8 @@ export function setupFirestoreRealtimeListeners(userId: string, onUpdate: () => 
       }
     }
     if (hasChanges) onUpdate();
+  }, (err) => {
+    console.error('Firestore public_ledger subscription error:', err);
   });
 
   const unsub3 = onSnapshot(qMonitored, async (snapshot) => {
@@ -689,6 +693,8 @@ export function setupFirestoreRealtimeListeners(userId: string, onUpdate: () => 
       }
     }
     if (hasChanges) onUpdate();
+  }, (err) => {
+    console.error('Firestore monitored_domains subscription error:', err);
   });
 
   const unsub4 = onSnapshot(qPrivate, async (snapshot) => {
@@ -704,6 +710,8 @@ export function setupFirestoreRealtimeListeners(userId: string, onUpdate: () => 
       }
     }
     if (hasChanges) onUpdate();
+  }, (err) => {
+    console.error('Firestore private_ledger subscription error:', err);
   });
 
   return () => {

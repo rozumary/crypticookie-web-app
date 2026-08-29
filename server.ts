@@ -53,7 +53,7 @@ async function startServer() {
       const siteDomain = String(domain).toLowerCase().trim();
       const scriptHash = hash ? String(hash).trim() : '73926ef91823ab0288f34291f09e248b64e9123847a9821034f828108c90fe32';
       const cType = cookieType || 'all';
-      const uId = userId || 'u_chrome_extension_user';
+      const uId = userId || 'u_auditor_primary';
 
       // 1. Create Cookie Event
       const eventId = 'ev_' + Math.random().toString(36).substring(2, 11);
@@ -77,6 +77,7 @@ async function startServer() {
         block_index: Date.now() % 10000,
         prev_hash: '0000000000000000000000000000000000000000000000000000000000000000',
         hash: pubHash,
+        user_id: uId,
         site_domain: siteDomain,
         cookie_hash: scriptHash,
         verification_result: cookieEvent.verification_result,

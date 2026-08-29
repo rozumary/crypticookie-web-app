@@ -84,7 +84,7 @@ export interface DetectedTracker {
 
 export interface MonitoredDomain {
   id: string;
-  profile_id?: string;
+  user_id?: string;
   domain: string;
   url: string;
   title: string;

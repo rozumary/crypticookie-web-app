@@ -8,14 +8,13 @@ import {
   Sparkles,
 } from 'lucide-react';
 import { type User } from '../types/database';
-import { ChromeProfileSelector } from './ChromeProfileSelector';
+import { UserAccountSwitcher } from './UserAccountSwitcher';
 
 interface NavbarProps {
   activeTab: string;
   setActiveTab: (tab: string) => void;
   currentUser: User | null;
-  activeProfileId?: string;
-  onSelectProfile?: (profileId: string) => void;
+  onSelectUser: (user: User) => void;
   onOpenSignIn: () => void;
   onOpenSignUp: () => void;
   onLogout: () => void;
@@ -28,8 +27,9 @@ export const Navbar: React.FC<NavbarProps> = ({
   activeTab,
   setActiveTab,
   currentUser,
-  activeProfileId = 'profile_a',
-  onSelectProfile,
+  onSelectUser,
+  onOpenSignIn,
+  onOpenSignUp,
   onLogout,
   isDbReady,
   onToggleSidebar,
@@ -66,15 +66,17 @@ export const Navbar: React.FC<NavbarProps> = ({
           </div>
         </div>
 
-        {/* Right Side: Chrome Profile Selector, AI Bot Access & User profile */}
+        {/* Right Side: Account Switcher, AI Bot Access & Actions */}
         <div className="flex items-center gap-2 sm:gap-3">
-          {onSelectProfile && (
-            <ChromeProfileSelector
-              activeProfileId={activeProfileId}
-              onSelectProfile={onSelectProfile}
-              compact
-            />
-          )}
+          {/* User Account Switcher */}
+          <UserAccountSwitcher
+            currentUser={currentUser}
+            onSelectUser={onSelectUser}
+            onOpenSignIn={onOpenSignIn}
+            onOpenSignUp={onOpenSignUp}
+            onLogout={onLogout}
+            compact
+          />
 
           <button
             onClick={() => setActiveTab('ai_bot')}
@@ -84,23 +86,6 @@ export const Navbar: React.FC<NavbarProps> = ({
             <span className="hidden sm:inline">AI Privacy Bot</span>
             <span className="h-1.5 w-1.5 rounded-full bg-pink-500 animate-pulse" />
           </button>
-
-          {currentUser && (
-            <div className="flex items-center gap-2 bg-[#170830] border border-pink-500/30 rounded-xl p-1.5 pl-3">
-              <div className="h-6 w-6 rounded-lg bg-gradient-to-r from-pink-600 to-purple-600 text-white font-bold text-[11px] flex items-center justify-center">
-                {currentUser.username.charAt(0).toUpperCase()}
-              </div>
-              <span className="text-xs font-semibold text-white max-w-[120px] truncate">{currentUser.username}</span>
-              <button
-                id="btn-navbar-logout"
-                onClick={onLogout}
-                title="Sign Out"
-                className="p-1 hover:bg-[#2B0E44] rounded-lg text-purple-300/70 hover:text-rose-400 transition-colors cursor-pointer"
-              >
-                <LogOut className="h-3.5 w-3.5" />
-              </button>
-            </div>
-          )}
         </div>
       </div>
     </header>

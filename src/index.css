@@ -1,35 +1,37 @@
 @import "tailwindcss";
+
 @theme {
   --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Arial, sans-serif;
   --font-display: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Arial, sans-serif;
   --font-mono: 'JetBrains Mono', monospace, ui-monospace;
 }
+
 :root {
   font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Arial, sans-serif;
   color-scheme: dark;
 }
-body {
-  background-color: #0a0412;
-}
+
 h1, h2, h3, h4, .font-display {
   font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Arial, sans-serif;
   letter-spacing: -0.015em;
 }
+
 code, pre, .font-mono, .badge-mono {
   font-family: 'JetBrains Mono', monospace;
 }
+
 /* Custom crisp scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #06020a;
+  background: #090d16;
 }
 ::-webkit-scrollbar-thumb {
-  background: #3c0c4a;
+  background: #1e293b;
   border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #621477;
+  background: #334155;
 }

@@ -151,77 +151,7 @@ export async function deleteFromFirestore(collectionName: string, docId: string)
  * Initialize Database, seed initial demo accounts, CMPs and Genesis Block
  */
 export async function initializeDatabase(): Promise<void> {
-  // 1. Seed or update demo user accounts to ensure "Test Auditor" replaces any stale cached profiles
-  await db.users.put(INITIAL_DEMO_USERS[0]);
-  await syncToFirestore('users', INITIAL_DEMO_USERS[0].id, INITIAL_DEMO_USERS[0]);
-
-  // 2. Seed CMP Registry
-  const cmpCount = await db.cmp_registry.count();
-  if (cmpCount === 0) {
-    const items: CMPRegistryItem[] = INITIAL_CMP_REGISTRY.map((item) => ({
-      ...item,
-      id: 'cmp_' + Math.random().toString(36).substring(2, 10),
-    }));
-    await db.cmp_registry.bulkAdd(items);
-
-    // Sync seed CMPs to Firestore
-    for (const item of items) {
-      await syncToFirestore('cmp_registry', item.id, item);
-    }
-  }
-
-  // 3. Check if public and private ledgers have genesis blocks
-  const publicCount = await db.public_ledger.count();
-  if (publicCount === 0) {
-    const genesisTime = new Date().toISOString();
-    const genesisPublicHash = await computePublicBlockHash(
-      GENESIS_PREV_HASH,
-      0,
-      'crypticookie.genesis.network',
-      '0000000000000000000000000000000000000000000000000000000000000000',
-      'Verified',
-      'accept',
-      genesisTime
-    );
-
-    const genesisPublicBlock: PublicLedgerBlock = {
-      id: 'pb_genesis_0',
-      block_index: 0,
-      prev_hash: GENESIS_PREV_HASH,
-      hash: genesisPublicHash,
-      site_domain: 'crypticookie.genesis.network',
-      cookie_hash: '0000000000000000000000000000000000000000000000000000000000000000',
-      verification_result: 'Verified',
-      consent_action: 'accept',
-      timestamp: genesisTime,
-    };
-    await db.public_ledger.add(genesisPublicBlock);
-    await syncToFirestore('public_ledger', genesisPublicBlock.id, genesisPublicBlock);
-
-    const genesisPrivateHash = await computePrivateBlockHash(
-      GENESIS_PREV_HASH,
-      0,
-      'u_auditor_primary',
-      'event_genesis_0',
-      'accept',
-      'Consent Recorded',
-      genesisTime
-    );
-
-    const genesisPrivateBlock: PrivateLedgerBlock = {
-      id: 'pv_genesis_0',
-      block_index: 0,
-      prev_hash: GENESIS_PREV_HASH,
-      hash: genesisPrivateHash,
-      user_id: 'u_auditor_primary',
-      cookie_event_id: 'event_genesis_0',
-      consent_action: 'accept',
-      audit_output: 'Consent Recorded',
-      timestamp: genesisTime,
-    };
-    await db.private_ledger.add(genesisPrivateBlock);
-    await syncToFirestore('private_ledger', genesisPrivateBlock.id, genesisPrivateBlock);
-  }
+  // Database initialized. No longer seeding demo data.
 }
 
 /**

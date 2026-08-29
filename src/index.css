@@ -8,14 +8,14 @@
 
 :root {
   font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Arial, sans-serif;
-  color-scheme: light;
-  background-color: #F7F3FF;
-  color: #3B235C;
+  color-scheme: dark;
+  background-color: #0B0F17;
+  color: #F8FAFC;
 }
 
 body {
-  background-color: #F7F3FF;
-  color: #3B235C;
+  background-color: #0B0F17;
+  color: #F8FAFC;
 }
 
 h1, h2, h3, h4, .font-display {
@@ -33,12 +33,13 @@ code, pre, .font-mono, .badge-mono {
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #F7F3FF;
+  background: #0B0F17;
 }
 ::-webkit-scrollbar-thumb {
-  background: #CBA3F5;
+  background: #1E293B;
   border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #B78AE8;
+  background: #334155;
 }
+

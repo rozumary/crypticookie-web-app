@@ -107,19 +107,19 @@ export const BlockchainExplorer: React.FC<BlockchainExplorerProps> = ({ onRefres
   return (
     <div className="space-y-8 pb-12">
       {/* SECTION 1: Top Header Outer Container */}
-      <div className="bg-[#0F061F] border border-[#261445] rounded-3xl p-6 sm:p-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div className="bg-gradient-to-br from-[#231247] via-[#170B33] to-[#2A0E48] border border-[#3D1E6D] rounded-3xl p-6 sm:p-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 shadow-lg shadow-purple-950/20">
         <div>
           <div className="flex items-center gap-2">
             <h1 className="text-2xl font-bold text-white tracking-tight flex items-center gap-2">
-              <span>Blockchain Explorer</span>
+              <span>Security Receipt Log</span>
               <span className="h-2 w-2 rounded-full bg-pink-500" />
             </h1>
             <span className="px-2.5 py-0.5 rounded-full bg-[#1A0935] text-pink-300 border border-pink-500/30 text-[11px] font-mono font-semibold">
-              Hybrid PB+P Chain
+              Tamper-Proof History
             </span>
           </div>
-          <p className="text-xs text-purple-300/70 mt-1">
-            Dual-layer ledger: Public Ledger (PB) for verification + Private Ledger (P) for user records.
+          <p className="text-xs text-purple-300/80 mt-1">
+            A clear digital history proving your cookie choices on every website so platforms cannot change your settings secretly.
           </p>
         </div>
 
@@ -129,7 +129,7 @@ export const BlockchainExplorer: React.FC<BlockchainExplorerProps> = ({ onRefres
             className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-rose-950/80 hover:bg-rose-900 text-rose-200 border border-rose-800/60 text-xs font-bold transition-colors cursor-pointer"
           >
             <Flame className="h-3.5 w-3.5 text-rose-400" />
-            <span>Tamper Test</span>
+            <span>Test Safety Check</span>
           </button>
 
           <button
@@ -147,7 +147,7 @@ export const BlockchainExplorer: React.FC<BlockchainExplorerProps> = ({ onRefres
         <div
           className={`p-6 sm:p-8 rounded-3xl border flex flex-col sm:flex-row sm:items-center justify-between gap-4 ${
             verificationResult.isValid
-              ? 'border-pink-500/30 bg-[#1A0935] text-purple-100'
+              ? 'border-pink-500/40 bg-gradient-to-r from-[#211140] to-[#290E46] text-purple-100'
               : 'border-rose-800/80 bg-rose-950/60 text-rose-200'
           }`}
         >
@@ -161,17 +161,17 @@ export const BlockchainExplorer: React.FC<BlockchainExplorerProps> = ({ onRefres
               <div className="flex items-center gap-2">
                 <span className="text-base font-bold text-white">
                   {verificationResult.isValid
-                    ? 'Chain Integrity: 100% Valid'
-                    : `Tampered Block Detected at Index #${verificationResult.brokenBlockIndex}`}
+                    ? 'Receipt History Check: 100% Intact & Verified'
+                    : `Unverified Change Detected at Receipt #${verificationResult.brokenBlockIndex}`}
                 </span>
-                <span className="text-[11px] font-mono px-2.5 py-0.5 rounded-full bg-[#0F061F] text-pink-300 border border-pink-500/30 font-bold">
-                  {verificationResult.totalBlocks} Blocks
+                <span className="text-[11px] font-mono px-2.5 py-0.5 rounded-full bg-[#1A0935] text-pink-300 border border-pink-500/30 font-bold">
+                  {verificationResult.totalBlocks} Receipts
                 </span>
               </div>
-              <p className="text-xs text-purple-300/70 mt-0.5">
+              <p className="text-xs text-purple-300/80 mt-0.5">
                 {verificationResult.isValid
-                  ? 'All sequential cryptographic SHA-256 block hashes are intact.'
-                  : 'A block has been modified out-of-band. Cryptographic proof mismatch.'}
+                  ? 'All saved cookie choice receipts match their unique security fingerprints.'
+                  : 'A record was edited or modified. Digital security proof failed.'}
               </p>
             </div>
           </div>
@@ -183,16 +183,16 @@ export const BlockchainExplorer: React.FC<BlockchainExplorerProps> = ({ onRefres
               className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-xs font-bold text-white cursor-pointer shrink-0"
             >
               <Wrench className="h-3.5 w-3.5" />
-              <span>Repair Chain</span>
+              <span>Fix & Restore Log</span>
             </button>
           )}
         </div>
       )}
 
       {/* SECTION 3: Main Explorer Outer Container */}
-      <div className="bg-[#0F061F] border border-[#261445] rounded-3xl p-6 sm:p-8 space-y-6">
+      <div className="bg-gradient-to-br from-[#231247] via-[#170B33] to-[#2A0E48] border border-[#3D1E6D] rounded-3xl p-6 sm:p-8 space-y-6 shadow-lg shadow-purple-950/20">
         {/* Tabs & Search */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#29154A] pb-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#33185E] pb-4">
           <div className="flex items-center gap-2">
             <button
               onClick={() => setActiveLedgerTab('public')}
@@ -203,7 +203,7 @@ export const BlockchainExplorer: React.FC<BlockchainExplorerProps> = ({ onRefres
               }`}
             >
               <Unlock className="h-3.5 w-3.5 text-pink-300" />
-              <span>Public Ledger ({publicBlocks.length})</span>
+              <span>Verified Log ({publicBlocks.length})</span>
             </button>
 
             <button
@@ -215,7 +215,7 @@ export const BlockchainExplorer: React.FC<BlockchainExplorerProps> = ({ onRefres
               }`}
             >
               <Lock className="h-3.5 w-3.5 text-pink-300" />
-              <span>Private Ledger ({privateBlocks.length})</span>
+              <span>Your Personal Log ({privateBlocks.length})</span>
             </button>
           </div>
 
@@ -225,8 +225,8 @@ export const BlockchainExplorer: React.FC<BlockchainExplorerProps> = ({ onRefres
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search domain or hash..."
-              className="w-full rounded-xl bg-[#130729] pl-9 pr-3 py-1.5 text-xs text-purple-100 border border-[#29154A] focus:outline-none focus:border-pink-500 font-mono placeholder-purple-400/40"
+              placeholder="Search website or receipt code..."
+              className="w-full rounded-xl bg-[#170A30] pl-9 pr-3 py-1.5 text-xs text-purple-100 border border-[#301659] focus:outline-none focus:border-pink-500 font-mono placeholder-purple-400/40"
             />
           </div>
         </div>
@@ -235,8 +235,8 @@ export const BlockchainExplorer: React.FC<BlockchainExplorerProps> = ({ onRefres
         {activeLedgerTab === 'public' && (
           <div className="space-y-4">
             {filteredPublicBlocks.length === 0 ? (
-              <div className="text-center py-10 bg-[#130729] rounded-2xl border border-[#29154A] text-purple-300/60 text-xs font-mono">
-                No public blocks found.
+              <div className="text-center py-10 bg-[#1B0D38] rounded-2xl border border-[#33185E] text-purple-300/60 text-xs font-mono">
+                No verified receipts found matching search.
               </div>
             ) : (
               filteredPublicBlocks.map((block) => {
@@ -251,7 +251,7 @@ export const BlockchainExplorer: React.FC<BlockchainExplorerProps> = ({ onRefres
                     className={`p-5 rounded-2xl border transition-all ${
                       isTampered
                         ? 'border-rose-800/80 bg-rose-950/60'
-                        : 'border-[#29154A] bg-[#130729] hover:border-pink-500/40'
+                        : 'border-[#33185E] bg-[#1B0D38] hover:border-pink-500/50'
                     }`}
                   >
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
@@ -260,7 +260,7 @@ export const BlockchainExplorer: React.FC<BlockchainExplorerProps> = ({ onRefres
                           #{block.block_index}
                         </span>
                         <span className="font-bold text-white text-sm">
-                          {block.block_index === 0 ? 'Genesis Block' : block.site_domain}
+                          {block.block_index === 0 ? 'Initial System Receipt' : block.site_domain}
                         </span>
                         <span
                           className={`text-[10px] font-mono px-2.5 py-0.5 rounded-full font-bold ${
@@ -271,13 +271,13 @@ export const BlockchainExplorer: React.FC<BlockchainExplorerProps> = ({ onRefres
                               : 'bg-purple-950/70 text-purple-300 border border-purple-500/30'
                           }`}
                         >
-                          {block.verification_result}
+                          {block.verification_result === 'Verified' ? 'Verified Safe' : block.verification_result}
                         </span>
                       </div>
 
                       <div className="flex items-center gap-3 text-xs">
-                        <span className="font-mono text-purple-300/70 uppercase text-[11px]">
-                          Action: <strong className="text-pink-300 font-bold">{block.consent_action}</strong>
+                        <span className="font-mono text-purple-300/80 uppercase text-[11px]">
+                          Choice: <strong className="text-pink-300 font-bold">{block.consent_action}</strong>
                         </span>
                         <span className="text-purple-300/60 text-[11px] font-mono">
                           {new Date(block.timestamp).toLocaleTimeString()}
@@ -286,9 +286,9 @@ export const BlockchainExplorer: React.FC<BlockchainExplorerProps> = ({ onRefres
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs font-mono">
-                      <div className="p-3 rounded-xl bg-[#0F061F] border border-[#29154A]">
+                      <div className="p-3 rounded-xl bg-[#14082B] border border-[#301659]">
                         <div className="text-[10px] text-purple-300/70 flex items-center justify-between mb-1 font-semibold">
-                          <span>PREV HASH</span>
+                          <span>PREVIOUS RECEIPT CODE</span>
                           <button
                             onClick={() => handleCopy(block.prev_hash)}
                             className="text-pink-300 hover:text-white cursor-pointer"
@@ -299,9 +299,9 @@ export const BlockchainExplorer: React.FC<BlockchainExplorerProps> = ({ onRefres
                         <span className="text-purple-300/70 block truncate">{block.prev_hash}</span>
                       </div>
 
-                      <div className="p-3 rounded-xl bg-[#0F061F] border border-[#29154A]">
+                      <div className="p-3 rounded-xl bg-[#14082B] border border-[#301659]">
                         <div className="text-[10px] text-purple-300/70 flex items-center justify-between mb-1 font-semibold">
-                          <span>BLOCK HASH</span>
+                          <span>DIGITAL FINGERPRINT</span>
                           <button
                             onClick={() => handleCopy(block.hash)}
                             className="text-pink-300 hover:text-white cursor-pointer"
@@ -325,14 +325,14 @@ export const BlockchainExplorer: React.FC<BlockchainExplorerProps> = ({ onRefres
         {activeLedgerTab === 'private' && (
           <div className="space-y-4">
             {filteredPrivateBlocks.length === 0 ? (
-              <div className="text-center py-10 bg-[#130729] rounded-2xl border border-[#29154A] text-purple-300/60 text-xs font-mono">
-                No private blocks found.
+              <div className="text-center py-10 bg-[#1B0D38] rounded-2xl border border-[#33185E] text-purple-300/60 text-xs font-mono">
+                No personal receipts found.
               </div>
             ) : (
               filteredPrivateBlocks.map((block) => (
                 <div
                   key={block.id}
-                  className="p-5 rounded-2xl border border-[#29154A] bg-[#130729] hover:border-pink-500/40 transition-all"
+                  className="p-5 rounded-2xl border border-[#33185E] bg-[#1B0D38] hover:border-pink-500/50 transition-all"
                 >
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
                     <div className="flex items-center gap-2.5">
@@ -345,7 +345,7 @@ export const BlockchainExplorer: React.FC<BlockchainExplorerProps> = ({ onRefres
                     </div>
 
                     <div className="flex items-center gap-3 text-xs font-mono">
-                      <span className="text-purple-300/70 text-[11px]">User: <strong className="text-pink-300 font-bold">{block.user_id}</strong></span>
+                      <span className="text-purple-300/80 text-[11px]">User: <strong className="text-pink-300 font-bold">{block.user_id}</strong></span>
                       <span className="text-purple-300/60 text-[11px]">
                         {new Date(block.timestamp).toLocaleTimeString()}
                       </span>
@@ -353,13 +353,13 @@ export const BlockchainExplorer: React.FC<BlockchainExplorerProps> = ({ onRefres
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs font-mono">
-                    <div className="p-3 rounded-xl bg-[#0F061F] border border-[#29154A]">
-                      <span className="text-[10px] text-purple-300/70 block mb-1 font-semibold">PREV HASH</span>
+                    <div className="p-3 rounded-xl bg-[#14082B] border border-[#301659]">
+                      <span className="text-[10px] text-purple-300/70 block mb-1 font-semibold">PREVIOUS RECEIPT CODE</span>
                       <span className="text-purple-300/70 block truncate">{block.prev_hash}</span>
                     </div>
 
-                    <div className="p-3 rounded-xl bg-[#0F061F] border border-[#29154A]">
-                      <span className="text-[10px] text-purple-300/70 block mb-1 font-semibold">PRIVATE BLOCK HASH</span>
+                    <div className="p-3 rounded-xl bg-[#14082B] border border-[#301659]">
+                      <span className="text-[10px] text-purple-300/70 block mb-1 font-semibold">PRIVATE FINGERPRINT</span>
                       <span className="text-pink-300 block truncate font-bold">{block.hash}</span>
                     </div>
                   </div>

@@ -55,32 +55,32 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const navItems = [
     {
       id: 'overview',
-      label: 'Overview',
+      label: 'Privacy Dashboard',
       icon: Activity,
     },
     {
       id: 'simulator',
-      label: 'Extension Simulator',
+      label: 'Extension Guard',
       icon: Shield,
     },
     {
       id: 'blockchain',
-      label: 'Blockchain Explorer',
+      label: 'Security Log (Receipts)',
       icon: Layers,
     },
     {
       id: 'cmp_registry',
-      label: 'CMP Registry',
+      label: 'Approved Cookie Popups',
       icon: FileCheck,
     },
     {
       id: 'ai_bot',
-      label: 'AI Privacy Bot',
+      label: 'AI Privacy Helper',
       icon: Bot,
     },
     {
       id: 'settings',
-      label: 'Settings',
+      label: 'Settings & Preferences',
       icon: SettingsIcon,
     },
   ];

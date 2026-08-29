@@ -3,16 +3,15 @@ import {
   Cookie,
   Bot,
   Menu,
-  LogOut,
-  Shield,
-  Sparkles,
+  User,
 } from 'lucide-react';
-import { type User } from '../types/database';
+import { type User as UserType } from '../types/database';
 
 interface NavbarProps {
   activeTab: string;
   setActiveTab: (tab: string) => void;
-  currentUser: User | null;
+  currentUser: UserType | null;
+  onSelectUser: (user: UserType) => void;
   onOpenSignIn: () => void;
   onOpenSignUp: () => void;
   onLogout: () => void;
@@ -25,6 +24,9 @@ export const Navbar: React.FC<NavbarProps> = ({
   activeTab,
   setActiveTab,
   currentUser,
+  onSelectUser,
+  onOpenSignIn,
+  onOpenSignUp,
   onLogout,
   isDbReady,
   onToggleSidebar,
@@ -61,33 +63,32 @@ export const Navbar: React.FC<NavbarProps> = ({
           </div>
         </div>
 
-        {/* Right Side: AI Bot Access & User profile if active */}
+        {/* Right Side: Active User Account info & AI Bot Access */}
         <div className="flex items-center gap-2 sm:gap-3">
+          {currentUser ? (
+            <div className="flex items-center gap-2 px-3 py-1.5 bg-[#170830] text-purple-200 border border-pink-500/30 rounded-xl text-xs font-semibold">
+              <div className="w-5 h-5 rounded bg-gradient-to-r from-pink-600 to-purple-600 flex items-center justify-center text-white text-[10px] font-bold">
+                {currentUser.username.charAt(0).toUpperCase()}
+              </div>
+              <span className="hidden sm:inline max-w-[150px] truncate text-purple-100">{currentUser.username}</span>
+            </div>
+          ) : (
+            <button
+              onClick={onOpenSignIn}
+              className="px-3.5 py-1.5 bg-gradient-to-r from-pink-600 to-purple-600 text-white rounded-xl text-xs font-bold transition-all hover:opacity-90 active:scale-95"
+            >
+              Sign In
+            </button>
+          )}
+
           <button
             onClick={() => setActiveTab('ai_bot')}
-            className="flex items-center gap-1.5 px-3.5 py-1.5 bg-[#1D0938] hover:bg-gradient-to-r hover:from-pink-600 hover:to-purple-600 text-pink-300 hover:text-white text-xs font-semibold rounded-xl border border-pink-500/40 transition-all cursor-pointer hover:scale-105 active:scale-95"
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-[#1D0938] hover:bg-gradient-to-r hover:from-pink-600 hover:to-purple-600 text-pink-300 hover:text-white text-xs font-semibold rounded-xl border border-pink-500/40 transition-all cursor-pointer hover:scale-105 active:scale-95"
           >
             <Bot className="h-3.5 w-3.5 text-pink-400" />
             <span className="hidden sm:inline">AI Privacy Bot</span>
             <span className="h-1.5 w-1.5 rounded-full bg-pink-500 animate-pulse" />
           </button>
-
-          {currentUser && (
-            <div className="flex items-center gap-2 bg-[#170830] border border-pink-500/30 rounded-xl p-1.5 pl-3">
-              <div className="h-6 w-6 rounded-lg bg-gradient-to-r from-pink-600 to-purple-600 text-white font-bold text-[11px] flex items-center justify-center">
-                {currentUser.username.charAt(0).toUpperCase()}
-              </div>
-              <span className="text-xs font-semibold text-white max-w-[120px] truncate">{currentUser.username}</span>
-              <button
-                id="btn-navbar-logout"
-                onClick={onLogout}
-                title="Sign Out"
-                className="p-1 hover:bg-[#2B0E44] rounded-lg text-purple-300/70 hover:text-rose-400 transition-colors cursor-pointer"
-              >
-                <LogOut className="h-3.5 w-3.5" />
-              </button>
-            </div>
-          )}
         </div>
       </div>
     </header>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Navbar } from './components/Navbar';
 import { Sidebar } from './components/Sidebar';
 import { OverviewDashboard } from './components/OverviewDashboard';
@@ -9,7 +9,7 @@ import { SettingsView } from './components/SettingsView';
 import { AIPrivacyBot } from './components/AIPrivacyBot';
 import { DatabaseConsole } from './components/DatabaseConsole';
 import { AuthModal } from './components/AuthModal';
-import { initializeDatabase, getDatabaseMetrics, db, setupFirestoreRealtimeListeners } from './lib/db';
+import { initializeDatabase, getDatabaseMetrics, db, setupFirestoreRealtimeListeners, INITIAL_DEMO_USERS } from './lib/db';
 import { type User, type CookieEvent } from './types/database';
 
 export default function App() {
@@ -37,18 +37,37 @@ export default function App() {
 
   const [recentEvents, setRecentEvents] = useState<CookieEvent[]>([]);
 
-  // Refresh all state from database
-  const refreshDatabaseState = async () => {
+  const activeUserId = currentUser ? currentUser.id : 'u_auditor_primary';
+
+  // Refresh all state from database for current isolated User Account
+  const refreshDatabaseState = useCallback(async () => {
     try {
-      const stats = await getDatabaseMetrics();
+      const stats = await getDatabaseMetrics(activeUserId);
       setMetrics(stats);
 
-      const evs = await db.cookie_events.orderBy('created_at').reverse().toArray();
-      setRecentEvents(evs);
+      const allEvents = await db.cookie_events.orderBy('created_at').reverse().toArray();
+      const userEvents = allEvents.filter((e) => !e.user_id || e.user_id === activeUserId);
+      setRecentEvents(userEvents);
     } catch (err) {
       console.error('Error refreshing DB metrics:', err);
     }
-  };
+  }, [activeUserId]);
+
+  // Trigger state refresh on user account change or db ready
+  useEffect(() => {
+    if (isDbReady) {
+      refreshDatabaseState();
+    }
+  }, [activeUserId, isDbReady, refreshDatabaseState]);
+
+  // Real-time synchronization event listener
+  useEffect(() => {
+    const handleSync = () => {
+      refreshDatabaseState();
+    };
+    window.addEventListener('crypticookie_db_sync', handleSync);
+    return () => window.removeEventListener('crypticookie_db_sync', handleSync);
+  }, [refreshDatabaseState]);
 
   // Initial Boot
   useEffect(() => {
@@ -57,18 +76,23 @@ export default function App() {
       try {
         await initializeDatabase();
         setIsDbReady(true);
-        await refreshDatabaseState();
+
+        const storedUserId = localStorage.getItem('crypticookie_active_user_id');
+        if (storedUserId) {
+          const user = await db.users.get(storedUserId);
+          if (user) {
+            setCurrentUser(user);
+          } else {
+            setCurrentUser(null);
+          }
+        } else {
+          setCurrentUser(null);
+        }
 
         // Start real-time Firestore listeners
         unsubListeners = setupFirestoreRealtimeListeners(() => {
           refreshDatabaseState();
         });
-
-        const storedUserId = localStorage.getItem('crypticookie_active_user_id');
-        if (storedUserId) {
-          const user = await db.users.get(storedUserId);
-          if (user) setCurrentUser(user);
-        }
       } catch (err) {
         console.error('Boot initialization error:', err);
       }
@@ -80,9 +104,16 @@ export default function App() {
     };
   }, []);
 
+  const handleSelectUser = (user: User) => {
+    localStorage.setItem('crypticookie_active_user_id', user.id);
+    setCurrentUser(user);
+    window.dispatchEvent(new CustomEvent('crypticookie_user_changed', { detail: { userId: user.id } }));
+  };
+
   const handleLogout = () => {
     localStorage.removeItem('crypticookie_active_user_id');
     setCurrentUser(null);
+    window.dispatchEvent(new CustomEvent('crypticookie_user_changed', { detail: { userId: null } }));
   };
 
   const handleOpenSignIn = () => {
@@ -96,17 +127,7 @@ export default function App() {
   };
 
   const handleOneClickDemo = async () => {
-    let user = await db.users.toCollection().first();
-    if (!user) {
-      user = {
-        id: 'u_evaluator_' + Math.random().toString(36).substring(2, 9),
-        username: 'Guest Evaluator',
-        email: 'guest@crypticookie.local',
-        password_hash: 'guest123_hash',
-        created_at: new Date().toISOString(),
-      };
-      await db.users.add(user);
-    }
+    const user = INITIAL_DEMO_USERS[0];
     localStorage.setItem('crypticookie_active_user_id', user.id);
     setCurrentUser(user);
   };
@@ -141,6 +162,7 @@ export default function App() {
           activeTab={activeTab}
           setActiveTab={setActiveTab}
           currentUser={currentUser}
+          onSelectUser={handleSelectUser}
           onOpenSignIn={handleOpenSignIn}
           onOpenSignUp={handleOpenSignUp}
           onLogout={handleLogout}
@@ -177,7 +199,7 @@ export default function App() {
             <CMPRegistryManager onRefreshData={refreshDatabaseState} />
           )}
 
-          {activeTab === 'settings' && <SettingsView />}
+          {activeTab === 'settings' && <SettingsView currentUser={currentUser} onRefreshData={refreshDatabaseState} />}
 
           {activeTab === 'ai_bot' && <AIPrivacyBot />}
 
@@ -193,8 +215,7 @@ export default function App() {
         onClose={() => setIsAuthModalOpen(false)}
         initialMode={authMode}
         onLoginSuccess={(user) => {
-          localStorage.setItem('crypticookie_active_user_id', user.id);
-          setCurrentUser(user);
+          handleSelectUser(user);
           setIsAuthModalOpen(false);
         }}
       />

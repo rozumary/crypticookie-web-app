@@ -42,6 +42,9 @@ export const DatabaseConsole: React.FC<DatabaseConsoleProps> = ({ onRefreshData 
 
   useEffect(() => {
     loadTableData();
+    const handleSync = () => loadTableData();
+    window.addEventListener('crypticookie_db_sync', handleSync);
+    return () => window.removeEventListener('crypticookie_db_sync', handleSync);
   }, [selectedTable]);
 
   const handleExecuteReset = async () => {

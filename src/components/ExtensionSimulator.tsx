@@ -40,7 +40,6 @@ import {
   clearMonitoredDomains,
 } from '../lib/db';
 import { sha256, truncateHash } from '../lib/crypto';
-import { firebaseConfigData } from '../lib/firebase';
 import { InstallExtensionModal } from './InstallExtensionModal';
 
 interface ExtensionSimulatorProps {
@@ -135,16 +134,25 @@ export const ExtensionSimulator: React.FC<ExtensionSimulatorProps> = ({
   const [copiedHash, setCopiedHash] = useState(false);
   const [isInstallModalOpen, setIsInstallModalOpen] = useState(false);
 
+  const activeUserId = currentUser ? currentUser.id : 'u_auditor_primary';
+
   const refreshMonitoredHistory = async () => {
     try {
-      const items = await getMonitoredDomains(20);
+      const items = await getMonitoredDomains(25, activeUserId);
       setMonitoredHistory(items);
     } catch (e) {
       console.error('Error fetching monitored history:', e);
     }
   };
 
-  // Setup preview state without writing to database
+  useEffect(() => {
+    refreshMonitoredHistory();
+    const handleSync = () => refreshMonitoredHistory();
+    window.addEventListener('crypticookie_db_sync', handleSync);
+    return () => window.removeEventListener('crypticookie_db_sync', handleSync);
+  }, [activeUserId]);
+
+  // Setup preview state and precalculate hash
   const setupDomainPreview = async (domainToPreview: string) => {
     const domainClean = domainToPreview.replace(/^https?:\/\//, '').replace(/\/.*$/, '').toLowerCase().trim();
     if (!domainClean) return;
@@ -186,7 +194,6 @@ export const ExtensionSimulator: React.FC<ExtensionSimulatorProps> = ({
   };
 
   useEffect(() => {
-    refreshMonitoredHistory();
     setupDomainPreview(currentDomain);
   }, []);
 
@@ -224,6 +231,7 @@ export const ExtensionSimulator: React.FC<ExtensionSimulatorProps> = ({
     const riskLevel = result === 'Warning' || cookieType === 'suspicious' ? 'Critical' : (result === 'Unverified' ? 'Moderate' : 'Low');
 
     try {
+      // Record immediately to database and Firestore for real-time live sync
       await recordMonitoredDomain({
         domain: domainClean,
         url: `https://${domainClean}`,
@@ -238,8 +246,9 @@ export const ExtensionSimulator: React.FC<ExtensionSimulatorProps> = ({
         privacy_risk_level: riskLevel,
         auto_blocked: result === 'Warning' || cookieType === 'suspicious',
         guidance: guidance,
-      });
+      }, activeUserId);
       await refreshMonitoredHistory();
+      await onRefreshData();
     } catch (err) {
       console.error('Monitored log error:', err);
     } finally {
@@ -249,9 +258,8 @@ export const ExtensionSimulator: React.FC<ExtensionSimulatorProps> = ({
 
   const handleExecuteConsentAction = async (action: ConsentAction) => {
     try {
-      const userId = currentUser ? currentUser.id : 'u_researcher_default';
       const result = await recordConsentTransaction({
-        userId,
+        userId: activeUserId,
         siteDomain: currentDomain.trim().toLowerCase() || 'unspecified-domain.com',
         cookieHash: currentScriptHash || '0000000000000000000000000000000000000000000000000000000000000000',
         cookieType: currentCookieType,
@@ -280,8 +288,9 @@ export const ExtensionSimulator: React.FC<ExtensionSimulatorProps> = ({
   };
 
   const handleClearHistory = async () => {
-    await clearMonitoredDomains();
+    await clearMonitoredDomains(activeUserId);
     await refreshMonitoredHistory();
+    await onRefreshData();
   };
 
   return (
@@ -289,10 +298,10 @@ export const ExtensionSimulator: React.FC<ExtensionSimulatorProps> = ({
       {/* SECTION 1: Top Header Outer Container */}
       <div className="bg-[#0F061F] border border-[#261445] rounded-3xl p-6 sm:p-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             <h1 className="text-2xl font-bold text-white tracking-tight flex items-center gap-2">
               <span>Active Website & CMP Monitor</span>
-              <span className="h-2 w-2 rounded-full bg-pink-500" />
+              <span className="h-2 w-2 rounded-full bg-pink-500 animate-pulse" />
             </h1>
             <span className="flex items-center gap-1 px-3 py-1 rounded-full bg-[#1A0935] text-pink-300 border border-pink-500/30 text-[11px] font-mono font-semibold">
               <Radio className="h-3 w-3 text-pink-400 animate-pulse" />
@@ -300,14 +309,14 @@ export const ExtensionSimulator: React.FC<ExtensionSimulatorProps> = ({
             </span>
           </div>
           <p className="text-xs text-purple-300/70 mt-1">
-            Type any website domain below to check its real cookies, inspect privacy banners, or add to your web browser.
+            Audits any website domain in real time, intercepts cookie consent banners, and hashes script signatures to the ledger for account <strong className="text-white">{currentUser ? currentUser.username : 'Primary Auditor'}</strong>.
           </p>
         </div>
 
         <div className="flex items-center gap-3">
           <button
             onClick={() => setIsInstallModalOpen(true)}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 text-white text-xs font-bold transition-all cursor-pointer hover:scale-105 active:scale-95"
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 text-white text-xs font-bold transition-all cursor-pointer hover:scale-105 active:scale-95 shadow-md"
           >
             <Sparkles className="h-4 w-4 text-white" />
             <span>Install to Real Browser</span>
@@ -320,7 +329,7 @@ export const ExtensionSimulator: React.FC<ExtensionSimulatorProps> = ({
         <div className="flex items-center justify-between">
           <h2 className="text-base font-bold text-white flex items-center gap-2">
             <Globe className="h-4 w-4 text-pink-400" />
-            <span>Simulator Browser Frame</span>
+            <span>Live Browser Interceptor Window</span>
           </h2>
           <span className="text-xs font-mono font-semibold text-pink-300 bg-[#1A0935] px-3 py-1 rounded-full border border-pink-500/30">
             {currentDomain}
@@ -351,9 +360,9 @@ export const ExtensionSimulator: React.FC<ExtensionSimulatorProps> = ({
               />
               <button
                 type="submit"
-                className="px-3 py-1 rounded-lg bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 text-white font-medium text-xs shrink-0 transition-colors cursor-pointer"
+                className="px-3.5 py-1.5 rounded-lg bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 text-white font-semibold text-xs shrink-0 transition-colors cursor-pointer"
               >
-                Open Site
+                Inspect & Audit
               </button>
             </form>
 
@@ -388,7 +397,7 @@ export const ExtensionSimulator: React.FC<ExtensionSimulatorProps> = ({
                       </span>
                     </div>
                     <p className="text-xs text-purple-300/70 mt-0.5">
-                      Live DOM intercepted • SHA-256 Digest verified against registry
+                      Live DOM intercepted • SHA-256 Digest verified against CMP whitelist
                     </p>
                   </div>
                 </div>
@@ -460,7 +469,7 @@ export const ExtensionSimulator: React.FC<ExtensionSimulatorProps> = ({
               )}
             </div>
 
-            {/* Unified Smart Consent Shield Banner (Single, Clean Prompt) */}
+            {/* Unified Smart Consent Shield Banner */}
             {bannerVisible ? (
               <div className="rounded-2xl border border-pink-500/40 bg-[#1C093B] p-5 sm:p-6 space-y-4 animate-fadeIn">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#2C1258] pb-3">
@@ -549,9 +558,9 @@ export const ExtensionSimulator: React.FC<ExtensionSimulatorProps> = ({
             ) : (
               <div className="p-6 rounded-2xl bg-[#1C093B]/60 border border-pink-500/30 text-center space-y-2">
                 <CheckCircle2 className="h-8 w-8 text-emerald-400 mx-auto" />
-                <h4 className="text-sm font-bold text-white">Consent Decision Logged</h4>
+                <h4 className="text-sm font-bold text-white">Consent Decision Logged Live</h4>
                 <p className="text-xs text-purple-300/70">
-                  Decision committed to local block and synchronized with Firebase Firestore.
+                  Decision committed to local block and synchronized across database and dashboard in real time.
                 </p>
                 <button
                   onClick={() => setBannerVisible(true)}
@@ -618,7 +627,7 @@ export const ExtensionSimulator: React.FC<ExtensionSimulatorProps> = ({
         <div className="bg-[#130729] border border-[#29154A] rounded-2xl overflow-hidden">
           {monitoredHistory.length === 0 ? (
             <div className="text-center py-8 text-xs text-purple-300/60 font-mono">
-              No website monitoring events recorded yet. Type any domain above to start auditing.
+              No website monitoring events recorded yet for this account. Type any domain above to start auditing.
             </div>
           ) : (
             <div className="overflow-x-auto">
@@ -684,4 +693,3 @@ export const ExtensionSimulator: React.FC<ExtensionSimulatorProps> = ({
     </div>
   );
 };
-

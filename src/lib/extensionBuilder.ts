@@ -80,7 +80,7 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
       chrome.action.setBadgeBackgroundColor({ tabId: tabId, color: "#10b981" });
 
       // Save visit locally
-      chrome.storage.local.get({ monitored_sessions: [] }, (result) => {
+      chrome.storage.local.get({ monitored_sessions: [], active_user_id: "u_auditor_primary" }, (result) => {
         const list = result.monitored_sessions;
         const entry = {
           domain: domain,
@@ -91,19 +91,20 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
         list.unshift(entry);
         if (list.length > 50) list.pop();
         chrome.storage.local.set({ monitored_sessions: list });
-      });
 
-      // Real-time sync domain visit to Central Server & Firestore
-      fetch(SERVER_API_URL + "/api/domains/record", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          domain: domain,
-          url: tab.url,
-          title: tab.title || domain,
-          privacy_risk_level: domain.includes('track') || domain.includes('pirate') ? "High" : "Low"
-        })
-      }).catch(err => console.warn("Server domain sync note:", err));
+        // Real-time sync domain visit to Central Server & Firestore
+        fetch(SERVER_API_URL + "/api/domains/record", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            domain: domain,
+            url: tab.url,
+            title: tab.title || domain,
+            userId: result.active_user_id,
+            privacy_risk_level: domain.includes('track') || domain.includes('pirate') ? "High" : "Low"
+          })
+        }).catch(err => console.warn("Server domain sync note:", err));
+      });
     } catch (e) {
       console.warn("Navigation parse error:", e);
     }
@@ -112,6 +113,14 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
 
 // 2. Messaging Handler for CMP & Consent Actions
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  if (request.type === "SET_ACTIVE_USER_ID") {
+    chrome.storage.local.set({ active_user_id: request.userId }, () => {
+      console.log("Extension synchronized active user_id:", request.userId);
+    });
+    sendResponse({ status: "synced", userId: request.userId });
+    return true;
+  }
+
   if (request.type === "VERIFY_CMP_HASH") {
     const hash = request.hash;
     const entry = CMP_REGISTRY_CACHE.get(hash);
@@ -138,13 +147,13 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   }
 
   if (request.type === "RECORD_CONSENT_TRANSACTION") {
-    (async () => {
-      const timestamp = new Date().toISOString();
-      const payload = \`\${request.domain}|\${request.hash}|\${request.action}|\${timestamp}\`;
-      const blockHash = await sha256(payload);
+    chrome.storage.local.get({ consent_ledger: [], active_user_id: "u_auditor_primary" }, (result) => {
+      (async () => {
+        const timestamp = new Date().toISOString();
+        const payload = \`\${request.domain}|\${request.hash}|\${request.action}|\${timestamp}\`;
+        const blockHash = await sha256(payload);
 
-      // 1. Save to Chrome local storage
-      chrome.storage.local.get({ consent_ledger: [] }, (result) => {
+        // 1. Save to Chrome local storage
         const ledger = result.consent_ledger;
         const block = {
           block_index: ledger.length,
@@ -155,48 +164,51 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         };
         ledger.push(block);
         chrome.storage.local.set({ consent_ledger: ledger });
-      });
 
-      // 2. REAL-TIME HTTP post to Central Server & Firestore Database
-      try {
-        const resp = await fetch(SERVER_API_URL + "/api/consent/record", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            domain: request.domain,
-            hash: request.hash,
-            action: request.action,
-            userId: request.userId || "u_chrome_extension_user",
-            timestamp: timestamp
-          })
-        });
-        const data = await resp.json();
-        console.log("Real-time Consent Sync Success:", data);
-      } catch (err) {
-        console.warn("Failed to reach central server, stored locally:", err);
-      }
+        // 2. REAL-TIME HTTP post to Central Server & Firestore Database
+        try {
+          const resp = await fetch(SERVER_API_URL + "/api/consent/record", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              domain: request.domain,
+              hash: request.hash,
+              action: request.action,
+              userId: result.active_user_id,
+              timestamp: timestamp
+            })
+          });
+          const data = await resp.json();
+          console.log("Real-time Consent Sync Success:", data);
+        } catch (err) {
+          console.warn("Failed to reach central server, stored locally:", err);
+        }
 
-      sendResponse({ status: "committed", blockHash: blockHash });
-    })();
+        sendResponse({ status: "committed", blockHash: blockHash });
+      })();
+    });
     return true;
   }
 
   if (request.type === "DOMAIN_VISITED") {
-    (async () => {
-      try {
-        await fetch(SERVER_API_URL + "/api/domains/record", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            domain: request.domain,
-            url: request.url,
-            title: request.title,
-            privacy_risk_level: request.privacy_risk_level || "Low"
-          })
-        });
-      } catch (e) {}
-      sendResponse({ status: "logged" });
-    })();
+    chrome.storage.local.get({ active_user_id: "u_auditor_primary" }, (result) => {
+      (async () => {
+        try {
+          await fetch(SERVER_API_URL + "/api/domains/record", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              domain: request.domain,
+              url: request.url,
+              title: request.title,
+              userId: result.active_user_id,
+              privacy_risk_level: request.privacy_risk_level || "Low"
+            })
+          });
+        } catch (e) {}
+        sendResponse({ status: "logged" });
+      })();
+    });
     return true;
   }
 });
@@ -210,8 +222,37 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 (function initCrypticookieInterceptor() {
   const currentHost = window.location.hostname || 'website';
   
-  // Do not run on internal extension or local pages
-  if (!currentHost || currentHost === 'localhost' || currentHost === '127.0.0.1') return;
+  // Synchronize Active User ID if on the Crypticookie Web App origin
+  if (window.location.origin === "${apiOrigin}" || window.location.host.includes("asia-east1.run.app") || window.location.host.includes("localhost:3000")) {
+    const activeUserId = localStorage.getItem('crypticookie_active_user_id');
+    if (activeUserId) {
+      chrome.runtime.sendMessage({
+        type: 'SET_ACTIVE_USER_ID',
+        userId: activeUserId
+      });
+    }
+    // Set up reactive listener to sync whenever user logs in or switches accounts
+    window.addEventListener('storage', (e) => {
+      if (e.key === 'crypticookie_active_user_id' && e.newValue) {
+        chrome.runtime.sendMessage({
+          type: 'SET_ACTIVE_USER_ID',
+          userId: e.newValue
+        });
+      }
+    });
+
+    window.addEventListener('crypticookie_user_changed', (e: any) => {
+      if (e.detail && e.detail.userId) {
+        chrome.runtime.sendMessage({
+          type: 'SET_ACTIVE_USER_ID',
+          userId: e.detail.userId
+        });
+      }
+    });
+  }
+
+  // Do not run shield on internal extension, local or central app pages
+  if (!currentHost || currentHost === 'localhost' || currentHost === '127.0.0.1' || window.location.origin === "${apiOrigin}" || window.location.host.includes("asia-east1.run.app")) return;
 
   function computeScriptHashMock(domain) {
     if (domain.includes('mit.edu') || domain.includes('onetrust') || domain.includes('theverge')) {

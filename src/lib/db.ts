@@ -148,14 +148,9 @@ export async function deleteFromFirestore(collectionName: string, docId: string)
  * Initialize Database, seed initial demo accounts, CMPs and Genesis Block
  */
 export async function initializeDatabase(): Promise<void> {
-  // 1. Seed demo user accounts if no users exist
-  const usersCount = await db.users.count();
-  if (usersCount === 0) {
-    await db.users.bulkAdd(INITIAL_DEMO_USERS);
-    for (const u of INITIAL_DEMO_USERS) {
-      await syncToFirestore('users', u.id, u);
-    }
-  }
+  // 1. Seed or update demo user accounts to ensure "Test Auditor" replaces any stale cached profiles
+  await db.users.put(INITIAL_DEMO_USERS[0]);
+  await syncToFirestore('users', INITIAL_DEMO_USERS[0].id, INITIAL_DEMO_USERS[0]);
 
   // 2. Seed CMP Registry
   const cmpCount = await db.cmp_registry.count();

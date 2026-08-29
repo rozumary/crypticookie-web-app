@@ -9,6 +9,7 @@ interface AuthModalProps {
   onClose: () => void;
   onLoginSuccess: (user: UserType) => void;
   initialMode?: 'signin' | 'signup';
+  canClose?: boolean;
 }
 
 export const AuthModal: React.FC<AuthModalProps> = ({
@@ -16,6 +17,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   onClose,
   onLoginSuccess,
   initialMode = 'signin',
+  canClose = true,
 }) => {
   const [isRegisterMode, setIsRegisterMode] = useState(initialMode === 'signup');
   const [username, setUsername] = useState('');
@@ -106,12 +108,14 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#060310]/85 backdrop-blur-md p-4 animate-fadeIn">
       <div className="w-full max-w-md rounded-3xl border border-pink-500/30 bg-[#0c061d] p-6 sm:p-8 shadow-[0_0_50px_rgba(219,39,119,0.15)] space-y-6 relative text-purple-100">
-        <button
-          onClick={onClose}
-          className="absolute right-5 top-5 text-purple-300/50 hover:text-pink-400 transition-colors cursor-pointer p-1"
-        >
-          <X className="h-5 w-5" />
-        </button>
+        {canClose && (
+          <button
+            onClick={onClose}
+            className="absolute right-5 top-5 text-purple-300/50 hover:text-pink-400 transition-colors cursor-pointer p-1"
+          >
+            <X className="h-5 w-5" />
+          </button>
+        )}
 
         <div className="text-center space-y-1">
           <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-[#1a082d] text-pink-400 border border-pink-500/30 mb-3 shadow-[0_0_15px_rgba(219,39,119,0.1)]">

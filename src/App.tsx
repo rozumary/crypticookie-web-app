@@ -84,9 +84,11 @@ export default function App() {
             setCurrentUser(user);
           } else {
             setCurrentUser(null);
+            setIsAuthModalOpen(true);
           }
         } else {
           setCurrentUser(null);
+          setIsAuthModalOpen(true);
         }
 
         // Start real-time Firestore listeners
@@ -113,6 +115,8 @@ export default function App() {
   const handleLogout = () => {
     localStorage.removeItem('crypticookie_active_user_id');
     setCurrentUser(null);
+    setAuthMode('signin');
+    setIsAuthModalOpen(true);
     window.dispatchEvent(new CustomEvent('crypticookie_user_changed', { detail: { userId: null } }));
   };
 
@@ -128,8 +132,7 @@ export default function App() {
 
   const handleOneClickDemo = async () => {
     const user = INITIAL_DEMO_USERS[0];
-    localStorage.setItem('crypticookie_active_user_id', user.id);
-    setCurrentUser(user);
+    handleSelectUser(user);
   };
 
   return (
@@ -214,6 +217,7 @@ export default function App() {
         isOpen={isAuthModalOpen}
         onClose={() => setIsAuthModalOpen(false)}
         initialMode={authMode}
+        canClose={currentUser !== null}
         onLoginSuccess={(user) => {
           handleSelectUser(user);
           setIsAuthModalOpen(false);

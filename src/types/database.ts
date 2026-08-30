@@ -43,6 +43,7 @@ export interface CookieEvent {
   site_domain: string;
   cookie_hash: string;
   cookie_type: CookieType;
+  consent_action?: ConsentAction;
   verification_result: VerificationResult;
   guidance_shown: GuidanceRecommendation;
   created_at: string;
@@ -94,6 +95,7 @@ export interface MonitoredDomain {
   cmp_name: string;
   script_hash: string;
   verification_result: VerificationResult;
+  consent_action?: ConsentAction;
   cookie_count: number;
   trackers_count: number;
   trackers_list: DetectedTracker[];

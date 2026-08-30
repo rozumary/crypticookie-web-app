@@ -635,6 +635,7 @@ export const ExtensionSimulator: React.FC<ExtensionSimulatorProps> = ({
                     <th className="py-3 px-4">Domain / Website</th>
                     <th className="py-3 px-4">CMP Script Name</th>
                     <th className="py-3 px-4">Verification</th>
+                    <th className="py-3 px-4">Decision</th>
                     <th className="py-3 px-4">Trackers</th>
                     <th className="py-3 px-4">Risk Level</th>
                     <th className="py-3 px-4">Timestamp</th>
@@ -658,6 +659,25 @@ export const ExtensionSimulator: React.FC<ExtensionSimulatorProps> = ({
                         }`}>
                           {item.verification_result}
                         </span>
+                      </td>
+                      <td className="py-2.5 px-4">
+                        {item.consent_action === 'accept' ? (
+                          <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-950/80 text-emerald-300 border border-emerald-500/30">
+                            Accepted
+                          </span>
+                        ) : item.consent_action === 'reject' ? (
+                          <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-950/80 text-rose-300 border border-rose-500/30">
+                            Rejected
+                          </span>
+                        ) : item.consent_action === 'customize' ? (
+                          <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-950/80 text-amber-300 border border-amber-500/30">
+                            Customized
+                          </span>
+                        ) : (
+                          <span className="px-2 py-0.5 rounded text-[10px] text-purple-400 bg-purple-950/40 border border-purple-500/20">
+                            Audited
+                          </span>
+                        )}
                       </td>
                       <td className="py-2.5 px-4 text-purple-200">{item.trackers_count} trackers</td>
                       <td className="py-2.5 px-4">

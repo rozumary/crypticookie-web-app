@@ -5,6 +5,8 @@ import {
   Database,
   Play,
   CheckCircle2,
+  XCircle,
+  SlidersHorizontal,
   Plus,
   Radio,
   RefreshCw,
@@ -13,6 +15,9 @@ import {
   Lock,
   Search,
   ExternalLink,
+  Check,
+  X,
+  Filter,
 } from 'lucide-react';
 import {
   type CookieEvent,
@@ -27,6 +32,7 @@ import {
   recordMonitoredDomain,
   getMonitoredDomains,
   determineVerificationResult,
+  syncAllFromCentralServer,
 } from '../lib/db';
 import { CrypticookieLogo } from './CrypticookieLogo';
 
@@ -42,6 +48,9 @@ interface OverviewDashboardProps {
     blacklistedCMPs: number;
     unlistedCMPs: number;
     totalCMPs: number;
+    acceptedCount?: number;
+    rejectedCount?: number;
+    customizedCount?: number;
   };
   recentEvents: CookieEvent[];
   currentUser: User | null;
@@ -67,14 +76,14 @@ export const OverviewDashboard: React.FC<OverviewDashboardProps> = ({
   
   // Real-Time Monitored Websites for active account
   const [monitoredSites, setMonitoredSites] = useState<MonitoredDomain[]>([]);
-  const [quickAuditUrl, setQuickAuditUrl] = useState('');
-  const [isAuditingQuick, setIsAuditingQuick] = useState(false);
+  const [decisionFilter, setDecisionFilter] = useState<'all' | 'accept' | 'reject' | 'audited'>('all');
+  const [searchFilter, setSearchFilter] = useState('');
 
   const activeUserId = currentUser ? currentUser.id : 'u_auditor_primary';
 
   const loadMonitoredSites = async () => {
     try {
-      const list = await getMonitoredDomains(15, activeUserId);
+      const list = await getMonitoredDomains(50, activeUserId);
       setMonitoredSites(list);
     } catch (e) {
       console.error('Error fetching monitored sites:', e);
@@ -96,49 +105,33 @@ export const OverviewDashboard: React.FC<OverviewDashboardProps> = ({
 
   const handleManualRefresh = async () => {
     setIsRefreshing(true);
-    await onRefreshData();
-    await loadMonitoredSites();
-    setTimeout(() => setIsRefreshing(false), 400);
+    try {
+      await syncAllFromCentralServer(activeUserId);
+      await onRefreshData();
+      await loadMonitoredSites();
+    } catch (e) {
+      console.error('Live sync error:', e);
+    } finally {
+      setTimeout(() => setIsRefreshing(false), 500);
+    }
   };
 
-  const handleQuickAudit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!quickAuditUrl.trim()) return;
-
-    setIsAuditingQuick(true);
+  const handleQuickDecision = async (domain: string, action: ConsentAction) => {
     try {
-      const cleanDomain = quickAuditUrl.replace(/^https?:\/\//, '').replace(/\/.*$/, '').toLowerCase().trim();
-      const mockScriptHash = await sha256(cleanDomain + '_cmp_script_v1');
-      const { result } = await determineVerificationResult(mockScriptHash);
-
-      const isThreat = result === 'Warning' || cleanDomain.includes('ad') || cleanDomain.includes('track');
-      const riskLevel = isThreat ? 'High' : cleanDomain.includes('news') ? 'Moderate' : 'Low';
-
-      await recordMonitoredDomain({
-        domain: cleanDomain,
-        url: `https://${cleanDomain}`,
-        title: cleanDomain.toUpperCase(),
-        cmp_detected: true,
-        cmp_name: result === 'Verified' ? 'OneTrust Privacy Banner' : 'Generic Consent CMP',
-        script_hash: mockScriptHash,
-        verification_result: result,
-        cookie_count: Math.floor(Math.random() * 12) + 3,
-        trackers_count: isThreat ? 6 : Math.floor(Math.random() * 4),
-        trackers_list: [],
-        privacy_risk_level: riskLevel,
-        auto_blocked: isThreat,
-        guidance: isThreat ? 'Warning' : 'Customize?',
-      }, activeUserId);
-
-      setQuickAuditUrl('');
-      setSuccessMessage(`Live audit complete for ${cleanDomain}! Real-time logs updated instantly.`);
+      const computedHash = await sha256(domain + '_cmp_script');
+      await recordConsentTransaction({
+        userId: activeUserId,
+        siteDomain: domain.toLowerCase().trim(),
+        cookieHash: computedHash,
+        cookieType: action === 'reject' ? 'suspicious' : 'necessary',
+        consentAction: action,
+      });
+      setSuccessMessage(`Choice '${action.toUpperCase()}' successfully recorded for ${domain}!`);
       await loadMonitoredSites();
       await onRefreshData();
+      setTimeout(() => setSuccessMessage(null), 4000);
     } catch (err) {
-      console.error('Audit failed:', err);
-    } finally {
-      setIsAuditingQuick(false);
-      setTimeout(() => setSuccessMessage(null), 5000);
+      console.error('Quick decision error:', err);
     }
   };
 
@@ -158,23 +151,6 @@ export const OverviewDashboard: React.FC<OverviewDashboardProps> = ({
         consentAction,
       });
 
-      // Also record to monitored sites
-      await recordMonitoredDomain({
-        domain: domainInput.trim().toLowerCase(),
-        url: `https://${domainInput.trim().toLowerCase()}`,
-        title: domainInput.trim(),
-        cmp_detected: true,
-        cmp_name: 'Website CMP Banner',
-        script_hash: computedHash,
-        verification_result: result.publicBlock.verification_result,
-        cookie_count: 5,
-        trackers_count: cookieType === 'suspicious' ? 4 : 1,
-        trackers_list: [],
-        privacy_risk_level: cookieType === 'suspicious' ? 'High' : 'Low',
-        auto_blocked: cookieType === 'suspicious',
-        guidance: result.cookieEvent.guidance_shown,
-      }, activeUserId);
-
       setSuccessMessage(
         `Block #${result.publicBlock.block_index} chained for account [${currentUser ? currentUser.username : 'Primary'}]: SHA-256 hash ${truncateHash(result.publicBlock.hash, 8, 8)} saved live to blockchain.`
       );
@@ -189,6 +165,24 @@ export const OverviewDashboard: React.FC<OverviewDashboardProps> = ({
       setTimeout(() => setSuccessMessage(null), 6000);
     }
   };
+
+  // Filtered Monitored Domains
+  const filteredSites = monitoredSites.filter((site) => {
+    const matchesSearch = site.domain.toLowerCase().includes(searchFilter.toLowerCase()) ||
+      site.cmp_name.toLowerCase().includes(searchFilter.toLowerCase());
+    if (!matchesSearch) return false;
+
+    if (decisionFilter === 'all') return true;
+    if (decisionFilter === 'accept') return site.consent_action === 'accept';
+    if (decisionFilter === 'reject') return site.consent_action === 'reject';
+    if (decisionFilter === 'audited') return !site.consent_action;
+    return true;
+  });
+
+  const totalAccepted = monitoredSites.filter(s => s.consent_action === 'accept').length +
+    recentEvents.filter(e => e.consent_action === 'accept').length;
+  const totalRejected = monitoredSites.filter(s => s.consent_action === 'reject').length +
+    recentEvents.filter(e => e.consent_action === 'reject').length;
 
   return (
     <div className="space-y-8 pb-12">
@@ -214,12 +208,12 @@ export const OverviewDashboard: React.FC<OverviewDashboardProps> = ({
         </div>
 
         <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
-          {/* REFRESH BUTTON */}
+          {/* LIVE SYNC BUTTON */}
           <button
             onClick={handleManualRefresh}
             disabled={isRefreshing}
-            className="flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-[#1A0935] hover:bg-[#250B42] text-xs font-semibold text-pink-300 border border-pink-500/30 hover:border-pink-500/60 transition-all cursor-pointer"
-            title="Refresh dashboard data"
+            className="flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-[#1A0935] hover:bg-[#250B42] text-xs font-semibold text-pink-300 border border-pink-500/30 hover:border-pink-500/60 transition-all cursor-pointer shadow-sm"
+            title="Fetch all extension & server updates"
           >
             <RefreshCw className={`h-3.5 w-3.5 text-pink-400 ${isRefreshing ? 'animate-spin' : ''}`} />
             <span>{isRefreshing ? 'Syncing...' : 'Live Sync'}</span>
@@ -260,7 +254,23 @@ export const OverviewDashboard: React.FC<OverviewDashboardProps> = ({
             <div className="text-2xl sm:text-3xl font-bold text-white mt-1">
               {metrics.protectedPlatformsCount}
             </div>
-            <span className="text-[11px] text-pink-400 mt-1 block font-mono font-medium">Audited in Real-Time</span>
+            <span className="text-[11px] text-pink-400 mt-1 block font-mono font-medium">Audited & Monitored</span>
+          </div>
+
+          <div className="bg-[#1B0A38] border border-[#3A186B] p-5 rounded-2xl hover:border-purple-400/50 hover:bg-[#230D48] transition-all shadow-sm shadow-purple-950/20">
+            <span className="text-xs font-semibold text-purple-200/80">Accepted Websites</span>
+            <div className="text-2xl sm:text-3xl font-bold text-emerald-400 mt-1">
+              {totalAccepted}
+            </div>
+            <span className="text-[11px] text-emerald-400/80 mt-1 block font-mono font-medium">Recorded Choices</span>
+          </div>
+
+          <div className="bg-[#1B0A38] border border-[#3A186B] p-5 rounded-2xl hover:border-purple-400/50 hover:bg-[#230D48] transition-all shadow-sm shadow-purple-950/20">
+            <span className="text-xs font-semibold text-purple-200/80">Rejected / Blocked</span>
+            <div className="text-2xl sm:text-3xl font-bold text-rose-400 mt-1">
+              {totalRejected > 0 ? totalRejected : metrics.threatsBlockedCount}
+            </div>
+            <span className="text-[11px] text-rose-400 mt-1 block font-mono font-medium">Trackers Deflected</span>
           </div>
 
           <div className="bg-[#1B0A38] border border-[#3A186B] p-5 rounded-2xl hover:border-purple-400/50 hover:bg-[#230D48] transition-all shadow-sm shadow-purple-950/20">
@@ -270,25 +280,223 @@ export const OverviewDashboard: React.FC<OverviewDashboardProps> = ({
             </div>
             <span className="text-[11px] text-purple-300 mt-1 block font-mono font-medium">Immutable Chain Records</span>
           </div>
-
-          <div className="bg-[#1B0A38] border border-[#3A186B] p-5 rounded-2xl hover:border-purple-400/50 hover:bg-[#230D48] transition-all shadow-sm shadow-purple-950/20">
-            <span className="text-xs font-semibold text-purple-200/80">Threats Blocked</span>
-            <div className="text-2xl sm:text-3xl font-bold text-rose-400 mt-1">
-              {metrics.threatsBlockedCount}
-            </div>
-            <span className="text-[11px] text-rose-400 mt-1 block font-mono font-medium">Dark Patterns & Trackers</span>
-          </div>
-
-          <div className="bg-[#1B0A38] border border-[#3A186B] p-5 rounded-2xl hover:border-purple-400/50 hover:bg-[#230D48] transition-all shadow-sm shadow-purple-950/20">
-            <span className="text-xs font-semibold text-purple-200/80">Verified CMPs</span>
-            <div className="text-2xl sm:text-3xl font-bold text-emerald-400 mt-1">
-              {metrics.whitelistedCMPs}
-            </div>
-            <span className="text-[11px] text-emerald-400 mt-1 block font-mono font-medium">Trusted Consent Banners</span>
-          </div>
         </div>
       </div>
 
+      {/* SECTION 3: Live Audited Websites & Consent Decisions (Explicit List of Accepted/Rejected) */}
+      <div className="bg-[#0F061F] border border-[#261445] rounded-3xl p-6 sm:p-8 space-y-5">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <div className="flex items-center gap-2">
+              <Globe className="h-4 w-4 text-pink-400" />
+              <h2 className="text-base font-bold text-white">Audited Websites & Consent Decisions</h2>
+              <span className="px-2 py-0.5 rounded-full bg-[#1A0935] text-pink-300 text-[10px] font-mono border border-pink-500/30 font-semibold">
+                Live Extension Sync
+              </span>
+            </div>
+            <p className="text-xs text-purple-300/70 mt-0.5">
+              Live websites audited via the browser extension or simulator, showing your explicit <strong className="text-emerald-400">Accepted</strong>, <strong className="text-rose-400">Rejected</strong>, and monitored states.
+            </p>
+          </div>
+
+          <div className="flex items-center gap-2.5 flex-wrap">
+            {/* Search filter */}
+            <div className="relative">
+              <Search className="h-3.5 w-3.5 text-purple-400 absolute left-3 top-1/2 -translate-y-1/2" />
+              <input
+                type="text"
+                placeholder="Search websites..."
+                value={searchFilter}
+                onChange={(e) => setSearchFilter(e.target.value)}
+                className="bg-[#130729] border border-[#29154A] rounded-xl pl-8 pr-3 py-1.5 text-xs text-purple-100 placeholder-purple-400/50 focus:outline-none focus:border-pink-500 transition-colors w-40 sm:w-48"
+              />
+            </div>
+
+            {/* Filter buttons */}
+            <div className="flex items-center bg-[#130729] border border-[#29154A] rounded-xl p-1 gap-1">
+              <button
+                onClick={() => setDecisionFilter('all')}
+                className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                  decisionFilter === 'all'
+                    ? 'bg-gradient-to-r from-pink-600 to-purple-600 text-white'
+                    : 'text-purple-300 hover:text-white'
+                }`}
+              >
+                All ({monitoredSites.length})
+              </button>
+              <button
+                onClick={() => setDecisionFilter('accept')}
+                className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer flex items-center gap-1 ${
+                  decisionFilter === 'accept'
+                    ? 'bg-emerald-600 text-white'
+                    : 'text-emerald-300 hover:text-emerald-200'
+                }`}
+              >
+                <Check className="h-3 w-3" />
+                Accepted ({monitoredSites.filter(s => s.consent_action === 'accept').length})
+              </button>
+              <button
+                onClick={() => setDecisionFilter('reject')}
+                className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer flex items-center gap-1 ${
+                  decisionFilter === 'reject'
+                    ? 'bg-rose-600 text-white'
+                    : 'text-rose-300 hover:text-rose-200'
+                }`}
+              >
+                <X className="h-3 w-3" />
+                Rejected ({monitoredSites.filter(s => s.consent_action === 'reject').length})
+              </button>
+              <button
+                onClick={() => setDecisionFilter('audited')}
+                className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                  decisionFilter === 'audited'
+                    ? 'bg-purple-600 text-white'
+                    : 'text-purple-300 hover:text-white'
+                }`}
+              >
+                Audited ({monitoredSites.filter(s => !s.consent_action).length})
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Monitored Sites Table */}
+        <div className="bg-[#130729] border border-[#29154A] rounded-2xl overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs">
+              <thead className="bg-[#1A0935] text-purple-200 border-b border-[#29154A] font-mono text-[11px] font-bold">
+                <tr>
+                  <th className="py-3 px-4">Website Domain</th>
+                  <th className="py-3 px-4">Detected CMP</th>
+                  <th className="py-3 px-4">Trackers & Cookies</th>
+                  <th className="py-3 px-4">Privacy Risk</th>
+                  <th className="py-3 px-4">Consent Action Status</th>
+                  <th className="py-3 px-4 text-right">Quick Action</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-[#261445]">
+                {filteredSites.length === 0 ? (
+                  <tr>
+                    <td colSpan={6} className="py-8 text-center text-purple-300/60 text-xs">
+                      {monitoredSites.length === 0
+                        ? 'No website sessions logged yet for this account. Open the simulator or browse with the extension to populate!'
+                        : 'No websites match the selected filter.'}
+                    </td>
+                  </tr>
+                ) : (
+                  filteredSites.map((site) => (
+                    <tr key={site.id} className="hover:bg-[#1C0A3B] transition-colors">
+                      <td className="py-3 px-4">
+                        <div className="flex items-center gap-2">
+                          <div className="h-7 w-7 rounded-lg bg-[#250B42] border border-pink-500/30 flex items-center justify-center text-pink-300 font-bold text-xs">
+                            {site.domain.charAt(0).toUpperCase()}
+                          </div>
+                          <div>
+                            <div className="font-semibold text-white flex items-center gap-1.5">
+                              <span>{site.domain}</span>
+                              <a
+                                href={site.url}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="text-purple-400 hover:text-pink-300 transition-colors"
+                              >
+                                <ExternalLink className="h-3 w-3" />
+                              </a>
+                            </div>
+                            <span className="text-[10px] text-purple-400 font-mono">
+                              {new Date(site.timestamp).toLocaleTimeString()}
+                            </span>
+                          </div>
+                        </div>
+                      </td>
+
+                      <td className="py-3 px-4">
+                        <span className="text-purple-200 font-medium">{site.cmp_name}</span>
+                        <div className="flex items-center gap-1 mt-0.5">
+                          <span
+                            className={`inline-block h-1.5 w-1.5 rounded-full ${
+                              site.verification_result === 'Verified'
+                                ? 'bg-emerald-400'
+                                : site.verification_result === 'Warning'
+                                ? 'bg-rose-400'
+                                : 'bg-amber-400'
+                            }`}
+                          />
+                          <span className="text-[10px] text-purple-400 font-mono">
+                            {site.verification_result}
+                          </span>
+                        </div>
+                      </td>
+
+                      <td className="py-3 px-4">
+                        <span className="font-mono text-purple-200 font-semibold">
+                          {site.trackers_count} trackers / {site.cookie_count} cookies
+                        </span>
+                      </td>
+
+                      <td className="py-3 px-4">
+                        <span
+                          className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold font-mono ${
+                            site.privacy_risk_level === 'Critical' || site.privacy_risk_level === 'High'
+                              ? 'bg-rose-950/80 text-rose-300 border border-rose-500/30'
+                              : site.privacy_risk_level === 'Moderate'
+                              ? 'bg-amber-950/80 text-amber-300 border border-amber-500/30'
+                              : 'bg-emerald-950/80 text-emerald-300 border border-emerald-500/30'
+                          }`}
+                        >
+                          {site.privacy_risk_level} Risk
+                        </span>
+                      </td>
+
+                      <td className="py-3 px-4">
+                        {site.consent_action === 'accept' ? (
+                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-emerald-950/80 text-emerald-300 border border-emerald-500/40 text-[11px] font-bold font-mono shadow-sm">
+                            <Check className="h-3 w-3 text-emerald-400" />
+                            <span>Accepted</span>
+                          </span>
+                        ) : site.consent_action === 'reject' ? (
+                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-rose-950/80 text-rose-300 border border-rose-500/40 text-[11px] font-bold font-mono shadow-sm">
+                            <X className="h-3 w-3 text-rose-400" />
+                            <span>Rejected & Blocked</span>
+                          </span>
+                        ) : site.consent_action === 'customize' ? (
+                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-amber-950/80 text-amber-300 border border-amber-500/40 text-[11px] font-bold font-mono shadow-sm">
+                            <SlidersHorizontal className="h-3 w-3 text-amber-400" />
+                            <span>Customized</span>
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-[#200E3D] text-purple-300 border border-purple-500/30 text-[11px] font-medium font-mono">
+                            <span>Audited / Pending</span>
+                          </span>
+                        )}
+                      </td>
+
+                      <td className="py-3 px-4 text-right">
+                        <div className="flex items-center justify-end gap-1.5">
+                          <button
+                            onClick={() => handleQuickDecision(site.domain, 'accept')}
+                            title="Accept this website's cookies"
+                            className="px-2.5 py-1 rounded-lg bg-emerald-950 hover:bg-emerald-900 text-emerald-300 border border-emerald-500/30 hover:border-emerald-500/60 text-[11px] font-bold transition-all cursor-pointer"
+                          >
+                            Accept
+                          </button>
+                          <button
+                            onClick={() => handleQuickDecision(site.domain, 'reject')}
+                            title="Reject and block trackers"
+                            className="px-2.5 py-1 rounded-lg bg-rose-950 hover:bg-rose-900 text-rose-300 border border-rose-500/30 hover:border-rose-500/60 text-[11px] font-bold transition-all cursor-pointer"
+                          >
+                            Reject
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
 
       {/* SECTION 4: Record Real Consent Event Outer Container */}
       <div className="bg-[#0F061F] border border-[#261445] rounded-3xl p-6 sm:p-8 space-y-5">
@@ -385,13 +593,13 @@ export const OverviewDashboard: React.FC<OverviewDashboardProps> = ({
         </form>
       </div>
 
-      {/* SECTION 5: Recent Real Events Outer Container */}
+      {/* SECTION 5: Database Consent Ledger Events Outer Container */}
       <div className="bg-[#0F061F] border border-[#261445] rounded-3xl p-6 sm:p-8 space-y-5">
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-base font-bold text-white">Database Consent Ledger Events</h2>
             <p className="text-xs text-purple-300/70 mt-0.5">
-              Live cookie permissions and cryptographic checks for account <span className="text-pink-300 font-semibold">{currentUser ? currentUser.username : 'Primary'}</span>.
+              Live cryptographic cookie decisions committed to the ledger for <span className="text-pink-300 font-semibold">{currentUser ? currentUser.username : 'Primary Auditor'}</span>.
             </p>
           </div>
           <span className="text-xs font-mono font-semibold text-pink-300 bg-[#1A0935] px-3 py-1 rounded-full border border-pink-500/30">
@@ -406,6 +614,7 @@ export const OverviewDashboard: React.FC<OverviewDashboardProps> = ({
                 <tr>
                   <th className="py-3 px-4">Event ID</th>
                   <th className="py-3 px-4">Domain</th>
+                  <th className="py-3 px-4">Action Taken</th>
                   <th className="py-3 px-4">Script SHA-256</th>
                   <th className="py-3 px-4">Verification</th>
                   <th className="py-3 px-4">Guidance</th>
@@ -415,15 +624,37 @@ export const OverviewDashboard: React.FC<OverviewDashboardProps> = ({
               <tbody className="divide-y divide-[#261445]">
                 {recentEvents.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="py-6 text-center text-purple-300/60 text-xs">
+                    <td colSpan={7} className="py-6 text-center text-purple-300/60 text-xs">
                       No consent events logged yet for this account. Submit a test event above or in the simulator!
                     </td>
                   </tr>
                 ) : (
-                  recentEvents.slice(0, 10).map((ev) => (
+                  recentEvents.slice(0, 15).map((ev) => (
                     <tr key={ev.id} className="hover:bg-[#1C0A3B] transition-colors">
                       <td className="py-3 px-4 font-mono font-bold text-pink-300">{ev.id}</td>
                       <td className="py-3 px-4 font-semibold text-purple-100">{ev.site_domain}</td>
+                      <td className="py-3 px-4">
+                        {ev.consent_action === 'accept' ? (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold font-mono bg-emerald-950/80 text-emerald-300 border border-emerald-500/30">
+                            <Check className="h-2.5 w-2.5" />
+                            <span>ACCEPT</span>
+                          </span>
+                        ) : ev.consent_action === 'reject' ? (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold font-mono bg-rose-950/80 text-rose-300 border border-rose-500/30">
+                            <X className="h-2.5 w-2.5" />
+                            <span>REJECT</span>
+                          </span>
+                        ) : ev.consent_action === 'customize' ? (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold font-mono bg-amber-950/80 text-amber-300 border border-amber-500/30">
+                            <SlidersHorizontal className="h-2.5 w-2.5" />
+                            <span>CUSTOMIZE</span>
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-mono text-purple-400 bg-purple-950/50 border border-purple-500/20">
+                            LOGGED
+                          </span>
+                        )}
+                      </td>
                       <td className="py-3 px-4 font-mono text-purple-300/70" title={ev.cookie_hash}>
                         {truncateHash(ev.cookie_hash, 6, 6)}
                       </td>

@@ -256,12 +256,56 @@ export async function recordConsentTransaction(params: {
     site_domain: params.siteDomain.toLowerCase().trim(),
     cookie_hash: params.cookieHash.trim(),
     cookie_type: params.cookieType,
+    consent_action: params.consentAction,
     verification_result: verificationResult,
     guidance_shown: guidanceShown,
     created_at: timestamp,
   };
   await db.cookie_events.add(cookieEvent);
   await syncToFirestore('cookie_events', cookieEvent.id, cookieEvent);
+
+  // Also update or record the monitored domain entry so it reflects the accepted/rejected status
+  try {
+    const existingMon = await db.monitored_domains.where('domain').equals(params.siteDomain.toLowerCase().trim()).first();
+    if (existingMon && existingMon.user_id === params.userId) {
+      await db.monitored_domains.update(existingMon.id, {
+        consent_action: params.consentAction,
+        auto_blocked: params.consentAction === 'reject' || verificationResult === 'Warning',
+        timestamp,
+      });
+      await syncToFirestore('monitored_domains', existingMon.id, {
+        ...existingMon,
+        consent_action: params.consentAction,
+        auto_blocked: params.consentAction === 'reject' || verificationResult === 'Warning',
+        timestamp,
+      });
+    } else {
+      const monId = 'mon_' + Math.random().toString(36).substring(2, 11);
+      const newMon: MonitoredDomain = {
+        id: monId,
+        user_id: params.userId,
+        domain: params.siteDomain.toLowerCase().trim(),
+        url: `https://${params.siteDomain.toLowerCase().trim()}`,
+        title: params.siteDomain.toUpperCase(),
+        cmp_detected: true,
+        cmp_name: cmpItem ? cmpItem.cmp_name : 'Website CMP Banner',
+        script_hash: params.cookieHash.trim(),
+        verification_result: verificationResult,
+        consent_action: params.consentAction,
+        cookie_count: 5,
+        trackers_count: params.cookieType === 'suspicious' ? 4 : 1,
+        trackers_list: [],
+        privacy_risk_level: verificationResult === 'Warning' || params.cookieType === 'suspicious' ? 'High' : 'Low',
+        auto_blocked: params.consentAction === 'reject' || verificationResult === 'Warning',
+        guidance: guidanceShown,
+        timestamp,
+      };
+      await db.monitored_domains.add(newMon);
+      await syncToFirestore('monitored_domains', monId, newMon);
+    }
+  } catch (monErr) {
+    console.warn('Monitored domain sync note:', monErr);
+  }
 
   // 3. Chained Block in private_ledger for this user account
   const lastPrivateBlock = await db.private_ledger.where('user_id').equals(params.userId).last() ||
@@ -547,6 +591,16 @@ export async function getDatabaseMetrics(userId?: string) {
   const verifiedCount = events.filter((e) => e.verification_result === 'Verified').length;
   const unverifiedCount = events.filter((e) => e.verification_result === 'Unverified').length;
 
+  const acceptedCount =
+    events.filter((e) => e.consent_action === 'accept').length +
+    monitored.filter((m) => m.consent_action === 'accept').length;
+  const rejectedCount =
+    events.filter((e) => e.consent_action === 'reject').length +
+    monitored.filter((m) => m.consent_action === 'reject').length;
+  const customizedCount =
+    events.filter((e) => e.consent_action === 'customize').length +
+    monitored.filter((m) => m.consent_action === 'customize').length;
+
   const whitelistedCMPs = cmpItems.filter((c) => c.status === 'whitelist').length;
   const blacklistedCMPs = cmpItems.filter((c) => c.status === 'blacklist').length;
   const unlistedCMPs = cmpItems.filter((c) => c.status === 'unlisted').length;
@@ -559,6 +613,9 @@ export async function getDatabaseMetrics(userId?: string) {
     threatsBlockedCount: threatsBlocked,
     totalEventsCount: events.length,
     monitoredDomainsCount: monitored.length,
+    acceptedCount,
+    rejectedCount,
+    customizedCount,
     verifiedCount,
     unverifiedCount,
     whitelistedCMPs,

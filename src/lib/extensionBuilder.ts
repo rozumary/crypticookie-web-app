@@ -43,7 +43,6 @@ export const EXTENSION_MANIFEST_JSON = `{
 
 export function getExtensionFiles(serverOrigin: string): ExtensionFile[] {
   let apiOrigin = serverOrigin || (typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000');
-  apiOrigin = apiOrigin.replace('ais-dev-', 'ais-pre-');
 
   const backgroundJs = `/**
  * Crypticookie Background Service Worker (Manifest V3)

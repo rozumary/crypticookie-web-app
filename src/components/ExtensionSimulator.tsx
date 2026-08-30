@@ -119,7 +119,7 @@ export const ExtensionSimulator: React.FC<ExtensionSimulatorProps> = ({
   const [verificationResult, setVerificationResult] = useState<'Verified' | 'Unverified' | 'Warning'>('Verified');
   const [cmpItemName, setCmpItemName] = useState('OneTrust Privacy v6.32');
   const [guidanceRec, setGuidanceRec] = useState<string>('Customize?');
-  const [showConsentShield, setShowConsentShield] = useState(true);
+  const [showConsentShield, setShowConsentShield] = useState(false);
 
   const [monitoredHistory, setMonitoredHistory] = useState<MonitoredDomain[]>([]);
   const [isAuditingDomain, setIsAuditingDomain] = useState(false);
@@ -189,7 +189,6 @@ export const ExtensionSimulator: React.FC<ExtensionSimulatorProps> = ({
     setCmpItemName(cmpItem ? cmpItem.cmp_name : `${domainClean.split('.')[0].toUpperCase()} CMP Banner`);
     setGuidanceRec(guidance);
     setBannerVisible(true);
-    setShowConsentShield(true);
     setLastCommittedBlock(null);
   };
 
@@ -385,7 +384,7 @@ export const ExtensionSimulator: React.FC<ExtensionSimulatorProps> = ({
           </div>
 
           {/* Browser Page Viewport */}
-          <div className="p-6 sm:p-8 bg-[#130729] min-h-[380px] flex flex-col justify-between space-y-6">
+          <div className="p-4 sm:p-5 bg-[#130729] space-y-4">
             {/* Simulated Webpage Header & Sniffed Trackers Bar */}
             <div className="space-y-4">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-xl bg-[#1A0935] border border-[#29154A]">
@@ -435,16 +434,6 @@ export const ExtensionSimulator: React.FC<ExtensionSimulatorProps> = ({
                   <Layers className="h-3.5 w-3.5 text-pink-400" />
                   <span>Inspect CMP in Registry</span>
                 </button>
-
-                {!showConsentShield && (
-                  <button
-                    onClick={() => setShowConsentShield(true)}
-                    className="text-xs text-purple-200 hover:text-white bg-[#250B42] hover:bg-[#320F59] border border-purple-500/40 rounded-xl px-3 py-1.5 flex items-center gap-1.5 cursor-pointer transition-all font-semibold shadow-md"
-                  >
-                    <Shield className="h-3.5 w-3.5 text-pink-400" />
-                    <span>Open Cookie Consent Shield Popup</span>
-                  </button>
-                )}
               </div>
             </div>
 

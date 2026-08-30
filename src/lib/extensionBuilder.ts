@@ -911,21 +911,25 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
 .crypticookie-mini-badge {
   background: #160E2A;
-  border: 1px solid #4C2888;
+  border: 1.5px solid #8b5cf6;
   border-radius: 9999px;
-  padding: 4px 12px;
-  color: white;
+  padding: 10px 20px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: #ffffff;
   cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 8px;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
-  transition: all 0.15s ease;
+  gap: 10px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.7);
+  transition: all 0.2s ease;
 }
 
 .crypticookie-mini-badge:hover {
-  border-color: #c084fc;
-  transform: scale(1.04);
+  border-color: #ec4899;
+  background: #251347;
+  transform: translateY(-2px) scale(1.03);
 }
 `;
 

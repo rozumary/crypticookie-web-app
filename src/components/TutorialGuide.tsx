@@ -149,8 +149,8 @@ export const TutorialGuide: React.FC<TutorialGuideProps> = ({ onNavigateTab }) =
                 <h2 className="text-base sm:text-lg font-bold text-white">
                   How To Use Crypticookie
                 </h2>
-                <span className="px-2 py-0.5 rounded-full bg-pink-500/20 text-pink-300 border border-pink-500/40 text-[10px] font-bold font-mono">
-                  How To Use Crypticookie
+                <span className="px-2.5 py-0.5 rounded-full bg-pink-500/20 text-pink-300 border border-pink-500/40 text-[11px] font-bold font-mono">
+                  Walkthrough
                 </span>
               </div>
               <p className="text-xs text-purple-300/70 mt-0.5">

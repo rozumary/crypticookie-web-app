@@ -24,6 +24,7 @@ import {
   Key,
 } from 'lucide-react';
 import { db, clearUserHistory } from '../lib/db';
+import { CrypticookieLogo } from './CrypticookieLogo';
 
 interface AppSettings {
   autoBlockAds: boolean;
@@ -231,15 +232,18 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
   return (
     <div className="w-full space-y-8 pb-12">
       {/* SECTION 1: Header Outer Container */}
-      <div className="bg-[#0F061F] border border-[#261445] rounded-3xl p-6 sm:p-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-white tracking-tight flex items-center gap-2">
-            <SettingsIcon className="h-6 w-6 text-pink-400" />
-            <span>Settings & Tutorial Guide</span>
-          </h1>
-          <p className="text-xs text-purple-300/70 mt-1">
-            New user quickstart instructions, cookie blocking preferences, and data controls.
-          </p>
+      <div className="bg-[#0F061F] border border-[#261445] rounded-3xl p-6 sm:p-8 flex flex-col sm:flex-row sm:items-center justify-between gap-5">
+        <div className="flex items-center gap-4">
+          <CrypticookieLogo size="lg" />
+          <div>
+            <h1 className="text-2xl font-bold text-white tracking-tight flex items-center gap-2 font-mono">
+              <SettingsIcon className="h-5 w-5 text-pink-400" />
+              <span>Settings & Tutorial Guide</span>
+            </h1>
+            <p className="text-xs text-purple-300/70 mt-1">
+              New user quickstart instructions, cookie blocking preferences, and data controls.
+            </p>
+          </div>
         </div>
 
         {savedSuccess && (

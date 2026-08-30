@@ -15,6 +15,7 @@ import {
   Radio,
 } from 'lucide-react';
 import { downloadExtensionZip } from '../lib/extensionBuilder';
+import { CrypticookieLogo } from './CrypticookieLogo';
 
 interface InstallExtensionModalProps {
   isOpen: boolean;
@@ -55,9 +56,7 @@ export const InstallExtensionModal: React.FC<InstallExtensionModalProps> = ({ is
         {/* Modal Header */}
         <div className="flex items-start justify-between relative z-10 border-b border-[#341F5C] pb-4">
           <div className="flex items-center gap-3">
-            <div className="h-11 w-11 rounded-2xl bg-[#251545] border border-[#4C2888] shadow-sm shrink-0 flex items-center justify-center">
-              <Shield className="h-5 w-5 text-purple-300" />
-            </div>
+            <CrypticookieLogo size="md" />
             <div>
               <div className="flex items-center gap-2">
                 <h2 className="text-lg font-bold text-white tracking-tight">

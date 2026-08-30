@@ -28,6 +28,7 @@ import {
   getMonitoredDomains,
   determineVerificationResult,
 } from '../lib/db';
+import { CrypticookieLogo } from './CrypticookieLogo';
 
 interface OverviewDashboardProps {
   metrics: {
@@ -192,21 +193,24 @@ export const OverviewDashboard: React.FC<OverviewDashboardProps> = ({
   return (
     <div className="space-y-8 pb-12">
       {/* SECTION 1: Top Header Container */}
-      <div className="bg-[#0F061F] border border-[#261445] rounded-3xl p-6 sm:p-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-2 flex-wrap">
-            <h1 className="text-2xl font-bold text-white tracking-tight flex items-center gap-2">
-              <span>Real-Time Privacy Dashboard</span>
-              <span className="h-2 w-2 rounded-full bg-pink-500 animate-pulse" />
-            </h1>
-            <span className="px-2.5 py-0.5 rounded-full bg-[#1A0935] text-pink-300 text-[11px] font-mono border border-pink-500/30 font-semibold flex items-center gap-1.5">
-              <Radio className="h-3 w-3 text-pink-400 animate-pulse" />
-              Live Feed Active
-            </span>
+      <div className="bg-[#0F061F] border border-[#261445] rounded-3xl p-6 sm:p-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-5">
+        <div className="flex items-center gap-4">
+          <CrypticookieLogo size="lg" />
+          <div>
+            <div className="flex items-center gap-2 flex-wrap">
+              <h1 className="text-2xl font-bold text-white tracking-tight flex items-center gap-2 font-mono">
+                <span>Real-Time Privacy Dashboard</span>
+                <span className="h-2 w-2 rounded-full bg-pink-500 animate-pulse" />
+              </h1>
+              <span className="px-2.5 py-0.5 rounded-full bg-[#1A0935] text-pink-300 text-[11px] font-mono border border-pink-500/30 font-semibold flex items-center gap-1.5">
+                <Radio className="h-3 w-3 text-pink-400 animate-pulse" />
+                Live Feed Active
+              </span>
+            </div>
+            <p className="text-xs text-purple-300/70 mt-1">
+              Live cookie audits and blockchain ledger for <strong className="text-white">{currentUser ? currentUser.username : 'Primary Auditor'}</strong>.
+            </p>
           </div>
-          <p className="text-sm text-purple-300/70 mt-1">
-            Live cookie audits and blockchain ledger for <strong className="text-white">{currentUser ? currentUser.username : 'Primary Auditor'}</strong>.
-          </p>
         </div>
 
         <div className="flex items-center gap-2 sm:gap-3 flex-wrap">

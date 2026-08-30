@@ -40,6 +40,7 @@ import {
 } from '../lib/db';
 import { sha256, truncateHash } from '../lib/crypto';
 import { InstallExtensionModal } from './InstallExtensionModal';
+import { CrypticookieLogo } from './CrypticookieLogo';
 
 interface ExtensionSimulatorProps {
   currentUser: User | null;
@@ -473,11 +474,9 @@ export const ExtensionSimulator: React.FC<ExtensionSimulatorProps> = ({
               <div className="rounded-2xl border border-pink-500/40 bg-[#1C093B] p-5 sm:p-6 space-y-4 animate-fadeIn">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#2C1258] pb-3">
                   <div className="flex items-center gap-2.5">
-                    <div className="h-9 w-9 rounded-xl bg-gradient-to-r from-pink-600 to-purple-600 text-white flex items-center justify-center shrink-0">
-                      <Shield className="h-5 w-5" />
-                    </div>
+                    <CrypticookieLogo size="sm" />
                     <div>
-                      <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                      <h3 className="text-sm font-bold text-white flex items-center gap-2 font-mono">
                         <span>Cookie Consent Shield</span>
                         <span className="text-xs font-normal text-purple-300/70 font-mono">({cmpItemName})</span>
                       </h3>

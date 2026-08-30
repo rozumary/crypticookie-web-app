@@ -11,9 +11,9 @@ import {
   UserPlus,
   LogOut,
   Sparkles,
-  Cookie,
 } from 'lucide-react';
 import { type User } from '../types/database';
+import { CrypticookieLogo } from './CrypticookieLogo';
 
 interface SidebarProps {
   activeTab: string;
@@ -110,16 +110,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
             onClick={() => handleNavClick('overview')}
             className="flex items-center gap-2.5 cursor-pointer overflow-hidden group"
           >
-            <div className="w-8 h-8 shrink-0 bg-[#1D0938] border border-pink-500/30 rounded-xl flex items-center justify-center text-pink-400 group-hover:scale-105 group-hover:border-pink-500/60 transition-all">
-              <Cookie className="h-4 w-4 text-pink-400" />
-            </div>
+            <CrypticookieLogo size="sm" className="group-hover:scale-105 transition-transform" />
             {(!isCollapsed || isOpen) && (
               <div className="flex flex-col min-w-0">
-                <span className="text-sm font-bold text-white tracking-tight flex items-center gap-1.5">
+                <span className="text-sm font-bold text-white tracking-tight flex items-center gap-1.5 font-mono">
                   <span>Crypticookie</span>
-                  <span className="h-1.5 w-1.5 rounded-full bg-pink-500" />
+                  <span className="h-1.5 w-1.5 rounded-full bg-pink-500 animate-pulse" />
                 </span>
-                <span className="text-[10px] text-purple-300/60 font-medium">
+                <span className="text-[10px] text-purple-300/60 font-medium font-mono">
                   Consent Shield
                 </span>
               </div>

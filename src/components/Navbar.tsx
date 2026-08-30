@@ -1,11 +1,11 @@
 import React from 'react';
 import {
-  Cookie,
   Menu,
   User,
   BookOpen,
 } from 'lucide-react';
 import { type User as UserType } from '../types/database';
+import { CrypticookieLogo } from './CrypticookieLogo';
 
 interface NavbarProps {
   activeTab: string;
@@ -51,13 +51,11 @@ export const Navbar: React.FC<NavbarProps> = ({
             onClick={() => setActiveTab('overview')}
             className="flex items-center gap-2.5 cursor-pointer group"
           >
-            <div className="w-8 h-8 rounded-xl bg-[#1D0938] text-pink-400 border border-pink-500/30 flex items-center justify-center group-hover:scale-105 group-hover:border-pink-500/60 transition-all">
-              <Cookie className="h-4 w-4 text-pink-400" />
-            </div>
+            <CrypticookieLogo size="sm" className="group-hover:scale-105 transition-transform" />
             <div className="flex items-center gap-2">
-              <span className="text-base font-bold text-white tracking-tight flex items-center gap-1.5">
+              <span className="text-base font-bold text-white tracking-tight flex items-center gap-1.5 font-mono">
                 <span>Crypticookie</span>
-                <span className="h-1.5 w-1.5 rounded-full bg-pink-500" />
+                <span className="h-1.5 w-1.5 rounded-full bg-pink-500 animate-pulse" />
               </span>
             </div>
           </div>

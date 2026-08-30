@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { User, Lock, Mail, Sparkles, X, Cookie } from 'lucide-react';
+import { User, Lock, Mail, Sparkles, X } from 'lucide-react';
 import { type User as UserType } from '../types/database';
 import { db, syncToFirestore } from '../lib/db';
 import { sha256 } from '../lib/crypto';
+import { CrypticookieLogo } from './CrypticookieLogo';
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -120,8 +121,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         )}
 
         <div className="text-center space-y-1">
-          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-[#1a082d] text-pink-400 border border-pink-500/30 mb-3 shadow-[0_0_15px_rgba(219,39,119,0.1)]">
-            <Cookie className="h-7 w-7 text-pink-400" />
+          <div className="mx-auto flex justify-center mb-3">
+            <CrypticookieLogo size="lg" />
           </div>
           <h2 className="text-xl font-extrabold bg-gradient-to-r from-pink-400 via-purple-300 to-indigo-300 bg-clip-text text-transparent tracking-tight">
             {isRegisterMode ? 'Create Crypticookie Account' : 'Welcome to Crypticookie'}

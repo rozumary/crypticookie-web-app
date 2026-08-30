@@ -254,7 +254,10 @@ export default function App() {
               )}
 
               {activeTab === 'database' && (
-                <DatabaseConsole onRefreshData={refreshDatabaseState} />
+                <DatabaseConsole
+                  currentUser={currentUser}
+                  onRefreshData={refreshDatabaseState}
+                />
               )}
             </>
           )}

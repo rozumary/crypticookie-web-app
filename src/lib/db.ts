@@ -244,7 +244,7 @@ export async function recordConsentTransaction(params: {
   const timestamp = new Date(Date.now() + (params.timestampOffsetMs || 0)).toISOString();
   
   // 1. Verify script hash against registry
-  const { result: verificationResult } = await determineVerificationResult(params.cookieHash);
+  const { result: verificationResult, cmpItem } = await determineVerificationResult(params.cookieHash);
   const guidanceShown = determineGuidance(params.cookieType, verificationResult);
   const auditOutput = determineAuditOutput(params.consentAction);
 
@@ -778,6 +778,17 @@ export async function syncAllFromCentralServer(userId: string): Promise<void> {
       }
     } catch (e) {
       console.warn("Rest sync monitored_domains note:", e);
+    }
+
+    // 5. Sync Users
+    try {
+      const res = await fetch(`${apiOrigin}/api/users`);
+      const body = await res.json();
+      if (body.status === "success" && Array.isArray(body.data)) {
+        await db.users.bulkPut(body.data);
+      }
+    } catch (e) {
+      console.warn("Rest sync users note:", e);
     }
 
     broadcastDbUpdate();

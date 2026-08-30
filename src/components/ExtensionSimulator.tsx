@@ -309,7 +309,7 @@ export const ExtensionSimulator: React.FC<ExtensionSimulatorProps> = ({
             </span>
           </div>
           <p className="text-xs text-purple-300/70 mt-1">
-            Live domain audits and script hashing for <strong className="text-white">{currentUser ? currentUser.username : 'Primary Auditor'}</strong>.
+            Live domain audits and script hashing.
           </p>
         </div>
 

@@ -193,7 +193,7 @@ export const OverviewDashboard: React.FC<OverviewDashboardProps> = ({
           <div>
             <div className="flex items-center gap-2 flex-wrap">
               <h1 className="text-2xl font-bold text-white tracking-tight flex items-center gap-2 font-mono">
-                <span>Hi, {currentUser ? currentUser.username : 'User'}</span>
+                <span>Hi, {currentUser ? currentUser.username : 'User'}!</span>
                 <span className="h-2 w-2 rounded-full bg-pink-500 animate-pulse" />
               </h1>
               <span className="px-2.5 py-0.5 rounded-full bg-[#1A0935] text-pink-300 text-[11px] font-mono border border-pink-500/30 font-semibold flex items-center gap-1.5">
@@ -202,7 +202,7 @@ export const OverviewDashboard: React.FC<OverviewDashboardProps> = ({
               </span>
             </div>
             <p className="text-xs text-purple-300/70 mt-1">
-              Live cookie audits and blockchain ledger for <strong className="text-white">{currentUser ? currentUser.username : 'Primary Auditor'}</strong>.
+              Live cookie audits and blockchain ledger.
             </p>
           </div>
         </div>
@@ -599,7 +599,7 @@ export const OverviewDashboard: React.FC<OverviewDashboardProps> = ({
           <div>
             <h2 className="text-base font-bold text-white">Database Consent Ledger Events</h2>
             <p className="text-xs text-purple-300/70 mt-0.5">
-              Live cryptographic cookie decisions committed to the ledger for <span className="text-pink-300 font-semibold">{currentUser ? currentUser.username : 'Primary Auditor'}</span>.
+              Live cookie permissions and cryptographic checks.
             </p>
           </div>
           <span className="text-xs font-mono font-semibold text-pink-300 bg-[#1A0935] px-3 py-1 rounded-full border border-pink-500/30">

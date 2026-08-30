@@ -1,5 +1,5 @@
 {
-  "name": "Crypticookie - Live Website Monitor & Blockchain Consent System",
+  "name": "Crypticookie - Live Website Monitor & Blockchain Cookie Consent System",
   "description": "Real-time active website & CMP detector, tracker audit, hybrid blockchain consent ledger, and Google Cloud Firestore database.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]

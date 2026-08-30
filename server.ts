@@ -386,6 +386,23 @@ async function startServer() {
     }
   });
 
+  // API route to get all registered user accounts
+  app.get("/api/users", async (req, res) => {
+    try {
+      const users: any[] = [];
+      if (firestoreDb) {
+        const snapshot = await getDocs(collection(firestoreDb, 'users'));
+        snapshot.forEach((d) => {
+          users.push({ id: d.id, ...d.data() });
+        });
+      }
+      return res.json({ status: "success", data: users });
+    } catch (error: any) {
+      console.error("Error fetching users:", error);
+      return res.status(500).json({ error: error.message || "Failed to fetch users." });
+    }
+  });
+
   // API route for AI Privacy Bot
   app.post("/api/bot/chat", async (req, res) => {
     try {
@@ -398,7 +415,7 @@ async function startServer() {
       // 1. Attempt Gemini API if key exists
       if (process.env.GEMINI_API_KEY) {
         try {
-          const systemInstruction = `You are Crypticookie AI — an expert privacy, web security, and blockchain advisor built into the Crypticookie Consent System.
+          const systemInstruction = `You are Crypticookie AI — an expert privacy, web security, and blockchain advisor built into the Crypticookie Cookie Consent System.
 Your core expertise:
 1. Consent Management Platforms (CMPs) & Integrity: You explain how CMPs (OneTrust, Cookiebot, TrustArc, Didomi, Quantcast) work, how SHA-256 cryptographic hashes detect unauthorized script modifications or supply-chain injections, and why untampered scripts matter.
 2. Web Trackers & Cookies: You analyze third-party cookies (_ga, _fbp, Criteo, TikTok pixels, DoubleClick), browser fingerprinting (canvas, audio, WebGL), session replay tools, and cross-site beacons.

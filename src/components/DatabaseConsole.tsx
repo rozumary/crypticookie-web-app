@@ -11,32 +11,60 @@ import {
   X,
   RefreshCw,
   Cloud,
+  User as UserIcon,
+  Filter,
 } from 'lucide-react';
 import { db, resetDatabaseToDefault, getMonitoredDomains } from '../lib/db';
 import { truncateHash } from '../lib/crypto';
 import { firebaseConfigData } from '../lib/firebase';
+import { type User } from '../types/database';
 
 interface DatabaseConsoleProps {
+  currentUser?: User | null;
   onRefreshData: () => void;
 }
 
-export const DatabaseConsole: React.FC<DatabaseConsoleProps> = ({ onRefreshData }) => {
+export const DatabaseConsole: React.FC<DatabaseConsoleProps> = ({ currentUser, onRefreshData }) => {
   const [selectedTable, setSelectedTable] = useState<
     'cmp_registry' | 'cookie_events' | 'public_ledger' | 'private_ledger' | 'monitored_domains' | 'users'
   >('cmp_registry');
   const [tableData, setTableData] = useState<any[]>([]);
+  const [allUsers, setAllUsers] = useState<User[]>([]);
+  const [selectedAccountFilter, setSelectedAccountFilter] = useState<string>('all');
   const [isResetting, setIsResetting] = useState(false);
   const [isResetModalOpen, setIsResetModalOpen] = useState(false);
   const [successToast, setSuccessToast] = useState<string | null>(null);
 
+  // Set initial account filter when currentUser becomes available
+  useEffect(() => {
+    if (currentUser && selectedAccountFilter === 'all') {
+      setSelectedAccountFilter(currentUser.id);
+    }
+  }, [currentUser]);
+
   const loadTableData = async () => {
+    const users = await db.users.toArray();
+    setAllUsers(users);
+
     let rows: any[] = [];
-    if (selectedTable === 'users') rows = await db.users.toArray();
-    if (selectedTable === 'cmp_registry') rows = await db.cmp_registry.toArray();
-    if (selectedTable === 'cookie_events') rows = await db.cookie_events.toArray();
-    if (selectedTable === 'private_ledger') rows = await db.private_ledger.orderBy('block_index').toArray();
-    if (selectedTable === 'public_ledger') rows = await db.public_ledger.orderBy('block_index').toArray();
-    if (selectedTable === 'monitored_domains') rows = await getMonitoredDomains(100);
+    if (selectedTable === 'users') {
+      rows = users;
+    } else if (selectedTable === 'cmp_registry') {
+      rows = await db.cmp_registry.toArray();
+    } else if (selectedTable === 'cookie_events') {
+      const allEvents = await db.cookie_events.orderBy('created_at').reverse().toArray();
+      rows = selectedAccountFilter !== 'all' ? allEvents.filter((e) => e.user_id === selectedAccountFilter) : allEvents;
+    } else if (selectedTable === 'private_ledger') {
+      const allPriv = await db.private_ledger.orderBy('block_index').toArray();
+      rows = selectedAccountFilter !== 'all' ? allPriv.filter((p) => p.user_id === selectedAccountFilter) : allPriv;
+    } else if (selectedTable === 'public_ledger') {
+      const allPub = await db.public_ledger.orderBy('block_index').toArray();
+      rows = selectedAccountFilter !== 'all' ? allPub.filter((p) => p.user_id === selectedAccountFilter) : allPub;
+    } else if (selectedTable === 'monitored_domains') {
+      const allMon = await db.monitored_domains.toArray();
+      const filtered = selectedAccountFilter !== 'all' ? allMon.filter((m) => m.user_id === selectedAccountFilter) : allMon;
+      rows = filtered.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+    }
     setTableData(rows);
   };
 
@@ -45,7 +73,7 @@ export const DatabaseConsole: React.FC<DatabaseConsoleProps> = ({ onRefreshData 
     const handleSync = () => loadTableData();
     window.addEventListener('crypticookie_db_sync', handleSync);
     return () => window.removeEventListener('crypticookie_db_sync', handleSync);
-  }, [selectedTable]);
+  }, [selectedTable, selectedAccountFilter]);
 
   const handleExecuteReset = async () => {
     setIsResetting(true);
@@ -177,8 +205,8 @@ export const DatabaseConsole: React.FC<DatabaseConsoleProps> = ({ onRefreshData 
 
       {/* SECTION 3: Table Explorer Outer Container */}
       <div className="bg-[#0F061F] border border-[#261445] rounded-3xl p-6 sm:p-8 space-y-4">
-        {/* Table Selector Tabs */}
-        <div className="flex items-center justify-between gap-2">
+        {/* Table Selector Tabs & Account Filter Toolbar */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
           <div className="flex items-center gap-2 overflow-x-auto pb-1">
             {[
               { id: 'cmp_registry', label: 'cmp_registry' },
@@ -202,19 +230,48 @@ export const DatabaseConsole: React.FC<DatabaseConsoleProps> = ({ onRefreshData 
             ))}
           </div>
 
-          <button
-            onClick={loadTableData}
-            title="Reload Table Data"
-            className="p-2 rounded-xl bg-[#1A0935] hover:bg-[#250B42] text-purple-200 border border-pink-500/30 transition-colors cursor-pointer shrink-0"
-          >
-            <RotateCw className="h-3.5 w-3.5 text-pink-300" />
-          </button>
+          <div className="flex items-center gap-2">
+            {/* Account Selector Filter for user-scoped tables */}
+            {selectedTable !== 'cmp_registry' && (
+              <div className="flex items-center gap-1.5 bg-[#130729] border border-[#29154A] px-3 py-1.5 rounded-xl">
+                <UserIcon className="h-3.5 w-3.5 text-pink-400 shrink-0" />
+                <label className="text-[10px] uppercase font-bold text-purple-300/70 font-mono">Account:</label>
+                <select
+                  value={selectedAccountFilter}
+                  onChange={(e) => setSelectedAccountFilter(e.target.value)}
+                  className="bg-transparent text-xs text-white font-mono focus:outline-none cursor-pointer pr-1"
+                >
+                  <option value="all" className="bg-[#130729] text-purple-200">All User Accounts</option>
+                  {allUsers.map((u) => (
+                    <option key={u.id} value={u.id} className="bg-[#130729] text-white">
+                      {u.username} ({u.id})
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+
+            <button
+              onClick={loadTableData}
+              title="Reload Table Data"
+              className="p-2 rounded-xl bg-[#1A0935] hover:bg-[#250B42] text-purple-200 border border-pink-500/30 transition-colors cursor-pointer shrink-0"
+            >
+              <RotateCw className="h-3.5 w-3.5 text-pink-300" />
+            </button>
+          </div>
         </div>
 
         {/* Table Content */}
         <div className="rounded-2xl border border-[#29154A] bg-[#130729] overflow-hidden">
           <div className="p-3 bg-[#1A0935] border-b border-[#29154A] flex items-center justify-between text-xs font-bold text-white">
-            <span className="font-mono">Table: {selectedTable}</span>
+            <div className="flex items-center gap-2 font-mono">
+              <span>Table: <strong className="text-pink-300">{selectedTable}</strong></span>
+              {selectedTable !== 'cmp_registry' && selectedAccountFilter !== 'all' && (
+                <span className="text-[11px] px-2 py-0.5 rounded-md bg-[#0F061F] text-purple-300 border border-[#29154A]">
+                  Filter: {allUsers.find((u) => u.id === selectedAccountFilter)?.username || selectedAccountFilter}
+                </span>
+              )}
+            </div>
             <span className="font-mono text-pink-300">{tableData.length} records</span>
           </div>
 

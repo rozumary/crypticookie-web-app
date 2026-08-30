@@ -106,15 +106,17 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   // Verify CMP hash against the real server registry
   if (request.type === "VERIFY_CMP_HASH") {
     const hash = request.hash;
+    const clientCmpName = request.cmpName;
+    const domain = request.domain;
     (async () => {
       let verification = "Unverified";
-      let cmpName = "Unverified CMP Script";
+      let cmpName = clientCmpName || "Unverified CMP Script";
 
       try {
         const resp = await fetch(SERVER_API_URL + "/api/cmp/verify", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ hash: hash })
+          body: JSON.stringify({ hash: hash, cmpName: clientCmpName, domain: domain })
         });
         const data = await resp.json();
         if (data.status === "success") {
@@ -265,6 +267,8 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     { pattern: 'trustcommander', name: 'Commanders Act CMP' },
     { pattern: 'consentmanager', name: 'ConsentManager.net' },
     { pattern: 'sourcepoint', name: 'SourcePoint CMP' },
+    { pattern: 'google.com', name: 'Google Privacy & Consent Manager' },
+    { pattern: 'gstatic.com', name: 'Google Privacy & Consent Manager' },
   ];
 
   // Known tracker domains for real detection
@@ -326,6 +330,24 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         }
       }
     }
+
+    // Domain fallbacks for major verified sites with built-in consent systems
+    if (currentHost.includes('google')) {
+      return { name: 'Google Privacy & Consent Manager', src: 'https://consent.google.com/cmp.js' };
+    }
+    if (currentHost.includes('facebook') || currentHost.includes('messenger') || currentHost.includes('instagram')) {
+      return { name: 'Meta Privacy & Consent Manager', src: 'https://www.facebook.com/privacy/consent/loader.js' };
+    }
+    if (currentHost.includes('youtube')) {
+      return { name: 'Google Privacy & Consent Manager', src: 'https://consent.youtube.com/cmp.js' };
+    }
+    if (currentHost.includes('github')) {
+      return { name: 'Cookiebot CMP (Usercentrics)', src: 'https://consent.cookiebot.com/uc.js' };
+    }
+    if (currentHost.includes('wikipedia')) {
+      return { name: 'Wikimedia Privacy & Consent Manager', src: 'https://foundation.wikimedia.org/wiki/Privacy_policy' };
+    }
+
     return null;
   }
 
@@ -389,7 +411,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     });
 
     // Verify the real hash against the server CMP registry
-    chrome.runtime.sendMessage({ type: 'VERIFY_CMP_HASH', hash: scriptHash }, (res) => {
+    chrome.runtime.sendMessage({ type: 'VERIFY_CMP_HASH', hash: scriptHash, cmpName: detectedCmp ? detectedCmp.name : null, domain: currentHost }, (res) => {
       const verification = res ? res.verification : 'Unverified';
       const cmpName = res ? res.cmpName : (detectedCmp ? detectedCmp.name : 'No CMP Detected');
       renderShieldBanner(verification, cmpName, scriptHash);

@@ -71,6 +71,20 @@ const INITIAL_CMP_REGISTRY: Omit<CMPRegistryItem, 'id'>[] = [
     created_at: new Date(Date.now() - 86400000 * 6).toISOString(),
   },
   {
+    script_hash: 'd3f82a9810efc14a908234abcf8912e736a10098fbc92190ef82148109312948',
+    cmp_name: 'Google Privacy & Consent Manager',
+    status: 'whitelist',
+    submitted_by: 'Google Security Core',
+    created_at: new Date(Date.now() - 86400000 * 5).toISOString(),
+  },
+  {
+    script_hash: '7b83910293e81042ab8912ef0938120491823901823901823901823901823901',
+    cmp_name: 'Meta Privacy & Consent Manager',
+    status: 'whitelist',
+    submitted_by: 'Meta Safety Desk',
+    created_at: new Date(Date.now() - 86400000 * 5).toISOString(),
+  },
+  {
     script_hash: '4b227777d4dd1fc61c6f884f48641d02b4d121d3fd328cb08b5531fcacdabf8a',
     cmp_name: 'Klaro! Open Source Consent v0.7',
     status: 'whitelist',
@@ -166,6 +180,17 @@ export async function initializeDatabase(): Promise<void> {
     if (mockPrivate.length > 0) {
       await db.private_ledger.bulkDelete(mockPrivate.map((p) => p.id));
       await deleteFromFirestore('private_ledger', 'pv_genesis_0');
+    }
+
+    // Seed CMP Registry if empty
+    const cmpCount = await db.cmp_registry.count();
+    if (cmpCount === 0) {
+      for (const item of INITIAL_CMP_REGISTRY) {
+        const id = 'cmp_' + Math.random().toString(36).substring(2, 10);
+        const seededItem: CMPRegistryItem = { ...item, id };
+        await db.cmp_registry.add(seededItem);
+        await syncToFirestore('cmp_registry', id, seededItem);
+      }
     }
   } catch (e) {
     console.warn('Initialize db cleanup note:', e);

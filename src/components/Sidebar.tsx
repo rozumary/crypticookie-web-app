@@ -4,6 +4,7 @@ import {
   Shield,
   Layers,
   FileCheck,
+  BookOpen,
   Settings as SettingsIcon,
   ChevronLeft,
   ChevronRight,
@@ -71,6 +72,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
       id: 'cmp_registry',
       label: 'CMP Registry',
       icon: FileCheck,
+    },
+    {
+      id: 'tutorial',
+      label: 'Tutorial Guide',
+      icon: BookOpen,
     },
     {
       id: 'settings',

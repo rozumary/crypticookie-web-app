@@ -5,6 +5,7 @@ import { OverviewDashboard } from './components/OverviewDashboard';
 import { ExtensionSimulator } from './components/ExtensionSimulator';
 import { BlockchainExplorer } from './components/BlockchainExplorer';
 import { CMPRegistryManager } from './components/CMPRegistryManager';
+import { TutorialGuide } from './components/TutorialGuide';
 import { SettingsView } from './components/SettingsView';
 import { DatabaseConsole } from './components/DatabaseConsole';
 import { AuthModal } from './components/AuthModal';
@@ -241,11 +242,14 @@ export default function App() {
                 <CMPRegistryManager onRefreshData={refreshDatabaseState} />
               )}
 
+              {activeTab === 'tutorial' && (
+                <TutorialGuide onNavigateTab={setActiveTab} />
+              )}
+
               {activeTab === 'settings' && (
                 <SettingsView
                   currentUser={currentUser}
                   onRefreshData={refreshDatabaseState}
-                  onNavigateTab={setActiveTab}
                 />
               )}
 

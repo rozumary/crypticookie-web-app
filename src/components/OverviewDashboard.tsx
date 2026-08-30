@@ -199,7 +199,7 @@ export const OverviewDashboard: React.FC<OverviewDashboardProps> = ({
           <div>
             <div className="flex items-center gap-2 flex-wrap">
               <h1 className="text-2xl font-bold text-white tracking-tight flex items-center gap-2 font-mono">
-                <span>Real-Time Privacy Dashboard</span>
+                <span>Hi, {currentUser ? currentUser.username : 'User'}</span>
                 <span className="h-2 w-2 rounded-full bg-pink-500 animate-pulse" />
               </h1>
               <span className="px-2.5 py-0.5 rounded-full bg-[#1A0935] text-pink-300 text-[11px] font-mono border border-pink-500/30 font-semibold flex items-center gap-1.5">

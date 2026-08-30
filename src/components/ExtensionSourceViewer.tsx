@@ -47,7 +47,7 @@ export const ExtensionSourceViewer: React.FC = () => {
         <button
           onClick={handleDownload}
           disabled={isDownloading}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-xs font-bold text-white shadow-md shadow-purple-900/30 transition-all cursor-pointer"
+          className="flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-gradient-to-r from-pink-500 via-purple-600 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-xs font-bold text-white shadow-lg shadow-purple-900/40 transition-all cursor-pointer"
         >
           <Download className="h-3.5 w-3.5" />
           <span>{isDownloading ? 'Exporting...' : 'Download Extension (.zip)'}</span>

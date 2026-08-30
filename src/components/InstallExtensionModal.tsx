@@ -95,7 +95,7 @@ export const InstallExtensionModal: React.FC<InstallExtensionModalProps> = ({ is
           <button
             onClick={handleDownload}
             disabled={isDownloading}
-            className="flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold shadow-md shadow-purple-900/30 transition-all cursor-pointer shrink-0 disabled:opacity-50"
+            className="flex items-center justify-center gap-2 px-5 py-2.5 rounded-2xl bg-gradient-to-r from-pink-500 via-purple-600 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white text-xs font-bold shadow-lg shadow-purple-900/40 transition-all cursor-pointer shrink-0 disabled:opacity-50"
           >
             {isDownloading ? (
               <>
@@ -217,7 +217,7 @@ export const InstallExtensionModal: React.FC<InstallExtensionModalProps> = ({ is
           </div>
           <button
             onClick={onClose}
-            className="px-3.5 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs cursor-pointer shadow-sm"
+            className="px-5 py-2 rounded-2xl bg-gradient-to-r from-pink-500 via-purple-600 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white font-bold text-xs cursor-pointer shadow-lg shadow-purple-900/40 transition-all shrink-0"
           >
             Got It
           </button>

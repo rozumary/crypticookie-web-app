@@ -189,7 +189,6 @@ export const OverviewDashboard: React.FC<OverviewDashboardProps> = ({
       {/* SECTION 1: Top Header Container */}
       <div className="bg-[#0F061F] border border-[#261445] rounded-3xl p-6 sm:p-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-5">
         <div className="flex items-center gap-4">
-          <CrypticookieLogo size="lg" />
           <div>
             <div className="flex items-center gap-2 flex-wrap">
               <h1 className="text-2xl font-bold text-white tracking-tight flex items-center gap-2 font-mono">
@@ -208,15 +207,14 @@ export const OverviewDashboard: React.FC<OverviewDashboardProps> = ({
         </div>
 
         <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
-          {/* LIVE SYNC BUTTON */}
+          {/* LIVE SYNC BUTTON (ICON ONLY) */}
           <button
             onClick={handleManualRefresh}
             disabled={isRefreshing}
-            className="flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-[#1A0935] hover:bg-[#250B42] text-xs font-semibold text-pink-300 border border-pink-500/30 hover:border-pink-500/60 transition-all cursor-pointer shadow-sm"
-            title="Fetch all extension & server updates"
+            className="p-2.5 rounded-xl bg-[#1A0935] hover:bg-[#250B42] text-xs font-semibold text-pink-300 border border-pink-500/30 hover:border-pink-500/60 transition-all cursor-pointer shadow-sm flex items-center justify-center shrink-0"
+            title="Live Sync - Fetch latest extension & server updates"
           >
-            <RefreshCw className={`h-3.5 w-3.5 text-pink-400 ${isRefreshing ? 'animate-spin' : ''}`} />
-            <span>{isRefreshing ? 'Syncing...' : 'Live Sync'}</span>
+            <RefreshCw className={`h-4 w-4 text-pink-400 ${isRefreshing ? 'animate-spin' : ''}`} />
           </button>
 
           <button

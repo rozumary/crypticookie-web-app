@@ -144,7 +144,6 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
       {/* Header Container */}
       <div className="bg-[#0F061F] border border-[#261445] rounded-3xl p-6 sm:p-8 flex flex-col sm:flex-row sm:items-center justify-between gap-5">
         <div className="flex items-center gap-4">
-          <CrypticookieLogo size="lg" />
           <div>
             <h1 className="text-2xl font-bold text-white tracking-tight flex items-center gap-2 font-mono">
               <SettingsIcon className="h-6 w-6 text-pink-400" />

@@ -913,7 +913,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   background: #160E2A;
   border: 1px solid #4C2888;
   border-radius: 9999px;
-  padding: 8px 16px;
+  padding: 4px 12px;
   color: white;
   cursor: pointer;
   display: flex;

@@ -319,7 +319,7 @@ export const ExtensionSimulator: React.FC<ExtensionSimulatorProps> = ({
             className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 text-white text-xs font-bold transition-all cursor-pointer hover:scale-105 active:scale-95 shadow-md"
           >
             <Sparkles className="h-4 w-4 text-white" />
-            <span>Install to Real Browser</span>
+            <span>Add Browser Extension</span>
           </button>
         </div>
       </div>
@@ -525,7 +525,7 @@ export const ExtensionSimulator: React.FC<ExtensionSimulatorProps> = ({
                 </div>
               </div>
             ) : (
-              <div className="rounded-xl border border-pink-500/40 bg-[#160E2A] p-2 px-3 flex items-center gap-2 max-w-fit ml-auto shadow-2xl cursor-pointer hover:bg-[#2C1258] transition-colors" onClick={() => setBannerVisible(true)}>
+              <div className="rounded-full border border-pink-500/40 bg-[#160E2A] py-1 px-3 flex items-center gap-2 max-w-fit ml-auto shadow-2xl cursor-pointer hover:bg-[#2C1258] transition-colors" onClick={() => setBannerVisible(true)}>
                 <Shield className="h-4 w-4 text-pink-400" />
                 <span className="text-xs font-bold text-[#c084fc]">Crypticookie Shield</span>
               </div>

@@ -6,7 +6,8 @@ self.addEventListener('install', (event) => {
       return cache.addAll([
         '/',
         '/index.html',
-        '/logo.png'
+        '/icon-192.png',
+        '/icon-512.png'
       ]).catch(err => {
         console.warn('Failed to pre-cache some assets during install', err);
       });

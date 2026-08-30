@@ -147,7 +147,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
           <div>
             <h1 className="text-2xl font-bold text-white tracking-tight flex items-center gap-2 font-mono">
               <SettingsIcon className="h-6 w-6 text-pink-400" />
-              <span>Application & Shield Settings</span>
+              <span>Application Settings</span>
             </h1>
             <p className="text-xs text-purple-300/70 mt-1">
               Configure cookie blocking policies, tracker detection rules, and data export options.

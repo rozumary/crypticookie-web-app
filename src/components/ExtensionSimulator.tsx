@@ -119,7 +119,6 @@ export const ExtensionSimulator: React.FC<ExtensionSimulatorProps> = ({
   const [verificationResult, setVerificationResult] = useState<'Verified' | 'Unverified' | 'Warning'>('Verified');
   const [cmpItemName, setCmpItemName] = useState('OneTrust Privacy v6.32');
   const [guidanceRec, setGuidanceRec] = useState<string>('Customize?');
-  const [bannerVisible, setBannerVisible] = useState(true);
   const [showTechnicalDetails, setShowTechnicalDetails] = useState(false);
 
   const [monitoredHistory, setMonitoredHistory] = useState<MonitoredDomain[]>([]);
@@ -469,67 +468,6 @@ export const ExtensionSimulator: React.FC<ExtensionSimulatorProps> = ({
               )}
             </div>
 
-            {/* Unified Smart Consent Shield Banner */}
-            {bannerVisible ? (
-              <div className="rounded-2xl border border-pink-500/40 bg-[#160E2A] p-5 sm:p-6 space-y-4 animate-fadeIn max-w-sm ml-auto shadow-2xl shadow-purple-900/20">
-                <div className="flex items-center justify-between border-b border-[#341F5C] pb-3 mb-4">
-                  <div className="flex items-center gap-2">
-                    <Shield className="h-4 w-4 text-pink-400" />
-                    <h3 className="text-sm font-bold text-[#c084fc] font-sans">
-                      Crypticookie Shield v1.3
-                    </h3>
-                  </div>
-                  
-                  {/* Status Badge and Close Button */}
-                  <div className="flex items-center gap-2 shrink-0">
-                    <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#10b981] text-white tracking-wide">
-                      REAL-TIME
-                    </span>
-                    <button
-                      onClick={() => setBannerVisible(false)}
-                      className="p-1 rounded text-purple-300/70 hover:text-white hover:bg-[#341F5C] transition-colors cursor-pointer"
-                      title="Minimize to Floating Icon"
-                    >
-                      <span className="text-lg leading-none block -mt-1">─</span>
-                    </button>
-                    <button
-                      onClick={() => setBannerVisible(false)}
-                      className="p-1 rounded text-purple-300/70 hover:text-white hover:bg-[#341F5C] transition-colors cursor-pointer"
-                      title="Dismiss Shield"
-                    >
-                      <X className="h-4 w-4" />
-                    </button>
-                  </div>
-                </div>
-
-                <div className="space-y-3">
-                  <div className="bg-[#160E2A] rounded-xl border border-[#341F5C] p-3">
-                    <div className="text-[11px] text-[#a78bfa] mb-1">Active Monitored Website:</div>
-                    <div className="text-[13px] font-bold text-[#38bdf8] font-mono break-all">{currentDomain}</div>
-                  </div>
-
-                  <div className="bg-[#160E2A] rounded-xl border border-[#341F5C] p-3 space-y-1.5">
-                    <div className="flex justify-between items-center text-[11px]">
-                      <span className="text-[#a78bfa]">CMP Detected</span>
-                      <span className="font-semibold text-[#fbbf24] font-mono">{cmpItemName || 'No CMP Detected'}</span>
-                    </div>
-                    <div className="flex justify-between items-center text-[11px]">
-                      <span className="text-[#a78bfa]">Trackers & Cookies</span>
-                      <span className="font-semibold text-[#f87171] font-mono">{detectedTrackers.length} trackers, {detectedTrackers.length + 3} cookies</span>
-                    </div>
-                    <div className="flex justify-between items-center text-[11px]">
-                      <span className="text-[#a78bfa]">Firestore DB Sync</span>
-                      <span className="font-semibold text-[#38bdf8] font-mono">Connected</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <div className="rounded-full border border-pink-500/40 bg-[#160E2A] py-1 px-3 flex items-center gap-2 max-w-fit ml-auto shadow-2xl cursor-pointer hover:bg-[#2C1258] transition-colors" onClick={() => setBannerVisible(true)}>
-                <Shield className="h-4 w-4 text-pink-400" />
-                <span className="text-xs font-bold text-[#c084fc]">Crypticookie Shield</span>
-              </div>
-            )}
 
             {/* Transaction Success Toast */}
             {lastCommittedBlock && (

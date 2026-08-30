@@ -51,10 +51,10 @@ export const BlockchainExplorer: React.FC<BlockchainExplorerProps> = ({ currentU
     const pub = await db.public_ledger.orderBy('block_index').toArray();
     const priv = await db.private_ledger.orderBy('block_index').toArray();
 
-    // Filter public blocks by user_id or block_index === 0 (Genesis block)
-    const filteredPub = pub.filter((b) => b.block_index === 0 || b.user_id === activeUserId);
-    // Filter private blocks by user_id or block_index === 0 (Genesis block)
-    const filteredPriv = priv.filter((b) => b.block_index === 0 || b.user_id === activeUserId);
+    // Filter public blocks by active user
+    const filteredPub = pub.filter((b) => b.user_id === activeUserId);
+    // Filter private blocks by active user
+    const filteredPriv = priv.filter((b) => b.user_id === activeUserId);
 
     setPublicBlocks(filteredPub);
     setPrivateBlocks(filteredPriv);
@@ -273,7 +273,7 @@ export const BlockchainExplorer: React.FC<BlockchainExplorerProps> = ({ currentU
                           #{block.block_index}
                         </span>
                         <span className="font-bold text-white text-sm">
-                          {block.block_index === 0 ? 'Genesis Block' : block.site_domain}
+                          {block.site_domain || 'Consent Block'}
                         </span>
                         <span
                           className={`text-[10px] font-mono px-2.5 py-0.5 rounded-full font-bold ${

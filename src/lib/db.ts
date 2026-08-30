@@ -148,10 +148,28 @@ export async function deleteFromFirestore(collectionName: string, docId: string)
 }
 
 /**
- * Initialize Database, seed initial demo accounts, CMPs and Genesis Block
+ * Initialize Database, seed initial demo accounts, CMPs and clean mock records
  */
 export async function initializeDatabase(): Promise<void> {
-  // Database initialized. No longer seeding demo data.
+  try {
+    // Purge any legacy mock genesis blocks from local IndexedDB & Firestore
+    await db.public_ledger.delete('pb_genesis_0');
+    await db.private_ledger.delete('pv_genesis_0');
+    
+    // Also delete any public_ledger or private_ledger blocks with legacy mock IDs
+    const mockPublic = await db.public_ledger.where('id').equals('pb_genesis_0').toArray();
+    if (mockPublic.length > 0) {
+      await db.public_ledger.bulkDelete(mockPublic.map((p) => p.id));
+      await deleteFromFirestore('public_ledger', 'pb_genesis_0');
+    }
+    const mockPrivate = await db.private_ledger.where('id').equals('pv_genesis_0').toArray();
+    if (mockPrivate.length > 0) {
+      await db.private_ledger.bulkDelete(mockPrivate.map((p) => p.id));
+      await deleteFromFirestore('private_ledger', 'pv_genesis_0');
+    }
+  } catch (e) {
+    console.warn('Initialize db cleanup note:', e);
+  }
 }
 
 /**
@@ -407,7 +425,7 @@ export async function clearUserHistory(userId: string): Promise<void> {
 export async function verifyPublicChainIntegrity(userId?: string): Promise<ChainVerificationResult> {
   let blocks = await db.public_ledger.orderBy('block_index').toArray();
   if (userId) {
-    blocks = blocks.filter((b) => b.block_index === 0 || b.user_id === userId);
+    blocks = blocks.filter((b) => b.user_id === userId);
   }
   if (blocks.length === 0) {
     return { isValid: true, brokenBlockIndex: null, expectedHash: null, actualHash: null, totalBlocks: 0 };
@@ -517,9 +535,9 @@ export async function getDatabaseMetrics(userId?: string) {
   const allMonitored = await db.monitored_domains.toArray();
 
   const events = userId ? allEvents.filter((e) => e.user_id === userId) : allEvents;
-  const privateBlocks = userId ? allPrivate.filter((pv) => pv.id === 'pv_genesis_0' || pv.user_id === userId) : allPrivate;
+  const privateBlocks = userId ? allPrivate.filter((pv) => pv.user_id === userId) : allPrivate;
   const monitored = userId ? allMonitored.filter((m) => m.user_id === userId) : allMonitored;
-  const publicBlocks = userId ? allPublic.filter((pb) => pb.id === 'pb_genesis_0' || pb.user_id === userId) : allPublic;
+  const publicBlocks = userId ? allPublic.filter((pb) => pb.user_id === userId) : allPublic;
 
   const uniqueDomains = new Set([...events.map((e) => e.site_domain), ...monitored.map((m) => m.domain)]);
   const threatsBlocked =

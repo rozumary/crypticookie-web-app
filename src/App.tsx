@@ -6,7 +6,6 @@ import { ExtensionSimulator } from './components/ExtensionSimulator';
 import { BlockchainExplorer } from './components/BlockchainExplorer';
 import { CMPRegistryManager } from './components/CMPRegistryManager';
 import { SettingsView } from './components/SettingsView';
-import { AIPrivacyBot } from './components/AIPrivacyBot';
 import { DatabaseConsole } from './components/DatabaseConsole';
 import { AuthModal } from './components/AuthModal';
 import { initializeDatabase, getDatabaseMetrics, db, setupFirestoreRealtimeListeners, INITIAL_DEMO_USERS, broadcastDbUpdate, syncAllFromCentralServer } from './lib/db';
@@ -242,9 +241,13 @@ export default function App() {
                 <CMPRegistryManager onRefreshData={refreshDatabaseState} />
               )}
 
-              {activeTab === 'settings' && <SettingsView currentUser={currentUser} onRefreshData={refreshDatabaseState} />}
-
-              {activeTab === 'ai_bot' && <AIPrivacyBot />}
+              {activeTab === 'settings' && (
+                <SettingsView
+                  currentUser={currentUser}
+                  onRefreshData={refreshDatabaseState}
+                  onNavigateTab={setActiveTab}
+                />
+              )}
 
               {activeTab === 'database' && (
                 <DatabaseConsole onRefreshData={refreshDatabaseState} />

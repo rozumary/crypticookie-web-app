@@ -1,9 +1,9 @@
 import React from 'react';
 import {
   Cookie,
-  Bot,
   Menu,
   User,
+  BookOpen,
 } from 'lucide-react';
 import { type User as UserType } from '../types/database';
 
@@ -63,7 +63,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           </div>
         </div>
 
-        {/* Right Side: Active User Account info & AI Bot Access */}
+        {/* Right Side: Active User Account info & User Guide Access */}
         <div className="flex items-center gap-2 sm:gap-3">
           {currentUser ? (
             <div className="flex items-center gap-2 px-3 py-1.5 bg-[#170830] text-purple-200 border border-pink-500/30 rounded-xl text-xs font-semibold">
@@ -75,19 +75,19 @@ export const Navbar: React.FC<NavbarProps> = ({
           ) : (
             <button
               onClick={onOpenSignIn}
-              className="px-3.5 py-1.5 bg-gradient-to-r from-pink-600 to-purple-600 text-white rounded-xl text-xs font-bold transition-all hover:opacity-90 active:scale-95"
+              className="px-3.5 py-1.5 bg-gradient-to-r from-pink-600 to-purple-600 text-white rounded-xl text-xs font-bold transition-all hover:opacity-90 active:scale-95 cursor-pointer"
             >
               Sign In
             </button>
           )}
 
           <button
-            onClick={() => setActiveTab('ai_bot')}
+            onClick={() => setActiveTab('settings')}
             className="flex items-center gap-1.5 px-3 py-1.5 bg-[#1D0938] hover:bg-gradient-to-r hover:from-pink-600 hover:to-purple-600 text-pink-300 hover:text-white text-xs font-semibold rounded-xl border border-pink-500/40 transition-all cursor-pointer hover:scale-105 active:scale-95"
+            title="Open Tutorial & Settings"
           >
-            <Bot className="h-3.5 w-3.5 text-pink-400" />
-            <span className="hidden sm:inline">AI Privacy Bot</span>
-            <span className="h-1.5 w-1.5 rounded-full bg-pink-500 animate-pulse" />
+            <BookOpen className="h-3.5 w-3.5 text-pink-400" />
+            <span className="hidden sm:inline">Tutorial Guide</span>
           </button>
         </div>
       </div>

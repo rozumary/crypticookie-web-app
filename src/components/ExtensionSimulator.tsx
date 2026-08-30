@@ -21,7 +21,6 @@ import {
   ShieldAlert,
   ArrowRight,
   ExternalLink,
-  Bot,
   X,
 } from 'lucide-react';
 import {
@@ -422,14 +421,14 @@ export const ExtensionSimulator: React.FC<ExtensionSimulatorProps> = ({
                 </div>
               </div>
 
-              {/* Toggleable Technical Details & AI Advisor link */}
+              {/* Toggleable Technical Details & CMP Registry link */}
               <div className="flex items-center justify-between">
                 <button
-                  onClick={() => onNavigateTab('ai_bot')}
+                  onClick={() => onNavigateTab('cmp_registry')}
                   className="text-xs text-pink-300 hover:text-white bg-[#1A0935] hover:bg-[#250B42] border border-pink-500/30 rounded-xl px-3 py-1.5 flex items-center gap-1.5 cursor-pointer transition-all font-semibold"
                 >
-                  <Bot className="h-3.5 w-3.5 text-pink-400" />
-                  <span>Ask AI Bot About {currentDomain}</span>
+                  <Layers className="h-3.5 w-3.5 text-pink-400" />
+                  <span>Inspect CMP in Registry</span>
                 </button>
 
                 <button

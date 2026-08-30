@@ -5,7 +5,6 @@ import {
   Layers,
   FileCheck,
   Settings as SettingsIcon,
-  Bot,
   ChevronLeft,
   ChevronRight,
   UserCheck,
@@ -72,11 +71,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
       id: 'cmp_registry',
       label: 'CMP Registry',
       icon: FileCheck,
-    },
-    {
-      id: 'ai_bot',
-      label: 'AI Privacy Bot',
-      icon: Bot,
     },
     {
       id: 'settings',

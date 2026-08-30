@@ -290,11 +290,16 @@ async function startServer() {
   app.get("/api/consent/history", async (req, res) => {
     try {
       const { userId } = req.query;
-      const uId = String(userId || 'u_auditor_primary');
+      const uId = String(userId || 'all');
       const events: any[] = [];
 
       if (firestoreDb) {
-        const q = query(collection(firestoreDb, 'cookie_events'), where('user_id', '==', uId));
+        let q;
+        if (!userId || uId === 'all') {
+          q = query(collection(firestoreDb, 'cookie_events'));
+        } else {
+          q = query(collection(firestoreDb, 'cookie_events'), where('user_id', '==', uId));
+        }
         const snapshot = await getDocs(q);
         snapshot.forEach(doc => {
           events.push({ id: doc.id, ...doc.data() });
@@ -311,12 +316,16 @@ async function startServer() {
   app.get("/api/ledger/public", async (req, res) => {
     try {
       const { userId } = req.query;
-      const uId = String(userId || 'u_auditor_primary');
+      const uId = String(userId || 'all');
       const blocks: any[] = [];
 
       if (firestoreDb) {
-        // Get user blocks
-        const qUser = query(collection(firestoreDb, 'public_ledger'), where('user_id', '==', uId));
+        let qUser;
+        if (!userId || uId === 'all') {
+          qUser = query(collection(firestoreDb, 'public_ledger'));
+        } else {
+          qUser = query(collection(firestoreDb, 'public_ledger'), where('user_id', '==', uId));
+        }
         const userSnapshot = await getDocs(qUser);
         userSnapshot.forEach(d => {
           blocks.push({ id: d.id, ...d.data() });
@@ -340,11 +349,16 @@ async function startServer() {
   app.get("/api/ledger/private", async (req, res) => {
     try {
       const { userId } = req.query;
-      const uId = String(userId || 'u_auditor_primary');
+      const uId = String(userId || 'all');
       const blocks: any[] = [];
 
       if (firestoreDb) {
-        const qUser = query(collection(firestoreDb, 'private_ledger'), where('user_id', '==', uId));
+        let qUser;
+        if (!userId || uId === 'all') {
+          qUser = query(collection(firestoreDb, 'private_ledger'));
+        } else {
+          qUser = query(collection(firestoreDb, 'private_ledger'), where('user_id', '==', uId));
+        }
         const userSnapshot = await getDocs(qUser);
         userSnapshot.forEach(d => {
           blocks.push({ id: d.id, ...d.data() });
@@ -368,11 +382,16 @@ async function startServer() {
   app.get("/api/domains/history", async (req, res) => {
     try {
       const { userId } = req.query;
-      const uId = String(userId || 'u_auditor_primary');
+      const uId = String(userId || 'all');
       const domains: any[] = [];
 
       if (firestoreDb) {
-        const q = query(collection(firestoreDb, 'monitored_domains'), where('user_id', '==', uId));
+        let q;
+        if (!userId || uId === 'all') {
+          q = query(collection(firestoreDb, 'monitored_domains'));
+        } else {
+          q = query(collection(firestoreDb, 'monitored_domains'), where('user_id', '==', uId));
+        }
         const snapshot = await getDocs(q);
         snapshot.forEach(d => {
           domains.push({ id: d.id, ...d.data() });

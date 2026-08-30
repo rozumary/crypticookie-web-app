@@ -732,13 +732,13 @@ export function setupFirestoreRealtimeListeners(userId: string, onUpdate: () => 
  * Fully robust REST-based backup synchronization from central Cloud Database.
  * Bypasses iframe WebSocket/long-poll restrictions to ensure no data is lost on reload.
  */
-export async function syncAllFromCentralServer(userId: string): Promise<void> {
+export async function syncAllFromCentralServer(userId?: string): Promise<void> {
   try {
-    const apiOrigin = window.location.origin;
+    const apiOrigin = typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000';
 
     // 1. Sync Cookie Events
     try {
-      const res = await fetch(`${apiOrigin}/api/consent/history?userId=${userId}`);
+      const res = await fetch(`${apiOrigin}/api/consent/history?userId=all`);
       const body = await res.json();
       if (body.status === "success" && Array.isArray(body.data)) {
         await db.cookie_events.bulkPut(body.data);
@@ -749,7 +749,7 @@ export async function syncAllFromCentralServer(userId: string): Promise<void> {
 
     // 2. Sync Public Ledger
     try {
-      const res = await fetch(`${apiOrigin}/api/ledger/public?userId=${userId}`);
+      const res = await fetch(`${apiOrigin}/api/ledger/public?userId=all`);
       const body = await res.json();
       if (body.status === "success" && Array.isArray(body.data)) {
         await db.public_ledger.bulkPut(body.data);
@@ -760,7 +760,7 @@ export async function syncAllFromCentralServer(userId: string): Promise<void> {
 
     // 3. Sync Private Ledger
     try {
-      const res = await fetch(`${apiOrigin}/api/ledger/private?userId=${userId}`);
+      const res = await fetch(`${apiOrigin}/api/ledger/private?userId=all`);
       const body = await res.json();
       if (body.status === "success" && Array.isArray(body.data)) {
         await db.private_ledger.bulkPut(body.data);
@@ -771,7 +771,7 @@ export async function syncAllFromCentralServer(userId: string): Promise<void> {
 
     // 4. Sync Monitored Domains
     try {
-      const res = await fetch(`${apiOrigin}/api/domains/history?userId=${userId}`);
+      const res = await fetch(`${apiOrigin}/api/domains/history?userId=all`);
       const body = await res.json();
       if (body.status === "success" && Array.isArray(body.data)) {
         await db.monitored_domains.bulkPut(body.data);

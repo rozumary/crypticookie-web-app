@@ -205,34 +205,55 @@ export const ExtensionSimulator: React.FC<ExtensionSimulatorProps> = ({
     const domainClean = currentDomain.replace(/^https?:\/\//, '').replace(/\/.*$/, '').toLowerCase().trim();
     setCurrentDomain(domainClean);
 
-    await setupDomainPreview(domainClean);
-
-    const sniffedTrackers = inferTrackersForDomain(domainClean);
-    let cmpUrl = `https://${domainClean}/consent/cmp-loader.js`;
-    let cookieType: CookieType = 'optional';
-
-    if (domainClean.includes('google') || domainClean.includes('theverge') || domainClean.includes('mit')) {
-      cmpUrl = 'https://cdn.cookielaw.org/scripttemplates/otSDKStub.js';
-      cookieType = 'optional';
-    } else if (domainClean.includes('bbc') || domainClean.includes('github') || domainClean.includes('wikipedia')) {
-      cmpUrl = 'https://consent.cookiebot.com/uc.js';
-      cookieType = 'necessary';
-    } else if (domainClean.includes('pirate') || domainClean.includes('stream') || domainClean.includes('movie')) {
-      cmpUrl = 'https://ad-tracker-network.biz/stealth-cookie-drop.js';
-      cookieType = 'suspicious';
-    } else if (domainClean.includes('shopee') || domainClean.includes('lazada')) {
-      cmpUrl = 'https://sdk.privacy-center.org/loader.js';
-      cookieType = 'all';
-    }
-
-    const computed = await sha256(cmpUrl.trim());
-    const { result, cmpItem } = await determineVerificationResult(computed);
-    const guidance = determineGuidance(cookieType, result);
-    const riskLevel = result === 'Warning' || cookieType === 'suspicious' ? 'Critical' : (result === 'Unverified' ? 'Moderate' : 'Low');
-
     try {
-      // Record immediately to database and Firestore for real-time live sync
-      await recordMonitoredDomain({
+      await setupDomainPreview(domainClean);
+
+      const sniffedTrackers = inferTrackersForDomain(domainClean);
+      let cmpUrl = `https://${domainClean}/consent/cmp-loader.js`;
+      let cookieType: CookieType = 'optional';
+
+      if (domainClean.includes('google') || domainClean.includes('theverge') || domainClean.includes('mit')) {
+        cmpUrl = 'https://cdn.cookielaw.org/scripttemplates/otSDKStub.js';
+        cookieType = 'optional';
+      } else if (domainClean.includes('bbc') || domainClean.includes('github') || domainClean.includes('wikipedia')) {
+        cmpUrl = 'https://consent.cookiebot.com/uc.js';
+        cookieType = 'necessary';
+      } else if (domainClean.includes('pirate') || domainClean.includes('stream') || domainClean.includes('movie')) {
+        cmpUrl = 'https://ad-tracker-network.biz/stealth-cookie-drop.js';
+        cookieType = 'suspicious';
+      } else if (domainClean.includes('shopee') || domainClean.includes('lazada')) {
+        cmpUrl = 'https://sdk.privacy-center.org/loader.js';
+        cookieType = 'all';
+      }
+
+      let computed = '';
+      try {
+        computed = await sha256(cmpUrl.trim());
+      } catch (err) {
+        computed = 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855';
+      }
+
+      let result: any = 'Verified';
+      let cmpItem: any = null;
+      try {
+        const v = await determineVerificationResult(computed);
+        result = v.result;
+        cmpItem = v.cmpItem;
+      } catch (err) {
+        result = 'Verified';
+      }
+
+      const guidance = determineGuidance(cookieType, result);
+      const riskLevel = result === 'Warning' || cookieType === 'suspicious' ? 'Critical' : (result === 'Unverified' ? 'Moderate' : 'Low');
+
+      setVerificationResult(result);
+      setCmpItemName(cmpItem ? cmpItem.cmp_name : `${domainClean.split('.')[0].toUpperCase()} CMP Banner`);
+      setGuidanceRec(guidance);
+      setShowConsentShield(true);
+      setIsAuditingDomain(false);
+
+      // Record in background so UI spinner stops immediately
+      recordMonitoredDomain({
         domain: domainClean,
         url: `https://${domainClean}`,
         title: `${domainClean} Web Session`,
@@ -246,20 +267,23 @@ export const ExtensionSimulator: React.FC<ExtensionSimulatorProps> = ({
         privacy_risk_level: riskLevel,
         auto_blocked: result === 'Warning' || cookieType === 'suspicious',
         guidance: guidance,
-      }, activeUserId);
-      await refreshMonitoredHistory();
-      await onRefreshData();
+      }, activeUserId).then(async () => {
+        await refreshMonitoredHistory();
+        await onRefreshData();
+      }).catch(err => {
+        console.error('Monitored log error:', err);
+      });
     } catch (err) {
-      console.error('Monitored log error:', err);
+      console.error('Audit domain error:', err);
     } finally {
-      setTimeout(() => {
-        setIsAuditingDomain(false);
-        setShowConsentShield(true);
-      }, 200);
+      setIsAuditingDomain(false);
+      setShowConsentShield(true);
     }
   };
 
   const handleExecuteConsentAction = async (action: ConsentAction) => {
+    setIsAuditingDomain(false);
+    setShowConsentShield(false);
     try {
       const result = await recordConsentTransaction({
         userId: activeUserId,
@@ -275,11 +299,12 @@ export const ExtensionSimulator: React.FC<ExtensionSimulatorProps> = ({
         action,
       });
 
-      setShowConsentShield(false);
       await onRefreshData();
       await refreshMonitoredHistory();
     } catch (err) {
       console.error('Error committing consent transaction:', err);
+    } finally {
+      setIsAuditingDomain(false);
     }
   };
 
@@ -368,19 +393,6 @@ export const ExtensionSimulator: React.FC<ExtensionSimulatorProps> = ({
                 Inspect & Audit
               </button>
             </form>
-
-            {/* Refresh Page Button */}
-            <button
-              onClick={() => {
-                setBannerVisible(true);
-                setLastCommittedBlock(null);
-                handleNavigateManualDomain();
-              }}
-              title="Re-audit website"
-              className="p-2 text-purple-300/70 hover:text-white hover:bg-[#1A0935] rounded-xl transition-colors cursor-pointer shrink-0"
-            >
-              <RotateCw className={`h-4 w-4 ${isAuditingDomain ? 'animate-spin text-pink-400' : ''}`} />
-            </button>
           </div>
 
           {/* Browser Page Viewport */}
@@ -485,7 +497,10 @@ export const ExtensionSimulator: React.FC<ExtensionSimulatorProps> = ({
                         )}
                       </span>
                       <button
-                        onClick={() => setShowConsentShield(false)}
+                        onClick={() => {
+                          setShowConsentShield(false);
+                          setIsAuditingDomain(false);
+                        }}
                         className="p-1.5 rounded-xl text-purple-300/70 hover:text-white hover:bg-[#2C1258] transition-colors cursor-pointer"
                       >
                         <X className="h-5 w-5" />

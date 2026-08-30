@@ -456,7 +456,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     const bannerBox = document.getElementById('crypticookie-banner-box');
     const miniBadge = document.getElementById('crypticookie-mini-badge');
 
-    const minimize = () => { if (bannerBox) bannerBox.style.display = 'none'; if (miniBadge) miniBadge.style.display = 'flex'; };
+    const minimize = () => { if (bannerBox) bannerBox.style.display = 'none'; if (miniBadge) miniBadge.style.display = 'inline-flex'; };
     const expand = () => { if (bannerBox) bannerBox.style.display = 'block'; if (miniBadge) miniBadge.style.display = 'none'; };
 
     document.getElementById('crypticookie-minimize-btn')?.addEventListener('click', (e) => { e.stopPropagation(); minimize(); });
@@ -737,10 +737,12 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   right: 24px;
   z-index: 2147483647;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  width: 380px;
+  width: auto;
   max-width: min(420px, calc(100vw - 32px));
   box-sizing: border-box;
   animation: crypticookie-slide-up 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex;
+  justify-content: flex-end;
 }
 
 #crypticookie-shield-root * {
@@ -759,7 +761,8 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   border-radius: 16px;
   padding: 16px;
   color: #f8fafc;
-  width: 100%;
+  width: 380px;
+  max-width: calc(100vw - 32px);
 }
 
 .crypticookie-header {
@@ -913,15 +916,17 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   background: #160E2A;
   border: 1.5px solid #8b5cf6;
   border-radius: 9999px;
-  padding: 10px 20px;
+  padding: 8px 16px;
   font-size: 13px;
   font-weight: 700;
   letter-spacing: 0.02em;
   color: #ffffff;
   cursor: pointer;
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
+  width: max-content;
+  white-space: nowrap;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.7);
   transition: all 0.2s ease;
 }

@@ -4,13 +4,11 @@ import logoImage from '../assets/images/crypticookie_logo.png';
 interface CrypticookieLogoProps {
   className?: string;
   size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
-  withGlow?: boolean;
 }
 
 export const CrypticookieLogo: React.FC<CrypticookieLogoProps> = ({
   className = '',
   size = 'md',
-  withGlow = true,
 }) => {
   const sizeClasses = {
     xs: 'w-6 h-6',
@@ -24,7 +22,7 @@ export const CrypticookieLogo: React.FC<CrypticookieLogoProps> = ({
     <div
       className={`relative flex items-center justify-center shrink-0 ${
         sizeClasses[size]
-      } ${withGlow ? 'filter drop-shadow-[0_0_12px_rgba(219,39,119,0.35)]' : ''} ${className}`}
+      } ${className}`}
     >
       <img
         src={logoImage}

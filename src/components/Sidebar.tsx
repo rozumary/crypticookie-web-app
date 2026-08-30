@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Activity,
   Shield,
@@ -12,6 +12,7 @@ import {
   UserPlus,
   LogOut,
   Sparkles,
+  Download,
 } from 'lucide-react';
 import { type User } from '../types/database';
 import { CrypticookieLogo } from './CrypticookieLogo';
@@ -52,6 +53,32 @@ export const Sidebar: React.FC<SidebarProps> = ({
   isDbReady,
   metrics,
 }) => {
+  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+  const [isInstallable, setIsInstallable] = useState(false);
+
+  useEffect(() => {
+    const handleBeforeInstallPrompt = (e: Event) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+      setIsInstallable(true);
+    };
+
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    };
+  }, []);
+
+  const handleInstallClick = async () => {
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    if (outcome === 'accepted') {
+      setIsInstallable(false);
+    }
+    setDeferredPrompt(null);
+  };
+
   const navItems = [
     {
       id: 'overview',
@@ -181,6 +208,19 @@ export const Sidebar: React.FC<SidebarProps> = ({
               </button>
             );
           })}
+          
+          {isInstallable && (
+            <button
+              onClick={handleInstallClick}
+              title="Install Desktop App"
+              className={`group relative flex w-full items-center gap-3 rounded-2xl px-3.5 py-3 text-xs font-semibold transition-all duration-200 cursor-pointer text-pink-300 hover:text-white border border-pink-500/30 hover:bg-[#1D0938] mt-4`}
+            >
+              <Download className="h-4 w-4 shrink-0 transition-colors text-pink-400" />
+              {(!isCollapsed || isOpen) && (
+                <span className="truncate">Install Web App</span>
+              )}
+            </button>
+          )}
         </div>
 
         {/* Sidebar Footer User Card */}

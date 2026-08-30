@@ -147,10 +147,10 @@ export const TutorialGuide: React.FC<TutorialGuideProps> = ({ onNavigateTab }) =
             <div>
               <div className="flex items-center gap-2">
                 <h2 className="text-base sm:text-lg font-bold text-white">
-                  Interactive 4-Step Onboarding Walkthrough
+                  How To Use Crypticookie
                 </h2>
                 <span className="px-2 py-0.5 rounded-full bg-pink-500/20 text-pink-300 border border-pink-500/40 text-[10px] font-bold font-mono">
-                  Walkthrough
+                  How To Use Crypticookie
                 </span>
               </div>
               <p className="text-xs text-purple-300/70 mt-0.5">
@@ -204,9 +204,6 @@ export const TutorialGuide: React.FC<TutorialGuideProps> = ({ onNavigateTab }) =
                   <div className="flex items-center gap-2">
                     <span className="px-2.5 py-0.5 rounded-lg bg-pink-950 text-pink-300 border border-pink-500/40 text-[11px] font-bold font-mono">
                       {currentStep.badge}
-                    </span>
-                    <span className="text-purple-400 text-xs font-mono">
-                      Step {activeTutorialStep + 1} of {tutorialSteps.length}
                     </span>
                   </div>
                   <h3 className="text-lg font-bold text-white flex items-center gap-2">

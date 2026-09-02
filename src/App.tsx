@@ -9,7 +9,7 @@ import { TutorialGuide } from './components/TutorialGuide';
 import { SettingsView } from './components/SettingsView';
 import { DatabaseConsole } from './components/DatabaseConsole';
 import { AuthModal } from './components/AuthModal';
-import { initializeDatabase, getDatabaseMetrics, db, setupFirestoreRealtimeListeners, INITIAL_DEMO_USERS, broadcastDbUpdate, syncAllFromCentralServer } from './lib/db';
+import { initializeDatabase, getDatabaseMetrics, db, setupFirestoreRealtimeListeners, INITIAL_DEMO_USERS, broadcastDbUpdate, syncAllFromCentralServer, isUserMatch } from './lib/db';
 import { type User, type CookieEvent } from './types/database';
 
 export default function App() {
@@ -47,12 +47,23 @@ export default function App() {
       setMetrics(stats);
 
       const allEvents = await db.cookie_events.orderBy('created_at').reverse().toArray();
-      const userEvents = allEvents.filter((e) => e.user_id === activeUserId);
+      const userEvents = allEvents.filter((e) => isUserMatch(e.user_id, activeUserId));
       setRecentEvents(userEvents);
     } catch (err) {
       console.error('Error refreshing DB metrics:', err);
     }
   }, [activeUserId]);
+
+  // Synchronize active user with server so extension actions bind to Mary
+  useEffect(() => {
+    if (currentUser) {
+      fetch('/api/session/active-user', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user: currentUser }),
+      }).catch(err => console.warn('Session sync note:', err));
+    }
+  }, [currentUser]);
 
   // Trigger state refresh on user account change or db ready
   useEffect(() => {
@@ -123,13 +134,13 @@ export default function App() {
     };
   }, [activeUserId, isDbReady, refreshDatabaseState]);
 
-  // Periodic REST polling fallback (every 5s) so browser extension data appears live
+  // Periodic REST polling fallback (every 2.5s) so browser extension data appears live
   useEffect(() => {
     if (!isDbReady) return;
     const pollInterval = setInterval(async () => {
       await syncAllFromCentralServer(activeUserId);
       refreshDatabaseState();
-    }, 5000);
+    }, 2500);
     return () => clearInterval(pollInterval);
   }, [activeUserId, isDbReady, refreshDatabaseState]);
 

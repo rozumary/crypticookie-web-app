@@ -23,6 +23,7 @@ import {
   verifyPublicChainIntegrity,
   tamperPublicBlock,
   repairPublicChain,
+  isUserMatch,
 } from '../lib/db';
 import { truncateHash } from '../lib/crypto';
 
@@ -51,15 +52,13 @@ export const BlockchainExplorer: React.FC<BlockchainExplorerProps> = ({ currentU
     const pub = await db.public_ledger.orderBy('block_index').toArray();
     const priv = await db.private_ledger.orderBy('block_index').toArray();
 
-    // Filter public blocks by active user
-    const filteredPub = pub.filter((b) => b.user_id === activeUserId);
+    // Public ledger displays the entire transparent blockchain
+    setPublicBlocks(pub);
     // Filter private blocks by active user
-    const filteredPriv = priv.filter((b) => b.user_id === activeUserId);
-
-    setPublicBlocks(filteredPub);
+    const filteredPriv = priv.filter((b) => isUserMatch(b.user_id, activeUserId));
     setPrivateBlocks(filteredPriv);
 
-    const integrity = await verifyPublicChainIntegrity(activeUserId);
+    const integrity = await verifyPublicChainIntegrity();
     setVerificationResult(integrity);
   };
 

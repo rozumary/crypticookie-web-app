@@ -422,6 +422,18 @@ export async function recordMonitoredDomain(
 }
 
 /**
+ * Helper to determine if a record belongs to the active user or is a shared/primary extension log
+ */
+export function isUserMatch(itemUserId?: string, targetUserId?: string): boolean {
+  if (!targetUserId || targetUserId === 'all') return true;
+  if (!itemUserId) return true;
+  if (itemUserId === targetUserId) return true;
+  // Seamless fallback: Extension records or default auditor records automatically map to the active user
+  if (itemUserId === 'u_auditor_primary' || targetUserId === 'u_auditor_primary') return true;
+  return false;
+}
+
+/**
  * Fetch monitored domains for a specific User Account (most recent first)
  */
 export async function getMonitoredDomains(
@@ -429,7 +441,7 @@ export async function getMonitoredDomains(
   userId?: string
 ): Promise<MonitoredDomain[]> {
   const list = await db.monitored_domains.toArray();
-  const filtered = userId ? list.filter((item) => item.user_id === userId) : list;
+  const filtered = userId ? list.filter((item) => isUserMatch(item.user_id, userId)) : list;
   return filtered.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()).slice(0, limitCount);
 }
 
@@ -491,11 +503,8 @@ export async function clearUserHistory(userId: string): Promise<void> {
 /**
  * Verify cryptographic integrity of the Public Ledger Chain
  */
-export async function verifyPublicChainIntegrity(userId?: string): Promise<ChainVerificationResult> {
-  let blocks = await db.public_ledger.orderBy('block_index').toArray();
-  if (userId) {
-    blocks = blocks.filter((b) => b.user_id === userId);
-  }
+export async function verifyPublicChainIntegrity(_userId?: string): Promise<ChainVerificationResult> {
+  const blocks = await db.public_ledger.orderBy('block_index').toArray();
   if (blocks.length === 0) {
     return { isValid: true, brokenBlockIndex: null, expectedHash: null, actualHash: null, totalBlocks: 0 };
   }
@@ -603,10 +612,11 @@ export async function getDatabaseMetrics(userId?: string) {
   const cmpItems = await db.cmp_registry.toArray();
   const allMonitored = await db.monitored_domains.toArray();
 
-  const events = userId ? allEvents.filter((e) => e.user_id === userId) : allEvents;
-  const privateBlocks = userId ? allPrivate.filter((pv) => pv.user_id === userId) : allPrivate;
-  const monitored = userId ? allMonitored.filter((m) => m.user_id === userId) : allMonitored;
-  const publicBlocks = userId ? allPublic.filter((pb) => pb.user_id === userId) : allPublic;
+  const events = userId ? allEvents.filter((e) => isUserMatch(e.user_id, userId)) : allEvents;
+  const privateBlocks = userId ? allPrivate.filter((pv) => isUserMatch(pv.user_id, userId)) : allPrivate;
+  const monitored = userId ? allMonitored.filter((m) => isUserMatch(m.user_id, userId)) : allMonitored;
+  // Public ledger blocks represent public transparency chain
+  const publicBlocks = allPublic;
 
   const uniqueDomains = new Set([...events.map((e) => e.site_domain), ...monitored.map((m) => m.domain)]);
   const threatsBlocked =

@@ -137,10 +137,37 @@ async function startServer() {
     }
   });
 
+  // Track active logged-in user in memory for seamless extension binding
+  let activeSessionUser = {
+    id: 'u_auditor_primary',
+    username: 'Mary',
+    email: 'rosemarymontesa@gmail.com'
+  };
+
+  app.post("/api/session/active-user", (req, res) => {
+    try {
+      const { user } = req.body;
+      if (user && user.id) {
+        activeSessionUser = {
+          id: user.id,
+          username: user.username || 'Mary',
+          email: user.email || ''
+        };
+      }
+      return res.json({ status: "success", user: activeSessionUser });
+    } catch (err: any) {
+      return res.status(500).json({ error: err.message });
+    }
+  });
+
+  app.get("/api/session/active-user", (req, res) => {
+    return res.json({ status: "success", user: activeSessionUser });
+  });
+
   // API route to record consent from Chrome Extension or Web App
   app.post("/api/consent/record", async (req, res) => {
     try {
-      const { domain, hash, action, cookieType, userId, trackers, cookieCount, cmpName } = req.body;
+      const { domain, hash, action, cookieType, userId, username, trackers, cookieCount, cmpName } = req.body;
       if (!domain || !action) {
         return res.status(400).json({ error: "domain and action are required." });
       }
@@ -149,7 +176,10 @@ async function startServer() {
       const siteDomain = String(domain).toLowerCase().trim();
       const scriptHash = hash ? String(hash).trim().toLowerCase() : '73926ef91823ab0288f34291f09e248b64e9123847a9821034f828108c90fe32';
       const cType = cookieType || 'all';
-      const uId = userId || 'u_auditor_primary';
+      // Resolve user ID with active session fallback
+      const uId = (userId && userId !== 'u_auditor_primary') 
+        ? userId 
+        : (activeSessionUser.id || 'u_auditor_primary');
 
       // 1. Verify script hash against real CMP registry
       const { result: verificationResult, cmpName: verifiedCmpName } = await verifyScriptHash(scriptHash, cmpName, siteDomain);
@@ -289,7 +319,9 @@ async function startServer() {
 
       const siteDomain = String(domain).toLowerCase().trim();
       const timestamp = new Date().toISOString();
-      const uId = userId || 'u_auditor_primary';
+      const uId = (userId && userId !== 'u_auditor_primary') 
+        ? userId 
+        : (activeSessionUser.id || 'u_auditor_primary');
       const scriptHash = hash ? String(hash).trim().toLowerCase() : '';
 
       // Verify hash if provided

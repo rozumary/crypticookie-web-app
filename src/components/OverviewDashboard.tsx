@@ -100,7 +100,16 @@ export const OverviewDashboard: React.FC<OverviewDashboardProps> = ({
     };
 
     window.addEventListener('crypticookie_db_sync', handleSync);
-    return () => window.removeEventListener('crypticookie_db_sync', handleSync);
+
+    // Continuous real-time polling so extension choices appear live within seconds
+    const interval = setInterval(() => {
+      loadMonitoredSites();
+    }, 2500);
+
+    return () => {
+      window.removeEventListener('crypticookie_db_sync', handleSync);
+      clearInterval(interval);
+    };
   }, [activeUserId]);
 
   const handleManualRefresh = async () => {

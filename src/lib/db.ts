@@ -800,12 +800,40 @@ export async function syncAllFromCentralServer(userId?: string): Promise<void> {
       console.warn("Rest sync private_ledger note:", e);
     }
 
-    // 4. Sync Monitored Domains
+    // 4. Sync Monitored Domains - merge intelligently to preserve consent_action
     try {
       const res = await fetch(`${apiOrigin}/api/domains/history?userId=all`);
       const body = await res.json();
       if (body.status === "success" && Array.isArray(body.data)) {
-        await db.monitored_domains.bulkPut(body.data);
+        // For each server record, check if we already have a local record for the same domain+user
+        // If the server record has consent_action, always use it (extension wrote it)
+        for (const serverRecord of body.data) {
+          if (serverRecord.deleted) continue; // skip soft-deleted records
+          const existing = await db.monitored_domains.get(serverRecord.id);
+          if (existing) {
+            // Server record wins if it has a consent_action that local doesn't
+            if (serverRecord.consent_action && !existing.consent_action) {
+              await db.monitored_domains.put(serverRecord);
+            } else if (serverRecord.consent_action) {
+              // Server has consent_action, update timestamp too
+              await db.monitored_domains.put(serverRecord);
+            } else if (!existing.consent_action && serverRecord.timestamp > existing.timestamp) {
+              // Neither has consent_action, take the newer one
+              await db.monitored_domains.put(serverRecord);
+            }
+          } else {
+            // Check if there's a local record for the same domain + user under a different ID
+            const localDups = await db.monitored_domains
+              .where('domain').equals(serverRecord.domain || '')
+              .toArray();
+            const localDup = localDups.find(d => d.user_id === serverRecord.user_id);
+            if (localDup && !localDup.consent_action && serverRecord.consent_action) {
+              // Server has the consent action, remove local dup and use server's
+              await db.monitored_domains.delete(localDup.id);
+            }
+            await db.monitored_domains.put(serverRecord);
+          }
+        }
       }
     } catch (e) {
       console.warn("Rest sync monitored_domains note:", e);

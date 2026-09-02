@@ -246,27 +246,40 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (isAppOrigin) {
     const trySyncUserId = () => {
       const activeUserId = localStorage.getItem('crypticookie_active_user_id') || document.documentElement.dataset.crypticookieUserId;
+      const activeUsername = localStorage.getItem('crypticookie_active_username') || '';
       if (activeUserId) {
-        chrome.runtime.sendMessage({ type: 'SET_ACTIVE_USER_ID', userId: activeUserId });
+        chrome.runtime.sendMessage({ type: 'SET_ACTIVE_USER_ID', userId: activeUserId, username: activeUsername || activeUserId });
       }
     };
 
     trySyncUserId();
+    // Re-sync periodically in case the user logs in after page load
+    setInterval(trySyncUserId, 3000);
     window.addEventListener('storage', (e) => {
-      if (e.key === 'crypticookie_active_user_id' && e.newValue) {
-        chrome.runtime.sendMessage({ type: 'SET_ACTIVE_USER_ID', userId: e.newValue });
+      if ((e.key === 'crypticookie_active_user_id' || e.key === 'crypticookie_active_username') && e.newValue) {
+        trySyncUserId();
       }
     });
     window.addEventListener('crypticookie_user_changed', (e) => {
       if (e.detail && e.detail.userId) {
-        chrome.runtime.sendMessage({ type: 'SET_ACTIVE_USER_ID', userId: e.detail.userId });
+        chrome.runtime.sendMessage({ type: 'SET_ACTIVE_USER_ID', userId: e.detail.userId, username: e.detail.username || e.detail.userId });
       }
     });
     window.addEventListener('message', (e) => {
       if (e.data && e.data.type === 'CRYPTICOOKIE_USER_CHANGED' && e.data.userId) {
-        chrome.runtime.sendMessage({ type: 'SET_ACTIVE_USER_ID', userId: e.data.userId });
+        chrome.runtime.sendMessage({ type: 'SET_ACTIVE_USER_ID', userId: e.data.userId, username: e.data.username || e.data.userId });
       }
     });
+  } else {
+    // On external websites, fetch active user from server to ensure correct binding
+    fetch("${apiOrigin}/api/session/active-user")
+      .then(r => r.json())
+      .then(data => {
+        if (data.status === 'success' && data.user && data.user.id) {
+          chrome.runtime.sendMessage({ type: 'SET_ACTIVE_USER_ID', userId: data.user.id, username: data.user.username || data.user.id });
+        }
+      })
+      .catch(() => {});
   }
 
   // Do not run shield on internal extension, local or central app pages
@@ -578,25 +591,32 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         statusBox.innerText = 'Syncing to Firestore & Blockchain...';
       }
 
-      chrome.runtime.sendMessage({
-        type: 'RECORD_CONSENT_TRANSACTION',
-        domain: currentHost,
-        hash: hash,
-        action: actionChoice,
-        trackers: detectedTrackers,
-        cookieCount: cookieCount,
-        cmpName: cmpName,
-        cookieType: cookieType
-      }, (res) => {
-        if (statusBox) {
-          const blockIdx = res && res.serverResponse && res.serverResponse.publicBlockIndex !== undefined 
-            ? ' (Block #' + res.serverResponse.publicBlockIndex + ')' 
-            : '';
-          statusBox.innerText = '✓ ' + actionChoice.toUpperCase() + ' Synced to Firestore!' + blockIdx;
-          statusBox.style.background = actionChoice === 'reject' ? '#450a0a' : '#064e3b';
-          statusBox.style.borderColor = actionChoice === 'reject' ? '#ef4444' : '#10b981';
-          statusBox.style.color = actionChoice === 'reject' ? '#fca5a5' : '#a7f3d0';
-        }
+      // Fetch the synced user from background to ensure correct binding
+      chrome.runtime.sendMessage({ type: 'GET_ACTIVE_USER_ID' }, (userRes) => {
+        const effectiveUserId = (userRes && userRes.userId) || '';
+        const effectiveUsername = (userRes && userRes.username) || '';
+        chrome.runtime.sendMessage({
+          type: 'RECORD_CONSENT_TRANSACTION',
+          domain: currentHost,
+          hash: hash,
+          action: actionChoice,
+          trackers: detectedTrackers,
+          cookieCount: cookieCount,
+          cmpName: cmpName,
+          cookieType: cookieType,
+          userId: effectiveUserId,
+          username: effectiveUsername
+        }, (res) => {
+          if (statusBox) {
+            const blockIdx = res && res.serverResponse && res.serverResponse.publicBlockIndex !== undefined 
+              ? ' (Block #' + res.serverResponse.publicBlockIndex + ')' 
+              : '';
+            statusBox.innerText = '✓ ' + actionChoice.toUpperCase() + ' Synced to Firestore!' + blockIdx;
+            statusBox.style.background = actionChoice === 'reject' ? '#450a0a' : '#064e3b';
+            statusBox.style.borderColor = actionChoice === 'reject' ? '#ef4444' : '#10b981';
+            statusBox.style.color = actionChoice === 'reject' ? '#fca5a5' : '#a7f3d0';
+          }
+        });
       });
     };
 
@@ -824,7 +844,9 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
   document.getElementById('account-picker')?.addEventListener('change', (e) => {
     const newUserId = e.target.value;
-    chrome.runtime.sendMessage({ type: 'SET_ACTIVE_USER_ID', userId: newUserId });
+    const selectedOption = e.target.options[e.target.selectedIndex];
+    const newUsername = selectedOption ? selectedOption.innerText : newUserId;
+    chrome.runtime.sendMessage({ type: 'SET_ACTIVE_USER_ID', userId: newUserId, username: newUsername });
   });
 
   chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
@@ -903,23 +925,31 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       statusDiv.innerText = 'Syncing to Firestore...';
     }
 
-    chrome.runtime.sendMessage({
-      type: 'RECORD_CONSENT_TRANSACTION',
-      domain: currentDomain,
-      hash: detectedHash || 'verified',
-      action: actionChoice,
-      trackers: detectedTrackers,
-      cmpName: detectedCmpName
-    }, (res) => {
-      if (statusDiv) {
-        const blockIdx = res && res.serverResponse && res.serverResponse.publicBlockIndex !== undefined
-          ? ' (Block #' + res.serverResponse.publicBlockIndex + ')'
-          : '';
-        statusDiv.innerText = '✓ ' + actionChoice.toUpperCase() + ' Synced!' + blockIdx;
-        statusDiv.style.background = actionChoice === 'reject' ? '#450a0a' : '#064e3b';
-        statusDiv.style.borderColor = actionChoice === 'reject' ? '#ef4444' : '#10b981';
-        statusDiv.style.color = actionChoice === 'reject' ? '#fca5a5' : '#a7f3d0';
-      }
+    // Get current active user to ensure correct binding
+    chrome.runtime.sendMessage({ type: 'GET_ACTIVE_USER_ID' }, (userRes) => {
+      const effectiveUserId = (userRes && userRes.userId) || '';
+      const effectiveUsername = (userRes && userRes.username) || '';
+      chrome.runtime.sendMessage({
+        type: 'RECORD_CONSENT_TRANSACTION',
+        domain: currentDomain,
+        hash: detectedHash || 'verified',
+        action: actionChoice,
+        trackers: detectedTrackers,
+        cmpName: detectedCmpName,
+        cookieCount: 0,
+        userId: effectiveUserId,
+        username: effectiveUsername
+      }, (res) => {
+        if (statusDiv) {
+          const blockIdx = res && res.serverResponse && res.serverResponse.publicBlockIndex !== undefined
+            ? ' (Block #' + res.serverResponse.publicBlockIndex + ')'
+            : '';
+          statusDiv.innerText = '✓ ' + actionChoice.toUpperCase() + ' Synced!' + blockIdx;
+          statusDiv.style.background = actionChoice === 'reject' ? '#450a0a' : '#064e3b';
+          statusDiv.style.borderColor = actionChoice === 'reject' ? '#ef4444' : '#10b981';
+          statusDiv.style.color = actionChoice === 'reject' ? '#fca5a5' : '#a7f3d0';
+        }
+      });
     });
   };
 

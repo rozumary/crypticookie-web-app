@@ -151,13 +151,15 @@ export default function App() {
 
   const handleSelectUser = (user: User) => {
     localStorage.setItem('crypticookie_active_user_id', user.id);
+    localStorage.setItem('crypticookie_active_username', user.username || user.id);
     setCurrentUser(user);
-    window.dispatchEvent(new CustomEvent('crypticookie_user_changed', { detail: { userId: user.id } }));
-    window.postMessage({ type: 'CRYPTICOOKIE_USER_CHANGED', userId: user.id }, '*');
+    window.dispatchEvent(new CustomEvent('crypticookie_user_changed', { detail: { userId: user.id, username: user.username } }));
+    window.postMessage({ type: 'CRYPTICOOKIE_USER_CHANGED', userId: user.id, username: user.username }, '*');
   };
 
   const handleLogout = () => {
     localStorage.removeItem('crypticookie_active_user_id');
+    localStorage.removeItem('crypticookie_active_username');
     setCurrentUser(null);
     setAuthMode('signin');
     setIsAuthModalOpen(true);

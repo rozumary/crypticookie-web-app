@@ -176,7 +176,38 @@ export const OverviewDashboard: React.FC<OverviewDashboardProps> = ({
   };
 
   // Filtered Monitored Domains
-  const filteredSites = monitoredSites.filter((site) => {
+  // First, deduplicate by domain+userId: prefer entries that have a consent_action
+  const deduplicatedSites = (() => {
+    const domainMap = new Map<string, MonitoredDomain>();
+    for (const site of monitoredSites) {
+      const key = `${site.domain}_${site.user_id}`;
+      const existing = domainMap.get(key);
+      if (!existing) {
+        domainMap.set(key, site);
+      } else {
+        // Prefer the entry that has a consent_action
+        if (site.consent_action && !existing.consent_action) {
+          domainMap.set(key, site);
+        } else if (site.consent_action && existing.consent_action) {
+          // Both have consent_action, keep the most recent
+          if (new Date(site.timestamp).getTime() > new Date(existing.timestamp).getTime()) {
+            domainMap.set(key, site);
+          }
+        } else if (!site.consent_action && !existing.consent_action) {
+          // Neither has consent_action, keep the most recent
+          if (new Date(site.timestamp).getTime() > new Date(existing.timestamp).getTime()) {
+            domainMap.set(key, site);
+          }
+        }
+        // else: existing has consent_action but new doesn't - keep existing (do nothing)
+      }
+    }
+    return Array.from(domainMap.values()).sort((a, b) =>
+      new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+    );
+  })();
+
+  const filteredSites = deduplicatedSites.filter((site) => {
     const matchesSearch = site.domain.toLowerCase().includes(searchFilter.toLowerCase()) ||
       site.cmp_name.toLowerCase().includes(searchFilter.toLowerCase());
     if (!matchesSearch) return false;
@@ -188,10 +219,10 @@ export const OverviewDashboard: React.FC<OverviewDashboardProps> = ({
     return true;
   });
 
-  const totalAccepted = monitoredSites.filter(s => s.consent_action === 'accept').length +
-    recentEvents.filter(e => e.consent_action === 'accept').length;
-  const totalRejected = monitoredSites.filter(s => s.consent_action === 'reject').length +
-    recentEvents.filter(e => e.consent_action === 'reject').length;
+  const totalAccepted = deduplicatedSites.filter(s => s.consent_action === 'accept').length +
+    recentEvents.filter(e => e.consent_action === 'accept' && !deduplicatedSites.some(s => s.domain === e.site_domain && s.consent_action === 'accept')).length;
+  const totalRejected = deduplicatedSites.filter(s => s.consent_action === 'reject').length +
+    recentEvents.filter(e => e.consent_action === 'reject' && !deduplicatedSites.some(s => s.domain === e.site_domain && s.consent_action === 'reject')).length;
 
   return (
     <div className="space-y-8 pb-12">
@@ -400,7 +431,7 @@ export const OverviewDashboard: React.FC<OverviewDashboardProps> = ({
 
           <div className="flex items-center gap-2">
             <span className="text-xs font-mono font-semibold text-pink-300 bg-[#1A0935] px-3 py-1 rounded-full border border-pink-500/30">
-              {monitoredSites.length} Audited Sites
+              {deduplicatedSites.length} Audited Sites
             </span>
           </div>
         </div>
@@ -420,14 +451,14 @@ export const OverviewDashboard: React.FC<OverviewDashboardProps> = ({
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#261445]">
-                {monitoredSites.length === 0 ? (
+                {deduplicatedSites.length === 0 ? (
                   <tr>
                     <td colSpan={7} className="py-8 text-center text-purple-300/60 text-xs">
                       No live websites logged yet for this account. Browse Facebook, Messenger, or Google with the extension installed, or click <strong>Live Sync (🔄)</strong> above!
                     </td>
                   </tr>
                 ) : (
-                  monitoredSites.map((site) => (
+                  deduplicatedSites.map((site) => (
                     <tr key={site.id} className="hover:bg-[#1C0A3B] transition-colors">
                       <td className="py-3 px-4 font-semibold text-purple-100 font-mono">
                         {site.domain}

@@ -270,16 +270,6 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         chrome.runtime.sendMessage({ type: 'SET_ACTIVE_USER_ID', userId: e.data.userId, username: e.data.username || e.data.userId });
       }
     });
-  } else {
-    // On external websites, fetch active user from server to ensure correct binding
-    fetch("${apiOrigin}/api/session/active-user")
-      .then(r => r.json())
-      .then(data => {
-        if (data.status === 'success' && data.user && data.user.id) {
-          chrome.runtime.sendMessage({ type: 'SET_ACTIVE_USER_ID', userId: data.user.id, username: data.user.username || data.user.id });
-        }
-      })
-      .catch(() => {});
   }
 
   // Do not run shield on internal extension, local or central app pages

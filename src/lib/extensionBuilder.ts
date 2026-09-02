@@ -11,7 +11,7 @@ export interface ExtensionFile {
 export const EXTENSION_MANIFEST_JSON = `{
   "manifest_version": 3,
   "name": "Crypticookie: Live Website & CMP Consent Shield",
-  "version": "1.3.1",
+  "version": "1.3.2",
   "description": "Real-time active website monitoring, cookie & tracker sniffer, CMP verification, and hybrid blockchain consent auditing with cloud database sync.",
   "permissions": [
     "activeTab",
@@ -589,7 +589,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (msg.type === 'SHOW_SHIELD_OVERLAY') {
       const hash = detectedCmp ? detectedCmp.src : currentHost;
       sha256(hash).then(function(realHash) {
-        renderShieldBanner('Unverified', detectedCmp ? detectedCmp.name : 'No CMP Detected', realHash);
+        renderShieldBanner('Unverified', detectedCmp ? detectedCmp.name : 'No CMP Detected', realHash, detectedCookieType);
       });
       sendResponse({ status: 'shown' });
     }

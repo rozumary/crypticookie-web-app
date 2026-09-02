@@ -589,13 +589,20 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         cookieType: cookieType
       }, (res) => {
         if (statusBox) {
-          const blockIdx = res && res.serverResponse && res.serverResponse.publicBlockIndex !== undefined 
-            ? ' (Block #' + res.serverResponse.publicBlockIndex + ')' 
-            : '';
-          statusBox.innerText = '✓ ' + actionChoice.toUpperCase() + ' Synced to Firestore!' + blockIdx;
-          statusBox.style.background = actionChoice === 'reject' ? '#450a0a' : '#064e3b';
-          statusBox.style.borderColor = actionChoice === 'reject' ? '#ef4444' : '#10b981';
-          statusBox.style.color = actionChoice === 'reject' ? '#fca5a5' : '#a7f3d0';
+          if (res && res.serverResponse && res.serverResponse.status === 'success') {
+            const blockIdx = res.serverResponse.publicBlockIndex !== undefined 
+              ? ' (Block #' + res.serverResponse.publicBlockIndex + ')' 
+              : '';
+            statusBox.innerText = '✓ ' + actionChoice.toUpperCase() + ' Synced to Firestore!' + blockIdx;
+            statusBox.style.background = actionChoice === 'reject' ? '#450a0a' : '#064e3b';
+            statusBox.style.borderColor = actionChoice === 'reject' ? '#ef4444' : '#10b981';
+            statusBox.style.color = actionChoice === 'reject' ? '#fca5a5' : '#a7f3d0';
+          } else {
+            statusBox.innerText = '⚠️ ' + actionChoice.toUpperCase() + ' Stored Locally (Sync Failed)';
+            statusBox.style.background = '#450a0a';
+            statusBox.style.borderColor = '#ef4444';
+            statusBox.style.color = '#fca5a5';
+          }
         }
       });
     };
@@ -912,13 +919,20 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       cmpName: detectedCmpName
     }, (res) => {
       if (statusDiv) {
-        const blockIdx = res && res.serverResponse && res.serverResponse.publicBlockIndex !== undefined
-          ? ' (Block #' + res.serverResponse.publicBlockIndex + ')'
-          : '';
-        statusDiv.innerText = '✓ ' + actionChoice.toUpperCase() + ' Synced!' + blockIdx;
-        statusDiv.style.background = actionChoice === 'reject' ? '#450a0a' : '#064e3b';
-        statusDiv.style.borderColor = actionChoice === 'reject' ? '#ef4444' : '#10b981';
-        statusDiv.style.color = actionChoice === 'reject' ? '#fca5a5' : '#a7f3d0';
+        if (res && res.serverResponse && res.serverResponse.status === 'success') {
+          const blockIdx = res.serverResponse.publicBlockIndex !== undefined
+            ? ' (Block #' + res.serverResponse.publicBlockIndex + ')'
+            : '';
+          statusDiv.innerText = '✓ ' + actionChoice.toUpperCase() + ' Synced!' + blockIdx;
+          statusDiv.style.background = actionChoice === 'reject' ? '#450a0a' : '#064e3b';
+          statusDiv.style.borderColor = actionChoice === 'reject' ? '#ef4444' : '#10b981';
+          statusDiv.style.color = actionChoice === 'reject' ? '#fca5a5' : '#a7f3d0';
+        } else {
+          statusDiv.innerText = '⚠️ ' + actionChoice.toUpperCase() + ' Stored Locally (Sync Failed)';
+          statusDiv.style.background = '#450a0a';
+          statusDiv.style.borderColor = '#ef4444';
+          statusDiv.style.color = '#fca5a5';
+        }
       }
     });
   };

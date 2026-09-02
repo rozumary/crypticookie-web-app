@@ -14,15 +14,17 @@ import {
   Cpu,
   Radio,
 } from 'lucide-react';
+import { type User } from '../types/database';
 import { downloadExtensionZip } from '../lib/extensionBuilder';
 import { CrypticookieLogo } from './CrypticookieLogo';
 
 interface InstallExtensionModalProps {
   isOpen: boolean;
   onClose: () => void;
+  currentUser?: User | null;
 }
 
-export const InstallExtensionModal: React.FC<InstallExtensionModalProps> = ({ isOpen, onClose }) => {
+export const InstallExtensionModal: React.FC<InstallExtensionModalProps> = ({ isOpen, onClose, currentUser }) => {
   const [isDownloading, setIsDownloading] = useState(false);
   const [downloadSuccess, setDownloadSuccess] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
@@ -33,7 +35,7 @@ export const InstallExtensionModal: React.FC<InstallExtensionModalProps> = ({ is
   const handleDownload = async () => {
     try {
       setIsDownloading(true);
-      await downloadExtensionZip();
+      await downloadExtensionZip(currentUser);
       setDownloadSuccess(true);
       setActiveStep(2);
       setTimeout(() => setDownloadSuccess(false), 4000);
@@ -49,6 +51,9 @@ export const InstallExtensionModal: React.FC<InstallExtensionModalProps> = ({ is
     setCopiedLink(true);
     setTimeout(() => setCopiedLink(false), 2000);
   };
+
+  const activeUsername = currentUser?.username || 'Primary Auditor';
+  const activeUserId = currentUser?.id || 'u_auditor_primary';
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#090514]/80 backdrop-blur-md p-4 animate-fadeIn">
@@ -80,6 +85,17 @@ export const InstallExtensionModal: React.FC<InstallExtensionModalProps> = ({ is
           </button>
         </div>
 
+        {/* User Account Link Info Badge */}
+        <div className="p-3 px-4 rounded-xl bg-[#251347] border border-pink-500/30 flex items-center justify-between text-xs">
+          <div className="flex items-center gap-2">
+            <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
+            <span className="text-purple-200">Account Bound to Extension:</span>
+            <strong className="text-pink-300 font-mono">{activeUsername}</strong>
+            <span className="text-purple-400/80 text-[11px] font-mono">({activeUserId})</span>
+          </div>
+          <span className="text-[11px] text-emerald-400 font-semibold">✓ Auto-linked</span>
+        </div>
+
         {/* Primary Download Action Box */}
         <div className="relative z-10 p-5 rounded-2xl bg-[#180F2F] border border-[#341F5C] flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm">
           <div className="space-y-1">
@@ -88,7 +104,7 @@ export const InstallExtensionModal: React.FC<InstallExtensionModalProps> = ({ is
               <span>Step 1: Download Extension Package (.zip)</span>
             </div>
             <p className="text-xs text-purple-300/70">
-              Generates complete Chromium extension bundle (<code className="text-purple-300 font-bold">manifest.json</code>, <code className="text-purple-300 font-bold">background.js</code>, <code className="text-purple-300 font-bold">content.js</code>, popup UI).
+              Generates complete Chromium extension bundle pre-configured for <strong>{activeUsername}</strong> (<code className="text-purple-300 font-bold">manifest.json</code>, <code className="text-purple-300 font-bold">background.js</code>, <code className="text-purple-300 font-bold">content.js</code>, popup UI).
             </p>
           </div>
 

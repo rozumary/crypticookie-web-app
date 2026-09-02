@@ -587,6 +587,7 @@ export const ExtensionSimulator: React.FC<ExtensionSimulatorProps> = ({
       <InstallExtensionModal
         isOpen={isInstallModalOpen}
         onClose={() => setIsInstallModalOpen(false)}
+        currentUser={currentUser}
       />
     </div>
   );

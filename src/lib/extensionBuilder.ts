@@ -42,8 +42,14 @@ export const EXTENSION_MANIFEST_JSON = `{
   }
 }`;
 
-export function getExtensionFiles(serverOrigin: string): ExtensionFile[] {
+export function getExtensionFiles(
+  serverOrigin: string,
+  user?: { id: string; username: string; email?: string } | null
+): ExtensionFile[] {
   let apiOrigin = serverOrigin || (typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000');
+  const activeUserId = user?.id || 'u_auditor_primary';
+  const activeUsername = user?.username || 'Test Auditor';
+  const activeUserEmail = user?.email || 'auditor@crypticookie.io';
 
   const backgroundJs = `/**
  * Crypticookie Background Service Worker (Manifest V3)
@@ -51,6 +57,8 @@ export function getExtensionFiles(serverOrigin: string): ExtensionFile[] {
  */
 
 const SERVER_API_URL = "${apiOrigin}";
+const DEFAULT_USER_ID = "${activeUserId}";
+const DEFAULT_USERNAME = "${activeUsername}";
 
 // 1. Live Website Navigation Detector
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
@@ -62,11 +70,11 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
       chrome.action.setBadgeText({ tabId: tabId, text: "PROT" });
       chrome.action.setBadgeBackgroundColor({ tabId: tabId, color: "#10b981" });
 
-      chrome.storage.local.get({ monitored_sessions: [], active_user_id: "u_auditor_primary" }, (result) => {
-        const list = result.monitored_sessions;
+      chrome.storage.local.get({ monitored_sessions: [], active_user_id: DEFAULT_USER_ID, active_username: DEFAULT_USERNAME }, (result) => {
+        const list = result.monitored_sessions || [];
         list.unshift({ domain: domain, url: tab.url, title: tab.title || domain, timestamp: new Date().toISOString() });
         if (list.length > 50) list.pop();
-        chrome.storage.local.set({ monitored_sessions: list });
+        chrome.storage.local.set({ monitored_sessions: list, active_user_id: result.active_user_id, active_username: result.active_username });
 
         fetch(SERVER_API_URL + "/api/domains/record", {
           method: "POST",
@@ -75,7 +83,8 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
             domain: domain,
             url: tab.url,
             title: tab.title || domain,
-            userId: result.active_user_id,
+            userId: result.active_user_id || DEFAULT_USER_ID,
+            username: result.active_username || DEFAULT_USERNAME,
             privacy_risk_level: "Low"
           })
         }).catch(err => console.warn("Server domain sync note:", err));
@@ -89,7 +98,7 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
 // 2. Messaging Handler for CMP & Consent Actions
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.type === "SET_ACTIVE_USER_ID") {
-    chrome.storage.local.set({ active_user_id: request.userId }, () => {
+    chrome.storage.local.set({ active_user_id: request.userId, active_username: request.username || request.userId }, () => {
       console.log("Extension synchronized active user_id:", request.userId);
     });
     sendResponse({ status: "synced", userId: request.userId });
@@ -97,8 +106,8 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   }
 
   if (request.type === "GET_ACTIVE_USER_ID") {
-    chrome.storage.local.get({ active_user_id: "u_auditor_primary" }, (res) => {
-      sendResponse({ userId: res.active_user_id });
+    chrome.storage.local.get({ active_user_id: DEFAULT_USER_ID, active_username: DEFAULT_USERNAME }, (res) => {
+      sendResponse({ userId: res.active_user_id || DEFAULT_USER_ID, username: res.active_username || DEFAULT_USERNAME });
     });
     return true;
   }
@@ -140,13 +149,22 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   }
 
   if (request.type === "RECORD_CONSENT_TRANSACTION") {
-    chrome.storage.local.get({ consent_ledger: [], active_user_id: "u_auditor_primary" }, (result) => {
+    chrome.storage.local.get({ consent_ledger: [], active_user_id: DEFAULT_USER_ID, active_username: DEFAULT_USERNAME }, (result) => {
       (async () => {
         const timestamp = new Date().toISOString();
-        const effectiveUserId = request.userId || result.active_user_id || "u_auditor_primary";
+        const effectiveUserId = request.userId || result.active_user_id || DEFAULT_USER_ID;
+        const effectiveUsername = request.username || result.active_username || DEFAULT_USERNAME;
 
-        const ledger = result.consent_ledger;
-        ledger.push({ block_index: ledger.length, domain: request.domain, hash: request.hash, action: request.action, userId: effectiveUserId, timestamp: timestamp });
+        const ledger = result.consent_ledger || [];
+        ledger.push({
+          block_index: ledger.length,
+          domain: request.domain,
+          hash: request.hash,
+          action: request.action,
+          userId: effectiveUserId,
+          username: effectiveUsername,
+          timestamp: timestamp
+        });
         chrome.storage.local.set({ consent_ledger: ledger });
 
         let serverResponse = null;
@@ -159,6 +177,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
               hash: request.hash,
               action: request.action,
               userId: effectiveUserId,
+              username: effectiveUsername,
               trackers: request.trackers || [],
               cookieCount: request.cookieCount || 0,
               cmpName: request.cmpName || null,
@@ -166,7 +185,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             })
           });
           serverResponse = await resp.json();
-          console.log("Real-time Consent Sync Success:", serverResponse);
+          console.log("Real-time Consent Sync Success for User [" + effectiveUserId + "]:", serverResponse);
         } catch (err) {
           console.warn("Failed to reach central server, stored locally:", err);
         }
@@ -178,9 +197,10 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   }
 
   if (request.type === "DOMAIN_VISITED") {
-    chrome.storage.local.get({ active_user_id: "u_auditor_primary" }, (result) => {
+    chrome.storage.local.get({ active_user_id: DEFAULT_USER_ID, active_username: DEFAULT_USERNAME }, (result) => {
       (async () => {
-        const effectiveUserId = request.userId || result.active_user_id || "u_auditor_primary";
+        const effectiveUserId = request.userId || result.active_user_id || DEFAULT_USER_ID;
+        const effectiveUsername = request.username || result.active_username || DEFAULT_USERNAME;
         try {
           await fetch(SERVER_API_URL + "/api/domains/record", {
             method: "POST",
@@ -190,6 +210,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
               url: request.url,
               title: request.title,
               userId: effectiveUserId,
+              username: effectiveUsername,
               hash: request.hash || '',
               trackers: request.trackers || [],
               cookieCount: request.cookieCount || 0,
@@ -1145,9 +1166,11 @@ export const ALL_EXTENSION_FILES: ExtensionFile[] = getExtensionFiles(
   typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000'
 );
 
-export async function downloadExtensionZip(): Promise<void> {
+export async function downloadExtensionZip(
+  user?: { id: string; username: string; email?: string } | null
+): Promise<void> {
   const origin = typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000';
-  const files = getExtensionFiles(origin);
+  const files = getExtensionFiles(origin, user);
 
   const zip = new JSZip();
 

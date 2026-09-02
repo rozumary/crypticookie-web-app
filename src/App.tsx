@@ -86,24 +86,42 @@ export default function App() {
     const boot = async () => {
       try {
         await initializeDatabase();
-        setIsDbReady(true);
-        setIsInitialSyncDone(true); // Ensure dashboard renders
+        await syncAllFromCentralServer();
 
         const storedUserId = localStorage.getItem('crypticookie_active_user_id');
+        const storedUsername = localStorage.getItem('crypticookie_active_username') || 'User';
+
         if (storedUserId) {
-          const user = await db.users.get(storedUserId);
-          if (user) {
-            setCurrentUser(user);
+          let user = await db.users.get(storedUserId);
+          if (!user) {
+            user = {
+              id: storedUserId,
+              username: storedUsername,
+              email: `${storedUsername.toLowerCase().replace(/\s+/g, '')}@gmail.com`,
+              password_hash: 'stored_local',
+              created_at: new Date().toISOString(),
+            };
+            await db.users.put(user);
+          }
+          setCurrentUser(user);
+        } else {
+          // If no stored user, check if any user exists in database
+          const allUsers = await db.users.toArray();
+          if (allUsers.length > 0) {
+            const mary = allUsers.find(u => u.username?.toLowerCase() === 'mary' || u.username?.toLowerCase() === 'rozu') || allUsers[0];
+            setCurrentUser(mary);
+            localStorage.setItem('crypticookie_active_user_id', mary.id);
+            localStorage.setItem('crypticookie_active_username', mary.username || mary.id);
           } else {
             setCurrentUser(null);
             setIsAuthModalOpen(true);
           }
-        } else {
-          setCurrentUser(null);
-          setIsAuthModalOpen(true);
         }
       } catch (err) {
         console.error('Boot initialization error:', err);
+      } finally {
+        setIsDbReady(true);
+        setIsInitialSyncDone(true);
       }
     };
     boot();

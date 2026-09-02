@@ -376,6 +376,119 @@ export const OverviewDashboard: React.FC<OverviewDashboardProps> = ({
         </form>
       </div>
 
+      {/* SECTION 4.5: Real-Time Monitored Websites & Extension Decisions */}
+      <div className="bg-[#0F061F] border border-[#261445] rounded-3xl p-6 sm:p-8 space-y-5">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <h2 className="text-base font-bold text-white flex items-center gap-2">
+              <Globe className="h-4 w-4 text-pink-400" />
+              <span>Live Monitored Websites & Extension Decisions</span>
+            </h2>
+            <p className="text-xs text-purple-300/70 mt-0.5">
+              Live websites audited and protected by your Crypticookie extension.
+            </p>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-mono font-semibold text-pink-300 bg-[#1A0935] px-3 py-1 rounded-full border border-pink-500/30">
+              {monitoredSites.length} Audited Sites
+            </span>
+          </div>
+        </div>
+
+        <div className="bg-[#130729] border border-[#29154A] rounded-2xl overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs">
+              <thead className="bg-[#1A0935] text-purple-200 border-b border-[#29154A] font-mono text-[11px] font-bold">
+                <tr>
+                  <th className="py-3 px-4">Website Domain</th>
+                  <th className="py-3 px-4">CMP Detected</th>
+                  <th className="py-3 px-4">User Consent Choice</th>
+                  <th className="py-3 px-4">Verification</th>
+                  <th className="py-3 px-4">Trackers / Cookies</th>
+                  <th className="py-3 px-4">Privacy Risk</th>
+                  <th className="py-3 px-4">Last Activity</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-[#261445]">
+                {monitoredSites.length === 0 ? (
+                  <tr>
+                    <td colSpan={7} className="py-8 text-center text-purple-300/60 text-xs">
+                      No live websites logged yet for this account. Browse Facebook, Messenger, or Google with the extension installed, or click <strong>Live Sync (🔄)</strong> above!
+                    </td>
+                  </tr>
+                ) : (
+                  monitoredSites.map((site) => (
+                    <tr key={site.id} className="hover:bg-[#1C0A3B] transition-colors">
+                      <td className="py-3 px-4 font-semibold text-purple-100 font-mono">
+                        {site.domain}
+                      </td>
+                      <td className="py-3 px-4 text-purple-200">
+                        {site.cmp_name || 'Generic Cookie Banner'}
+                      </td>
+                      <td className="py-3 px-4">
+                        {site.consent_action === 'accept' ? (
+                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-bold font-mono bg-emerald-950/90 text-emerald-300 border border-emerald-500/40">
+                            <Check className="h-2.5 w-2.5 text-emerald-400" />
+                            <span>ACCEPTED</span>
+                          </span>
+                        ) : site.consent_action === 'reject' ? (
+                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-bold font-mono bg-rose-950/90 text-rose-300 border border-rose-500/40">
+                            <X className="h-2.5 w-2.5 text-rose-400" />
+                            <span>REJECTED</span>
+                          </span>
+                        ) : site.consent_action === 'customize' ? (
+                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-bold font-mono bg-purple-950/90 text-purple-300 border border-purple-500/40">
+                            <SlidersHorizontal className="h-2.5 w-2.5 text-purple-400" />
+                            <span>CUSTOMIZED</span>
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-mono text-purple-400/80 bg-purple-950/40 border border-purple-500/20">
+                            AUDITED
+                          </span>
+                        )}
+                      </td>
+                      <td className="py-3 px-4">
+                        <span
+                          className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold font-mono ${
+                            site.verification_result === 'Verified'
+                              ? 'bg-emerald-950/70 text-emerald-300 border border-emerald-500/30'
+                              : site.verification_result === 'Warning'
+                              ? 'bg-rose-950/70 text-rose-300 border border-rose-500/30'
+                              : 'bg-amber-950/70 text-amber-300 border border-amber-500/30'
+                          }`}
+                        >
+                          {site.verification_result || 'Unverified'}
+                        </span>
+                      </td>
+                      <td className="py-3 px-4 font-mono text-[11px] text-purple-300/80">
+                        {site.trackers_count || 0} trackers, {site.cookie_count || 2} cookies
+                      </td>
+                      <td className="py-3 px-4">
+                        <span
+                          className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold font-mono ${
+                            site.privacy_risk_level === 'High' || site.privacy_risk_level === 'Critical'
+                              ? 'text-rose-400 bg-rose-950/40 border border-rose-500/30'
+                              : site.privacy_risk_level === 'Moderate'
+                              ? 'text-amber-400 bg-amber-950/40 border border-amber-500/30'
+                              : 'text-emerald-400 bg-emerald-950/40 border border-emerald-500/30'
+                          }`}
+                        >
+                          {site.privacy_risk_level || 'Low'}
+                        </span>
+                      </td>
+                      <td className="py-3 px-4 font-mono text-purple-300/60 text-[11px]">
+                        {new Date(site.timestamp).toLocaleTimeString()}
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
       {/* SECTION 5: Database Consent Ledger Events Outer Container */}
       <div className="bg-[#0F061F] border border-[#261445] rounded-3xl p-6 sm:p-8 space-y-5">
         <div className="flex items-center justify-between">

@@ -1,6 +1,6 @@
 import { initializeApp, getApps, getApp, type FirebaseApp } from 'firebase/app';
 import { getFirestore, initializeFirestore, type Firestore } from 'firebase/firestore';
-import firebaseConfigData from '../../firebase-applet-config.json' with { type: 'json' };
+import firebaseConfigData from '../../firebase-applet-config.json';
 
 const firebaseConfig = {
   projectId: firebaseConfigData.projectId,

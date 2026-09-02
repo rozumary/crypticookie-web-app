@@ -73,7 +73,7 @@ export const OverviewDashboard: React.FC<OverviewDashboardProps> = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
-  
+
   // Real-Time Monitored Websites for active account
   const [monitoredSites, setMonitoredSites] = useState<MonitoredDomain[]>([]);
   const [decisionFilter, setDecisionFilter] = useState<'all' | 'accept' | 'reject' | 'audited'>('all');
@@ -321,9 +321,15 @@ export const OverviewDashboard: React.FC<OverviewDashboardProps> = ({
         </div>
       </div>
 
-
       {/* SECTION 4.5: Real-Time Monitored Websites & Extension Decisions */}
       <div className="bg-[#0F061F] border border-[#261445] rounded-3xl p-6 sm:p-8 space-y-5">
+        {successMessage && (
+          <div className="p-3.5 rounded-xl bg-[#1A0935] border border-pink-500/40 text-xs text-purple-200 flex items-center gap-2 font-mono">
+            <CheckCircle2 className="h-4 w-4 text-pink-400 shrink-0" />
+            <span>{successMessage}</span>
+          </div>
+        )}
+
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
             <h2 className="text-base font-bold text-white flex items-center gap-2">
@@ -396,13 +402,12 @@ export const OverviewDashboard: React.FC<OverviewDashboardProps> = ({
                       </td>
                       <td className="py-3 px-4">
                         <span
-                          className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold font-mono ${
-                            site.verification_result === 'Verified'
-                              ? 'bg-emerald-950/70 text-emerald-300 border border-emerald-500/30'
-                              : site.verification_result === 'Warning'
+                          className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold font-mono ${site.verification_result === 'Verified'
+                            ? 'bg-emerald-950/70 text-emerald-300 border border-emerald-500/30'
+                            : site.verification_result === 'Warning'
                               ? 'bg-rose-950/70 text-rose-300 border border-rose-500/30'
                               : 'bg-amber-950/70 text-amber-300 border border-amber-500/30'
-                          }`}
+                            }`}
                         >
                           {site.verification_result || 'Unverified'}
                         </span>
@@ -412,13 +417,12 @@ export const OverviewDashboard: React.FC<OverviewDashboardProps> = ({
                       </td>
                       <td className="py-3 px-4">
                         <span
-                          className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold font-mono ${
-                            site.privacy_risk_level === 'High' || site.privacy_risk_level === 'Critical'
-                              ? 'text-rose-400 bg-rose-950/40 border border-rose-500/30'
-                              : site.privacy_risk_level === 'Moderate'
+                          className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold font-mono ${site.privacy_risk_level === 'High' || site.privacy_risk_level === 'Critical'
+                            ? 'text-rose-400 bg-rose-950/40 border border-rose-500/30'
+                            : site.privacy_risk_level === 'Moderate'
                               ? 'text-amber-400 bg-amber-950/40 border border-amber-500/30'
                               : 'text-emerald-400 bg-emerald-950/40 border border-emerald-500/30'
-                          }`}
+                            }`}
                         >
                           {site.privacy_risk_level || 'Low'}
                         </span>
@@ -502,13 +506,12 @@ export const OverviewDashboard: React.FC<OverviewDashboardProps> = ({
                       </td>
                       <td className="py-3 px-4">
                         <span
-                          className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold font-mono ${
-                            ev.verification_result === 'Verified'
-                              ? 'bg-emerald-950/70 text-emerald-300 border border-emerald-500/30'
-                              : ev.verification_result === 'Warning'
+                          className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold font-mono ${ev.verification_result === 'Verified'
+                            ? 'bg-emerald-950/70 text-emerald-300 border border-emerald-500/30'
+                            : ev.verification_result === 'Warning'
                               ? 'bg-rose-950/70 text-rose-300 border border-rose-500/30'
                               : 'bg-purple-950/70 text-purple-300 border border-purple-500/30'
-                          }`}
+                            }`}
                         >
                           {ev.verification_result}
                         </span>

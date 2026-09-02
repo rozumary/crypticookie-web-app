@@ -188,7 +188,7 @@ export const ExtensionSimulator: React.FC<ExtensionSimulatorProps> = ({
     setVerificationResult(result);
     setCmpItemName(cmpItem ? cmpItem.cmp_name : `${domainClean.split('.')[0].toUpperCase()} CMP Banner`);
     setGuidanceRec(guidance);
-    setBannerVisible(true);
+    setShowConsentShield(true);
     setLastCommittedBlock(null);
   };
 
@@ -437,8 +437,8 @@ export const ExtensionSimulator: React.FC<ExtensionSimulatorProps> = ({
                 </div>
               </div>
 
-              {/* Toggleable Technical Details & CMP Registry link */}
-              <div className="flex items-center justify-between gap-2 flex-wrap">
+              {/* CMP Registry link */}
+              <div className="flex items-center justify-between gap-2">
                 <button
                   onClick={() => onNavigateTab('cmp_registry')}
                   className="text-xs text-pink-300 hover:text-white bg-[#1A0935] hover:bg-[#250B42] border border-pink-500/30 rounded-xl px-3 py-1.5 flex items-center gap-1.5 cursor-pointer transition-all font-semibold"
@@ -448,96 +448,6 @@ export const ExtensionSimulator: React.FC<ExtensionSimulatorProps> = ({
                 </button>
               </div>
             </div>
-
-            {showConsentShield && (
-              <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fadeIn">
-                <div className="relative w-full max-w-2xl rounded-3xl border border-purple-500/40 bg-[#14082B] p-6 sm:p-8 space-y-6 shadow-2xl shadow-purple-950/80">
-                  <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 border-b border-[#2C1258] pb-4">
-                    <div className="flex items-start gap-3.5">
-                      <div className="h-12 w-12 rounded-2xl bg-[#250B42] border border-purple-500/40 flex items-center justify-center shrink-0 shadow-md">
-                        <Shield className="h-6 w-6 text-purple-400" />
-                      </div>
-                      <div>
-                        <h3 className="text-base font-bold text-white flex items-center gap-2 font-sans tracking-tight">
-                          Cookie Consent Shield
-                          <span className="text-xs font-normal text-purple-300/70 font-mono">({cmpItemName})</span>
-                        </h3>
-                        <p className="text-xs sm:text-sm text-purple-300/80 mt-1">
-                          Recommendation Engine: <strong className="text-pink-300 font-bold">{guidanceRec}</strong>
-                        </p>
-                      </div>
-                    </div>
-
-                    {/* Status Badge and Close Button */}
-                    <div className="flex items-center gap-2.5 shrink-0">
-                      <span
-                        className={`px-3 py-1 rounded-full text-xs font-mono font-bold flex items-center gap-1.5 ${
-                          verificationResult === 'Verified'
-                            ? 'bg-emerald-950/70 text-emerald-300 border border-emerald-500/30'
-                            : verificationResult === 'Warning'
-                            ? 'bg-rose-950/70 text-rose-300 border border-rose-500/30'
-                            : 'bg-[#250B42] text-purple-300 border border-purple-500/30'
-                        }`}
-                      >
-                        {verificationResult === 'Verified' ? (
-                          <>
-                            <Check className="h-3.5 w-3.5 text-emerald-400" />
-                            <span>✓ Verified CMP</span>
-                          </>
-                        ) : verificationResult === 'Warning' ? (
-                          <>
-                            <ShieldAlert className="h-3.5 w-3.5 text-rose-400" />
-                            <span>⚠ Dark Pattern Risk</span>
-                          </>
-                        ) : (
-                          <>
-                            <Shield className="h-3.5 w-3.5 text-purple-400" />
-                            <span>i Unverified CMP</span>
-                          </>
-                        )}
-                      </span>
-                      <button
-                        onClick={() => {
-                          setShowConsentShield(false);
-                          setIsAuditingDomain(false);
-                        }}
-                        className="p-1.5 rounded-xl text-purple-300/70 hover:text-white hover:bg-[#2C1258] transition-colors cursor-pointer"
-                      >
-                        <X className="h-5 w-5" />
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Action Buttons */}
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-5 pt-1">
-                    <span className="text-xs sm:text-sm text-purple-300/80 max-w-xs">
-                      Choose your consent preference to record this decision on the hybrid blockchain:
-                    </span>
-
-                    <div className="flex items-center gap-2.5 shrink-0">
-                      <button
-                        onClick={() => handleExecuteConsentAction('reject')}
-                        className="px-4 sm:px-5 py-2.5 rounded-xl bg-rose-950/80 hover:bg-rose-900 text-rose-200 border border-rose-800/60 text-xs sm:text-sm font-bold cursor-pointer transition-all hover:scale-105 active:scale-95"
-                      >
-                        Reject Trackers
-                      </button>
-                      <button
-                        onClick={() => handleExecuteConsentAction('customize')}
-                        className="px-4 sm:px-5 py-2.5 rounded-xl bg-[#1A0935] hover:bg-[#250B42] text-purple-200 border border-[#29154A] text-xs sm:text-sm font-semibold cursor-pointer transition-all hover:scale-105 active:scale-95"
-                      >
-                        Customize
-                      </button>
-                      <button
-                        onClick={() => handleExecuteConsentAction('accept')}
-                        className="px-5 sm:px-6 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white text-xs sm:text-sm font-bold cursor-pointer transition-all hover:scale-105 active:scale-95 shadow-lg shadow-indigo-900/40"
-                      >
-                        Accept Verified
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
 
             {/* Transaction Success Toast */}
             {lastCommittedBlock && (

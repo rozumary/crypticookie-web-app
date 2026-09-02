@@ -351,7 +351,7 @@ async function startServer() {
         }
         const snapshot = await getDocs(q);
         snapshot.forEach(doc => {
-          events.push({ id: doc.id, ...doc.data() });
+          events.push({ id: doc.id, ...(doc.data() as Record<string, any>) });
         });
       }
       return res.json({ status: "success", data: events });
@@ -377,13 +377,13 @@ async function startServer() {
         }
         const userSnapshot = await getDocs(qUser);
         userSnapshot.forEach(d => {
-          blocks.push({ id: d.id, ...d.data() });
+          blocks.push({ id: d.id, ...(d.data() as Record<string, any>) });
         });
 
         // Also fetch the genesis block directly
         const genDoc = await getDoc(doc(firestoreDb, 'public_ledger', 'pb_genesis_0'));
         if (genDoc.exists() && !blocks.some(b => b.id === genDoc.id)) {
-          blocks.push({ id: genDoc.id, ...genDoc.data() });
+          blocks.push({ id: genDoc.id, ...(genDoc.data() as Record<string, any>) });
         }
       }
       blocks.sort((a, b) => a.block_index - b.block_index);
@@ -410,13 +410,13 @@ async function startServer() {
         }
         const userSnapshot = await getDocs(qUser);
         userSnapshot.forEach(d => {
-          blocks.push({ id: d.id, ...d.data() });
+          blocks.push({ id: d.id, ...(d.data() as Record<string, any>) });
         });
 
         // Fetch genesis block directly
         const genDoc = await getDoc(doc(firestoreDb, 'private_ledger', 'pv_genesis_0'));
         if (genDoc.exists() && !blocks.some(b => b.id === genDoc.id)) {
-          blocks.push({ id: genDoc.id, ...genDoc.data() });
+          blocks.push({ id: genDoc.id, ...(genDoc.data() as Record<string, any>) });
         }
       }
       blocks.sort((a, b) => a.block_index - b.block_index);
@@ -443,7 +443,7 @@ async function startServer() {
         }
         const snapshot = await getDocs(q);
         snapshot.forEach(d => {
-          domains.push({ id: d.id, ...d.data() });
+          domains.push({ id: d.id, ...(d.data() as Record<string, any>) });
         });
       }
       domains.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());

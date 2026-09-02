@@ -393,6 +393,17 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   let detectedTrackers = detectTrackers();
   let cookieCount = countCookies();
 
+  // Determine cookie type and guidance according to Table 2:
+  // Necessary Cookies -> "Accept?"
+  // Optional Cookies   -> "Customize?"
+  // Suspicious Cookies -> "Warning"
+  let detectedCookieType = 'necessary';
+  if (detectedTrackers.some(t => t.category === 'Fingerprinting') || currentHost.includes('pirate') || currentHost.includes('stream')) {
+    detectedCookieType = 'suspicious';
+  } else if (detectedTrackers.length > 0 || currentHost.includes('shopee') || currentHost.includes('lazada') || currentHost.includes('facebook') || currentHost.includes('google')) {
+    detectedCookieType = 'optional';
+  }
+
   (async () => {
     const rawToHash = detectedCmp ? (detectedCmp.src || detectedCmp.name) : (currentHost + '_crypticookie_audit');
     const scriptHash = await sha256(rawToHash);
@@ -414,19 +425,30 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     chrome.runtime.sendMessage({ type: 'VERIFY_CMP_HASH', hash: scriptHash, cmpName: detectedCmp ? detectedCmp.name : null, domain: currentHost }, (res) => {
       const verification = res ? res.verification : 'Unverified';
       const cmpName = res ? res.cmpName : (detectedCmp ? detectedCmp.name : 'No CMP Detected');
-      renderShieldBanner(verification, cmpName, scriptHash);
+      renderShieldBanner(verification, cmpName, scriptHash, detectedCookieType);
     });
   })();
 
-  function renderShieldBanner(verification, cmpName, hash) {
+  function renderShieldBanner(verification, cmpName, hash, cookieType) {
     let existing = document.getElementById('crypticookie-shield-root');
     if (existing) existing.remove();
 
     const shieldDiv = document.createElement('div');
     shieldDiv.id = 'crypticookie-shield-root';
 
-    const badgeColor = verification === 'Verified' ? '#10b981' : (verification === 'Warning' ? '#ef4444' : '#f59e0b');
-    const badgeText = verification === 'Verified' ? '✓ Whitelist Verified' : (verification === 'Warning' ? '⚠ Blacklisted Dark Pattern' : 'ℹ Unverified Script');
+    // Guidance according to Table 2
+    let guidanceText = 'Accept?';
+    let guidanceColor = '#10b981';
+    if (cookieType === 'suspicious' || verification === 'Warning') {
+      guidanceText = 'Warning';
+      guidanceColor = '#ef4444';
+    } else if (cookieType === 'optional' || (detectedTrackers && detectedTrackers.length > 0)) {
+      guidanceText = 'Customize?';
+      guidanceColor = '#f59e0b';
+    } else {
+      guidanceText = 'Accept?';
+      guidanceColor = '#10b981';
+    }
 
     shieldDiv.innerHTML = \`
       <div class="crypticookie-banner-container" id="crypticookie-banner-box">
@@ -460,9 +482,43 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             <span>Trackers & Cookies</span>
             <span style="color:#f87171; font-weight:600; font-family:monospace;">\${detectedTrackers.length} trackers, \${cookieCount} cookies</span>
           </div>
-          <div style="display:flex; justify-content:space-between; font-size:11px; color:#a78bfa;">
+          <div style="display:flex; justify-content:space-between; margin-bottom:6px; font-size:11px; color:#a78bfa;">
             <span>Firestore DB Sync</span>
             <span style="color:#38bdf8; font-weight:600; font-family:monospace;">Connected</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; padding-top:6px; border-top:1px solid #251545; font-size:11px; color:#a78bfa;">
+            <span>Recommendation</span>
+            <span style="color:\${guidanceColor}; font-weight:700; font-family:monospace; background:rgba(0,0,0,0.4); padding:2px 6px; border-radius:4px;">\${guidanceText}</span>
+          </div>
+        </div>
+
+        <div style="background:\${guidanceText === 'Warning' ? 'rgba(239,68,68,0.1)' : (guidanceText === 'Customize?' ? 'rgba(245,158,11,0.1)' : 'rgba(16,185,129,0.1)')}; border:1px solid \${guidanceColor}44; border-radius:10px; padding:8px 10px; margin-top:6px; font-size:11px; line-height:1.4; color:#f3e8ff;">
+          <div style="font-weight:700; color:\${guidanceColor}; margin-bottom:2px;">
+            \${guidanceText === 'Warning' ? '⚠️ Privacy Alert:' : '💡 Privacy Recommendation:'}
+          </div>
+          \${guidanceText === 'Warning' 
+            ? 'Suspicious tracking scripts detected. Recommended to click <strong>Reject</strong> to safeguard your privacy.' 
+            : (guidanceText === 'Customize?' 
+              ? 'Optional tracking cookies detected. Recommended to <strong>Customize? (Opt for Necessary)</strong> to block trackers.' 
+              : 'Only necessary cookies detected. Safe to click <strong>Accept?</strong> to continue.')}
+        </div>
+
+        <div style="background:#0B0516; border-radius:12px; padding:10px; border:1px solid #251545; margin-top:6px;">
+          <div style="font-size:10px; color:#a78bfa; margin-bottom:6px; text-transform:uppercase; letter-spacing:0.05em; font-weight:600;">
+            Real-Time Consent Decision:
+          </div>
+          <div class="crypticookie-actions" style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:6px;">
+            <button id="crypticookie-btn-accept" class="crypticookie-btn primary" style="background:#10b981; color:white; font-size:11px; font-weight:700; padding:8px 4px; border-radius:8px; border:none; cursor:pointer; transition:all 0.15s ease;">
+              Accept?
+            </button>
+            <button id="crypticookie-btn-customize" class="crypticookie-btn secondary" style="background:#4c2888; border:1px solid #7c3aed; color:#e9d5ff; font-size:11px; font-weight:600; padding:8px 4px; border-radius:8px; cursor:pointer; transition:all 0.15s ease;">
+              Customize?
+            </button>
+            <button id="crypticookie-btn-reject" class="crypticookie-btn danger" style="background:#ef4444; color:white; font-size:11px; font-weight:700; padding:8px 4px; border-radius:8px; border:none; cursor:pointer; transition:all 0.15s ease;">
+              Reject
+            </button>
+          </div>
+          <div id="crypticookie-action-status" style="display:none; margin-top:8px; padding:6px; background:#064e3b; border:1px solid #10b981; border-radius:6px; font-size:10px; font-weight:700; color:#a7f3d0; text-align:center;">
           </div>
         </div>
       </div>
@@ -477,6 +533,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
     const bannerBox = document.getElementById('crypticookie-banner-box');
     const miniBadge = document.getElementById('crypticookie-mini-badge');
+    const statusBox = document.getElementById('crypticookie-action-status');
 
     const minimize = () => { if (bannerBox) bannerBox.style.display = 'none'; if (miniBadge) miniBadge.style.display = 'inline-flex'; };
     const expand = () => { if (bannerBox) bannerBox.style.display = 'block'; if (miniBadge) miniBadge.style.display = 'none'; };
@@ -484,6 +541,47 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     document.getElementById('crypticookie-minimize-btn')?.addEventListener('click', (e) => { e.stopPropagation(); minimize(); });
     document.getElementById('crypticookie-close-btn')?.addEventListener('click', (e) => { e.stopPropagation(); shieldDiv.remove(); });
     miniBadge?.addEventListener('click', (e) => { e.stopPropagation(); expand(); });
+
+    // Handle Real-Time Actions
+    const executeAction = (actionChoice) => {
+      const btnAccept = document.getElementById('crypticookie-btn-accept');
+      const btnCustomize = document.getElementById('crypticookie-btn-customize');
+      const btnReject = document.getElementById('crypticookie-btn-reject');
+      
+      if (btnAccept) btnAccept.disabled = true;
+      if (btnCustomize) btnCustomize.disabled = true;
+      if (btnReject) btnReject.disabled = true;
+
+      if (statusBox) {
+        statusBox.style.display = 'block';
+        statusBox.innerText = 'Syncing to Firestore & Blockchain...';
+      }
+
+      chrome.runtime.sendMessage({
+        type: 'RECORD_CONSENT_TRANSACTION',
+        domain: currentHost,
+        hash: hash,
+        action: actionChoice,
+        trackers: detectedTrackers,
+        cookieCount: cookieCount,
+        cmpName: cmpName,
+        cookieType: cookieType
+      }, (res) => {
+        if (statusBox) {
+          const blockIdx = res && res.serverResponse && res.serverResponse.publicBlockIndex !== undefined 
+            ? ' (Block #' + res.serverResponse.publicBlockIndex + ')' 
+            : '';
+          statusBox.innerText = '✓ ' + actionChoice.toUpperCase() + ' Synced to Firestore!' + blockIdx;
+          statusBox.style.background = actionChoice === 'reject' ? '#450a0a' : '#064e3b';
+          statusBox.style.borderColor = actionChoice === 'reject' ? '#ef4444' : '#10b981';
+          statusBox.style.color = actionChoice === 'reject' ? '#fca5a5' : '#a7f3d0';
+        }
+      });
+    };
+
+    document.getElementById('crypticookie-btn-accept')?.addEventListener('click', () => executeAction('accept'));
+    document.getElementById('crypticookie-btn-customize')?.addEventListener('click', () => executeAction('customize'));
+    document.getElementById('crypticookie-btn-reject')?.addEventListener('click', () => executeAction('reject'));
   }
 
   // Listen for toolbar popup commands
@@ -640,6 +738,32 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       <span>Firestore DB Sync</span>
       <span class="metric-val" style="color:#38bdf8;">Connected</span>
     </div>
+    <div class="metric-row" style="padding-top:6px; border-top:1px solid #341F5C;">
+      <span>Recommendation</span>
+      <span class="metric-val" id="rec-info" style="color:#10b981; font-weight:700;">Accept?</span>
+    </div>
+  </div>
+
+  <div id="rec-advisory-box" style="background:rgba(16,185,129,0.1); border:1px solid rgba(16,185,129,0.3); border-radius:10px; padding:8px 10px; margin-top:8px; font-size:11px; line-height:1.4; color:#f3e8ff;">
+    <div id="rec-advisory-title" style="font-weight:700; color:#10b981; margin-bottom:2px;">
+      💡 Privacy Recommendation:
+    </div>
+    <div id="rec-advisory-text">
+      Only necessary cookies detected. Safe to click <strong>Accept?</strong> to continue.
+    </div>
+  </div>
+
+  <div class="status-card" style="margin-top:8px;">
+    <div style="font-size:10px; color:#a78bfa; margin-bottom:6px; font-weight:700; text-transform:uppercase;">
+      Real-Time Consent Decision:
+    </div>
+    <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:6px;">
+      <button id="quick-accept-btn" class="btn accept" type="button">Accept?</button>
+      <button id="quick-customize-btn" class="btn dashboard" type="button" style="margin-top:0;">Customize?</button>
+      <button id="quick-reject-btn" class="btn reject" type="button" style="margin-top:0;">Reject</button>
+    </div>
+    <div id="popup-status" style="display:none; margin-top:8px; padding:6px; background:#064e3b; border:1px solid #10b981; border-radius:6px; font-size:10px; font-weight:700; color:#a7f3d0; text-align:center;">
+    </div>
   </div>
 
   <script src="popup.js"></script>
@@ -704,6 +828,45 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             if (trackerInfo) trackerInfo.innerText = detectedTrackers.length + ' trackers, ' + (response.cookieCount || 0) + ' cookies';
             const cmpInfo = document.getElementById('cmp-info');
             if (cmpInfo) cmpInfo.innerText = detectedCmpName;
+
+            const recInfo = document.getElementById('rec-info');
+            const advBox = document.getElementById('rec-advisory-box');
+            const advTitle = document.getElementById('rec-advisory-title');
+            const advText = document.getElementById('rec-advisory-text');
+
+            if (recInfo) {
+              if (detectedTrackers.some(t => t.category === 'Fingerprinting') || currentDomain.includes('pirate')) {
+                recInfo.innerText = 'Warning';
+                recInfo.style.color = '#ef4444';
+                if (advBox && advTitle && advText) {
+                  advBox.style.background = 'rgba(239,68,68,0.1)';
+                  advBox.style.borderColor = 'rgba(239,68,68,0.3)';
+                  advTitle.innerText = '⚠️ Privacy Alert:';
+                  advTitle.style.color = '#ef4444';
+                  advText.innerHTML = 'Suspicious or unverified tracking scripts detected. Recommended to click <strong>Reject</strong> to protect your privacy.';
+                }
+              } else if (detectedTrackers.length > 0) {
+                recInfo.innerText = 'Customize?';
+                recInfo.style.color = '#f59e0b';
+                if (advBox && advTitle && advText) {
+                  advBox.style.background = 'rgba(245,158,11,0.1)';
+                  advBox.style.borderColor = 'rgba(245,158,11,0.3)';
+                  advTitle.innerText = '💡 Privacy Recommendation:';
+                  advTitle.style.color = '#f59e0b';
+                  advText.innerHTML = 'Optional marketing trackers found. Recommended to <strong>Customize? (Opt for Necessary)</strong> to block third-party tracking.';
+                }
+              } else {
+                recInfo.innerText = 'Accept?';
+                recInfo.style.color = '#10b981';
+                if (advBox && advTitle && advText) {
+                  advBox.style.background = 'rgba(16,185,129,0.1)';
+                  advBox.style.borderColor = 'rgba(16,185,129,0.3)';
+                  advTitle.innerText = '💡 Privacy Recommendation:';
+                  advTitle.style.color = '#10b981';
+                  advText.innerHTML = 'Only necessary functional cookies detected. Safe to choose <strong>Accept?</strong> to continue browsing.';
+                }
+              }
+            }
           }
         });
       } catch (e) {
@@ -712,40 +875,36 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     }
   });
 
-  document.getElementById('show-shield-btn')?.addEventListener('click', () => {
-    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-      if (tabs[0] && tabs[0].id) {
-        chrome.tabs.sendMessage(tabs[0].id, { type: 'SHOW_SHIELD_OVERLAY' });
-        window.close();
-      }
-    });
-  });
+  const sendAction = (actionChoice) => {
+    const statusDiv = document.getElementById('popup-status');
+    if (statusDiv) {
+      statusDiv.style.display = 'block';
+      statusDiv.innerText = 'Syncing to Firestore...';
+    }
 
-  document.getElementById('quick-accept-btn')?.addEventListener('click', () => {
-    const btn = document.getElementById('quick-accept-btn');
-    if (btn) btn.innerText = '✓ Recorded!';
     chrome.runtime.sendMessage({
       type: 'RECORD_CONSENT_TRANSACTION',
       domain: currentDomain,
       hash: detectedHash || 'verified',
-      action: 'accept',
+      action: actionChoice,
       trackers: detectedTrackers,
       cmpName: detectedCmpName
+    }, (res) => {
+      if (statusDiv) {
+        const blockIdx = res && res.serverResponse && res.serverResponse.publicBlockIndex !== undefined
+          ? ' (Block #' + res.serverResponse.publicBlockIndex + ')'
+          : '';
+        statusDiv.innerText = '✓ ' + actionChoice.toUpperCase() + ' Synced!' + blockIdx;
+        statusDiv.style.background = actionChoice === 'reject' ? '#450a0a' : '#064e3b';
+        statusDiv.style.borderColor = actionChoice === 'reject' ? '#ef4444' : '#10b981';
+        statusDiv.style.color = actionChoice === 'reject' ? '#fca5a5' : '#a7f3d0';
+      }
     });
-  });
+  };
 
-  document.getElementById('quick-reject-btn')?.addEventListener('click', () => {
-    const btn = document.getElementById('quick-reject-btn');
-    if (btn) btn.innerText = '✓ Recorded!';
-    chrome.runtime.sendMessage({
-      type: 'RECORD_CONSENT_TRANSACTION',
-      domain: currentDomain,
-      hash: detectedHash || 'unverified',
-      action: 'reject',
-      trackers: detectedTrackers,
-      cmpName: detectedCmpName
-    });
-  });
+  document.getElementById('quick-accept-btn')?.addEventListener('click', () => sendAction('accept'));
+  document.getElementById('quick-customize-btn')?.addEventListener('click', () => sendAction('customize'));
+  document.getElementById('quick-reject-btn')?.addEventListener('click', () => sendAction('reject'));
 
   document.getElementById('open-dashboard-btn')?.addEventListener('click', () => {
     chrome.tabs.create({ url: "${apiOrigin}" });

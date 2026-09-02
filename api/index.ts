@@ -3,11 +3,10 @@ import { GoogleGenAI } from "@google/genai";
 import { firestoreDb } from "../src/lib/firebase";
 import { collection, doc, setDoc, getDoc, getDocs, query, orderBy, limit, where } from "firebase/firestore";
 
-async function sha256Server(message: string): Promise<string> {
-  const msgUint8 = new TextEncoder().encode(message);
-  const hashBuffer = await crypto.subtle.digest('SHA-256', msgUint8);
-  const hashArray = Array.from(new Uint8Array(hashBuffer));
-  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+import crypto from "crypto";
+
+function sha256Server(message: string): string {
+  return crypto.createHash('sha256').update(message).digest('hex');
 }
 
 const app = express();
@@ -183,7 +182,7 @@ app.post("/api/consent/record", async (req, res) => {
     // 4. Create Public Ledger Block (properly chained)
     const pubBlockId = 'pb_' + Math.random().toString(36).substring(2, 11);
     const pubPayload = `${lastPubHash}|${nextPubIndex}|${siteDomain}|${scriptHash}|${verificationResult}|${action}|${timestamp}`;
-    const pubHash = await sha256Server(pubPayload);
+    const pubHash = sha256Server(pubPayload);
     const publicBlock = {
       id: pubBlockId,
       block_index: nextPubIndex,
@@ -216,7 +215,7 @@ app.post("/api/consent/record", async (req, res) => {
     // 6. Create Private Ledger Block (properly chained)
     const privBlockId = 'pv_' + Math.random().toString(36).substring(2, 11);
     const privPayload = `${lastPrivHash}|${nextPrivIndex}|${uId}|${eventId}|${action}|${auditOutput}|${timestamp}`;
-    const privHash = await sha256Server(privPayload);
+    const privHash = sha256Server(privPayload);
     const privateBlock = {
       id: privBlockId,
       block_index: nextPrivIndex,

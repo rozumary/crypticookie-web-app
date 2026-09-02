@@ -73,7 +73,7 @@ export const OverviewDashboard: React.FC<OverviewDashboardProps> = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
-
+  
   // Real-Time Monitored Websites for active account
   const [monitoredSites, setMonitoredSites] = useState<MonitoredDomain[]>([]);
   const [decisionFilter, setDecisionFilter] = useState<'all' | 'accept' | 'reject' | 'audited'>('all');
@@ -321,8 +321,18 @@ export const OverviewDashboard: React.FC<OverviewDashboardProps> = ({
         </div>
       </div>
 
-      {/* SECTION 4.5: Real-Time Monitored Websites & Extension Decisions */}
+      {/* SECTION 4: Record Real Consent Event Outer Container */}
       <div className="bg-[#0F061F] border border-[#261445] rounded-3xl p-6 sm:p-8 space-y-5">
+        <div>
+          <h2 className="text-base font-bold text-white flex items-center gap-2">
+            <Plus className="h-4 w-4 text-pink-400" />
+            <span>Record Real Consent Event</span>
+          </h2>
+          <p className="text-xs text-purple-300/70 mt-0.5">
+            Log a website cookie choice to instantly verify its safety and save your privacy preference live to the blockchain.
+          </p>
+        </div>
+
         {successMessage && (
           <div className="p-3.5 rounded-xl bg-[#1A0935] border border-pink-500/40 text-xs text-purple-200 flex items-center gap-2 font-mono">
             <CheckCircle2 className="h-4 w-4 text-pink-400 shrink-0" />
@@ -330,6 +340,84 @@ export const OverviewDashboard: React.FC<OverviewDashboardProps> = ({
           </div>
         )}
 
+        <form onSubmit={handleRecordNewEvent} className="space-y-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-semibold text-purple-200 mb-1.5">
+                Site Domain
+              </label>
+              <input
+                type="text"
+                value={domainInput}
+                onChange={(e) => setDomainInput(e.target.value)}
+                placeholder="e.g. reddit.com"
+                required
+                className="w-full bg-[#130729] border border-[#29154A] rounded-xl px-3.5 py-2.5 text-xs text-purple-100 placeholder-purple-400/40 focus:outline-none focus:border-pink-500 transition-colors"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-purple-200 mb-1.5">
+                CMP Script / Content (Hashed via SHA-256)
+              </label>
+              <input
+                type="text"
+                value={scriptTextInput}
+                onChange={(e) => setScriptTextInput(e.target.value)}
+                placeholder="Script URL or raw JS"
+                className="w-full bg-[#130729] border border-[#29154A] rounded-xl px-3.5 py-2.5 text-xs text-purple-100 placeholder-purple-400/40 focus:outline-none focus:border-pink-500 transition-colors"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-semibold text-purple-200 mb-1.5">
+                Cookie Category
+              </label>
+              <select
+                value={cookieType}
+                onChange={(e) => setCookieType(e.target.value as CookieType)}
+                className="w-full bg-[#130729] border border-[#29154A] rounded-xl px-3.5 py-2.5 text-xs text-purple-100 focus:outline-none focus:border-pink-500 transition-colors cursor-pointer"
+              >
+                <option value="necessary" className="bg-[#0F061F]">Necessary (Essential)</option>
+                <option value="optional" className="bg-[#0F061F]">Optional (Analytics / Marketing)</option>
+                <option value="all" className="bg-[#0F061F]">Bundled (All Cookies)</option>
+                <option value="suspicious" className="bg-[#0F061F]">Suspicious (Dark Pattern / Tracker)</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-purple-200 mb-1.5">
+                User Consent Action
+              </label>
+              <select
+                value={consentAction}
+                onChange={(e) => setConsentAction(e.target.value as ConsentAction)}
+                className="w-full bg-[#130729] border border-[#29154A] rounded-xl px-3.5 py-2.5 text-xs text-purple-100 focus:outline-none focus:border-pink-500 transition-colors cursor-pointer"
+              >
+                <option value="accept" className="bg-[#0F061F]">Accept Cookies</option>
+                <option value="reject" className="bg-[#0F061F]">Reject Cookies</option>
+                <option value="customize" className="bg-[#0F061F]">Customize Preferences</option>
+              </select>
+            </div>
+          </div>
+
+          <div className="pt-2 flex items-center justify-end">
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 text-xs font-semibold text-white transition-all cursor-pointer flex items-center gap-2"
+            >
+              <Database className="h-3.5 w-3.5" />
+              <span>{isSubmitting ? 'Mining Block...' : 'Submit & Mine to Blockchain'}</span>
+            </button>
+          </div>
+        </form>
+      </div>
+
+      {/* SECTION 4.5: Real-Time Monitored Websites & Extension Decisions */}
+      <div className="bg-[#0F061F] border border-[#261445] rounded-3xl p-6 sm:p-8 space-y-5">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
             <h2 className="text-base font-bold text-white flex items-center gap-2">
@@ -402,12 +490,13 @@ export const OverviewDashboard: React.FC<OverviewDashboardProps> = ({
                       </td>
                       <td className="py-3 px-4">
                         <span
-                          className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold font-mono ${site.verification_result === 'Verified'
+                          className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold font-mono ${
+                            site.verification_result === 'Verified'
                               ? 'bg-emerald-950/70 text-emerald-300 border border-emerald-500/30'
                               : site.verification_result === 'Warning'
-                                ? 'bg-rose-950/70 text-rose-300 border border-rose-500/30'
-                                : 'bg-amber-950/70 text-amber-300 border border-amber-500/30'
-                            }`}
+                              ? 'bg-rose-950/70 text-rose-300 border border-rose-500/30'
+                              : 'bg-amber-950/70 text-amber-300 border border-amber-500/30'
+                          }`}
                         >
                           {site.verification_result || 'Unverified'}
                         </span>
@@ -417,12 +506,13 @@ export const OverviewDashboard: React.FC<OverviewDashboardProps> = ({
                       </td>
                       <td className="py-3 px-4">
                         <span
-                          className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold font-mono ${site.privacy_risk_level === 'High' || site.privacy_risk_level === 'Critical'
+                          className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold font-mono ${
+                            site.privacy_risk_level === 'High' || site.privacy_risk_level === 'Critical'
                               ? 'text-rose-400 bg-rose-950/40 border border-rose-500/30'
                               : site.privacy_risk_level === 'Moderate'
-                                ? 'text-amber-400 bg-amber-950/40 border border-amber-500/30'
-                                : 'text-emerald-400 bg-emerald-950/40 border border-emerald-500/30'
-                            }`}
+                              ? 'text-amber-400 bg-amber-950/40 border border-amber-500/30'
+                              : 'text-emerald-400 bg-emerald-950/40 border border-emerald-500/30'
+                          }`}
                         >
                           {site.privacy_risk_level || 'Low'}
                         </span>
@@ -506,12 +596,13 @@ export const OverviewDashboard: React.FC<OverviewDashboardProps> = ({
                       </td>
                       <td className="py-3 px-4">
                         <span
-                          className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold font-mono ${ev.verification_result === 'Verified'
+                          className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold font-mono ${
+                            ev.verification_result === 'Verified'
                               ? 'bg-emerald-950/70 text-emerald-300 border border-emerald-500/30'
                               : ev.verification_result === 'Warning'
-                                ? 'bg-rose-950/70 text-rose-300 border border-rose-500/30'
-                                : 'bg-purple-950/70 text-purple-300 border border-purple-500/30'
-                            }`}
+                              ? 'bg-rose-950/70 text-rose-300 border border-rose-500/30'
+                              : 'bg-purple-950/70 text-purple-300 border border-purple-500/30'
+                          }`}
                         >
                           {ev.verification_result}
                         </span>

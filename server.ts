@@ -176,10 +176,8 @@ async function startServer() {
       const siteDomain = String(domain).toLowerCase().trim();
       const scriptHash = hash ? String(hash).trim().toLowerCase() : '73926ef91823ab0288f34291f09e248b64e9123847a9821034f828108c90fe32';
       const cType = cookieType || 'all';
-      // Resolve user ID with active session fallback
-      const uId = (userId && userId !== 'u_auditor_primary') 
-        ? userId 
-        : (activeSessionUser.id || 'u_auditor_primary');
+      // Resolve user ID strictly
+      const uId = userId || (activeSessionUser ? activeSessionUser.id : 'u_auditor_primary');
 
       // 1. Verify script hash against real CMP registry
       const { result: verificationResult, cmpName: verifiedCmpName } = await verifyScriptHash(scriptHash, cmpName, siteDomain);
@@ -319,9 +317,7 @@ async function startServer() {
 
       const siteDomain = String(domain).toLowerCase().trim();
       const timestamp = new Date().toISOString();
-      const uId = (userId && userId !== 'u_auditor_primary') 
-        ? userId 
-        : (activeSessionUser.id || 'u_auditor_primary');
+      const uId = userId || (activeSessionUser ? activeSessionUser.id : 'u_auditor_primary');
       const scriptHash = hash ? String(hash).trim().toLowerCase() : '';
 
       // Verify hash if provided

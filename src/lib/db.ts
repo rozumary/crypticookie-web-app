@@ -422,15 +422,12 @@ export async function recordMonitoredDomain(
 }
 
 /**
- * Helper to determine if a record belongs to the active user or is a shared/primary extension log
+ * Helper to strictly determine if a record belongs to the active user
  */
 export function isUserMatch(itemUserId?: string, targetUserId?: string): boolean {
   if (!targetUserId || targetUserId === 'all') return true;
-  if (!itemUserId) return true;
-  if (itemUserId === targetUserId) return true;
-  // Seamless fallback: Extension records or default auditor records automatically map to the active user
-  if (itemUserId === 'u_auditor_primary' || targetUserId === 'u_auditor_primary') return true;
-  return false;
+  if (!itemUserId) return false;
+  return itemUserId === targetUserId;
 }
 
 /**
@@ -615,8 +612,7 @@ export async function getDatabaseMetrics(userId?: string) {
   const events = userId ? allEvents.filter((e) => isUserMatch(e.user_id, userId)) : allEvents;
   const privateBlocks = userId ? allPrivate.filter((pv) => isUserMatch(pv.user_id, userId)) : allPrivate;
   const monitored = userId ? allMonitored.filter((m) => isUserMatch(m.user_id, userId)) : allMonitored;
-  // Public ledger blocks represent public transparency chain
-  const publicBlocks = allPublic;
+  const userPublicBlocks = userId ? allPublic.filter((pb) => isUserMatch(pb.user_id, userId)) : allPublic;
 
   const uniqueDomains = new Set([...events.map((e) => e.site_domain), ...monitored.map((m) => m.domain)]);
   const threatsBlocked =
@@ -642,9 +638,9 @@ export async function getDatabaseMetrics(userId?: string) {
 
   return {
     protectedPlatformsCount: uniqueDomains.size,
-    publicLedgerCount: publicBlocks.length,
+    publicLedgerCount: userPublicBlocks.length,
     privateLedgerCount: privateBlocks.length,
-    totalLedgerBlocks: publicBlocks.length + privateBlocks.length,
+    totalLedgerBlocks: userPublicBlocks.length + privateBlocks.length,
     threatsBlockedCount: threatsBlocked,
     totalEventsCount: events.length,
     monitoredDomainsCount: monitored.length,
